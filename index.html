@@ -2170,6 +2170,12 @@
     // 종목 선택 시 즉시 실시간 일봉 차트로 전환
     function selectStockForDetail(stock) {
       activeStock = stock;
+      if (stock.market && (stock.market.includes("코스피") || stock.market.includes("코스닥") || stock.market.includes("KRX"))) {
+        currentMarket = 'KR';
+      } else {
+        currentMarket = 'US';
+      }
+
       document.getElementById("detail-name").innerText = stock.name;
       document.getElementById("detail-code").innerText = stock.code;
       document.getElementById("detail-market").innerText = stock.market;
@@ -2291,15 +2297,33 @@
     }
 
     function searchCustomSymbol(symbol) {
-      if (isEtfStock({ name: symbol, code: symbol })) {
+      const cleanSym = symbol.trim().toUpperCase();
+      if (isEtfStock({ name: cleanSym, code: cleanSym })) {
         alert("ETF 종목은 조회 대상에서 제외되었습니다. 순수 개별 기업 주식을 입력해 주세요.");
         return;
       }
+
+      // 6자리 숫자로 구성된 한국 종목코드인 경우 (코스피/코스닥 자동 식별)
+      const isKrCode = /^[0-9]{6}$/.test(cleanSym) || cleanSym.endsWith(".KS") || cleanSym.endsWith(".KQ");
+      let yahooSym = cleanSym;
+      let marketName = "미국 거래소 (나스닥/NYSE/AMEX)";
+
+      if (isKrCode) {
+        if (!cleanSym.includes(".")) {
+          // 기본 코스피(.KS), 코스닥 목록 대조
+          const existing = KR_STOCKS.find(s => s.code === cleanSym);
+          yahooSym = existing ? existing.yahooSymbol : `${cleanSym}.KS`;
+          marketName = existing ? existing.market : "국내 거래소 (코스피/코스닥)";
+        } else {
+          marketName = cleanSym.endsWith(".KQ") ? "코스닥" : "코스피";
+        }
+      }
+
       const customStock = {
-        code: symbol,
-        yahooSymbol: symbol,
-        name: symbol,
-        price: 100.00,
+        code: cleanSym,
+        yahooSymbol: yahooSym,
+        name: cleanSym,
+        price: isKrCode ? 50000 : 100.00,
         change: 0.00,
         diff: 0.00,
         vol: "실시간",
@@ -2311,7 +2335,7 @@
         amount: "실시간",
         rsi: 50,
         highDistance: 0.0,
-        market: "해외 주식",
+        market: marketName,
         isEtf: false
       };
       selectStockForDetail(customStock);
