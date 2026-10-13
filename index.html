@@ -115,10 +115,6 @@
           <i data-lucide="search" class="w-4 h-4 text-tossTextMuted"></i>
           <span class="hidden md:inline text-tossTextMuted">종목명 또는 심볼 검색</span>
         </button>
-
-        <button onclick="openKisModal()" class="sm:hidden p-2 rounded-full bg-tossCard border border-tossBorder text-amber-400">
-          <i data-lucide="key-round" class="w-4 h-4"></i>
-        </button>
       </div>
 
     </div>
@@ -145,10 +141,10 @@
           </p>
         </div>
       </div>
-      <button onclick="openKisModal()" class="self-start sm:self-center px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md transition flex items-center gap-1.5">
-        <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-        한투 API 설정
-      </button>
+      <div class="flex items-center gap-2 text-xs text-emerald-400 font-medium px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span>실시간 피드 활성화됨</span>
+      </div>
     </div>
 
     <!-- 2-2. 섹션 A: 랭킹 및 TOP 100 탐색기 -->
@@ -190,14 +186,19 @@
       </div>
 
       <!-- 랭킹 상단 안내 바 -->
-      <div class="flex items-center justify-between text-xs text-tossTextMuted px-1">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-tossTextMuted px-1">
         <div id="ranking-description" class="flex items-center gap-1.5 font-medium text-slate-300">
           <i data-lucide="info" class="w-4 h-4 text-amber-400"></i>
           평균 거래량 대비 300%~1,000% 이상 폭증한 세력 수급 유입 종목 순위입니다.
         </div>
-        <div class="flex items-center gap-2 text-[11px]">
-          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-          <span>10초마다 자동 시세 갱신</span>
+        <div class="flex items-center gap-3 text-[11px]">
+          <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold">
+            ETF 제외 순수 개별주
+          </span>
+          <div class="flex items-center gap-1.5">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>10초마다 자동 시세 갱신</span>
+          </div>
         </div>
       </div>
 
@@ -340,14 +341,17 @@
       </div>
 
       <div class="space-y-1.5">
-        <span class="text-xs text-tossTextMuted font-semibold">인기 검색 종목:</span>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-tossTextMuted font-semibold">인기 개별 종목:</span>
+          <span class="text-[11px] text-emerald-400 font-medium">※ ETF 제외 순수 주식 전용</span>
+        </div>
         <div class="flex flex-wrap gap-1.5 text-xs">
           <button onclick="quickSearch('엔비디아')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">엔비디아</button>
           <button onclick="quickSearch('테슬라')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">테슬라</button>
           <button onclick="quickSearch('삼성전자')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">삼성전자</button>
           <button onclick="quickSearch('SK하이닉스')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">SK하이닉스</button>
-          <button onclick="quickSearch('TQQQ')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">TQQQ</button>
-          <button onclick="quickSearch('SOXL')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">SOXL</button>
+          <button onclick="quickSearch('브로드컴')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">브로드컴</button>
+          <button onclick="quickSearch('팔란티어')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">팔란티어</button>
         </div>
       </div>
 
@@ -358,51 +362,7 @@
     </div>
   </div>
 
-  <!-- 4. 한국투자증권(KIS) Open API 연동 모달 -->
-  <div id="kis-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-tossCard border border-tossBorder rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl p-6 space-y-5 animate-in fade-in zoom-in-95 duration-150">
-      
-      <div class="flex items-center justify-between border-b border-tossBorder pb-3">
-        <div class="flex items-center space-x-2 text-white font-bold text-base">
-          <i data-lucide="key" class="w-5 h-5 text-amber-400"></i>
-          <span>한투 KIS & 야후 파이낸스 시세 연동</span>
-        </div>
-        <button onclick="closeKisModal()" class="p-1 rounded-lg hover:bg-slate-800 text-tossTextMuted hover:text-white transition">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
 
-      <div class="text-xs text-tossTextMuted leading-relaxed space-y-2">
-        <p class="text-slate-200 font-semibold">
-          💡 별도 인증 없이 야후 파이낸스 무료 엔진이 전 세계 주식 및 ETF의 실시간/과거 데이터를 무제한 공급합니다.
-        </p>
-        <p>
-          한국투자증권(KIS) 계좌가 있으신 경우 App Key를 등록하시면 실시간 국내 호가 채널도 함께 병행 연동됩니다. (키가 없어도 야후 파이낸스 엔진으로 100% 정상 작동)
-        </p>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block font-semibold text-slate-300 mb-1">한투 KIS App Key (선택)</label>
-          <input type="text" id="kis-app-key" placeholder="한국투자증권 발급 App Key (없으면 공용 피드 사용)" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-tossBlue">
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-300 mb-1">한투 KIS App Secret (선택)</label>
-          <input type="password" id="kis-app-secret" placeholder="한국투자증권 발급 App Secret" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-tossBlue">
-        </div>
-      </div>
-
-      <div class="flex items-center justify-end space-x-2 pt-2 border-t border-tossBorder">
-        <button onclick="closeKisModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">
-          취소
-        </button>
-        <button onclick="saveKisConfig()" class="px-4 py-2 rounded-xl bg-tossBlue hover:bg-tossBlueHover text-xs font-semibold text-white transition shadow-md">
-          연동 설정 저장
-        </button>
-      </div>
-
-    </div>
-  </div>
 
   <!-- 5. 푸터 (법적 필수 사업자 정보 완비) -->
   <footer class="bg-[#0b0b0d] border-t border-tossBorder/70 text-tossTextMuted text-xs py-10 mt-12">
@@ -463,33 +423,41 @@
       low: 133.50
     };
 
-    // 1. 국내 및 미국 대표 주식 데이터베이스 (100% 한국어 명칭)
+    // 1. 국내 및 미국 대표 주식 데이터베이스 (100% 한국어 명칭, 순수 개별주 전용 - ETF 완전 제외)
     const KR_STOCKS = [
-      { code: "005930", yahooSymbol: "005930.KS", name: "삼성전자", price: 78400, change: 3.02, diff: 2300, vol: "1,840만 주", relVol: "5.4배", amount: "1조 4,500억 원", market: "코스피" },
-      { code: "000660", yahooSymbol: "000660.KS", name: "SK하이닉스", price: 189500, change: 4.81, diff: 8700, vol: "820만 주", relVol: "6.8배", amount: "1조 5,200억 원", market: "코스피" },
-      { code: "005380", yahooSymbol: "005380.KS", name: "현대차", price: 254000, change: 1.80, diff: 4500, vol: "140만 주", relVol: "2.1배", amount: "3,500억 원", market: "코스피" },
-      { code: "373220", yahooSymbol: "373220.KS", name: "LG에너지솔루션", price: 382000, change: -1.29, diff: -5000, vol: "41만 주", relVol: "1.2배", amount: "1,560억 원", market: "코스피" },
-      { code: "247540", yahooSymbol: "247540.KQ", name: "에코프로비엠", price: 182300, change: 29.93, diff: 42000, vol: "1,250만 주", relVol: "9.8배", amount: "2조 1,000억 원", market: "코스닥", limitUp: true },
-      { code: "086520", yahooSymbol: "086520.KQ", name: "에코프로", price: 92400, change: 29.86, diff: 21200, vol: "910만 주", relVol: "8.4배", amount: "8,400억 원", market: "코스닥", limitUp: true },
-      { code: "042700", yahooSymbol: "042700.KS", name: "한미반도체", price: 142000, change: 14.52, diff: 18000, vol: "780만 주", relVol: "7.2배", amount: "1조 800억 원", market: "코스피" },
-      { code: "068270", yahooSymbol: "068270.KS", name: "셀트리온", price: 198000, change: 2.59, diff: 5000, vol: "110만 주", relVol: "1.9배", amount: "2,180억 원", market: "코스피" },
-      { code: "035420", yahooSymbol: "035420.KS", name: "NAVER", price: 172000, change: 0.58, diff: 1000, vol: "82만 주", relVol: "1.5배", amount: "1,410억 원", market: "코스피" },
-      { code: "035720", yahooSymbol: "035720.KS", name: "카카오", price: 42100, change: -0.94, diff: -400, vol: "160만 주", relVol: "1.1배", amount: "670억 원", market: "코스피" },
-      { code: "196170", yahooSymbol: "196170.KQ", name: "알테오젠", price: 320000, change: 18.52, diff: 50000, vol: "450만 주", relVol: "8.9배", amount: "1조 4,000억 원", market: "코스닥" }
+      { code: "005930", yahooSymbol: "005930.KS", name: "삼성전자", price: 78400, change: 3.02, diff: 2300, vol: "1,840만 주", relVol: "5.4배", amount: "1조 4,500억 원", market: "코스피", isEtf: false },
+      { code: "000660", yahooSymbol: "000660.KS", name: "SK하이닉스", price: 189500, change: 4.81, diff: 8700, vol: "820만 주", relVol: "6.8배", amount: "1조 5,200억 원", market: "코스피", isEtf: false },
+      { code: "005380", yahooSymbol: "005380.KS", name: "현대차", price: 254000, change: 1.80, diff: 4500, vol: "140만 주", relVol: "2.1배", amount: "3,500억 원", market: "코스피", isEtf: false },
+      { code: "373220", yahooSymbol: "373220.KS", name: "LG에너지솔루션", price: 382000, change: -1.29, diff: -5000, vol: "41만 주", relVol: "1.2배", amount: "1,560억 원", market: "코스피", isEtf: false },
+      { code: "247540", yahooSymbol: "247540.KQ", name: "에코프로비엠", price: 182300, change: 29.93, diff: 42000, vol: "1,250만 주", relVol: "9.8배", amount: "2조 1,000억 원", market: "코스닥", isEtf: false, limitUp: true },
+      { code: "086520", yahooSymbol: "086520.KQ", name: "에코프로", price: 92400, change: 29.86, diff: 21200, vol: "910만 주", relVol: "8.4배", amount: "8,400억 원", market: "코스닥", isEtf: false, limitUp: true },
+      { code: "042700", yahooSymbol: "042700.KS", name: "한미반도체", price: 142000, change: 14.52, diff: 18000, vol: "780만 주", relVol: "7.2배", amount: "1조 800억 원", market: "코스피", isEtf: false },
+      { code: "068270", yahooSymbol: "068270.KS", name: "셀트리온", price: 198000, change: 2.59, diff: 5000, vol: "110만 주", relVol: "1.9배", amount: "2,180억 원", market: "코스피", isEtf: false },
+      { code: "035420", yahooSymbol: "035420.KS", name: "NAVER", price: 172000, change: 0.58, diff: 1000, vol: "82만 주", relVol: "1.5배", amount: "1,410억 원", market: "코스피", isEtf: false },
+      { code: "035720", yahooSymbol: "035720.KS", name: "카카오", price: 42100, change: -0.94, diff: -400, vol: "160만 주", relVol: "1.1배", amount: "670억 원", market: "코스피", isEtf: false },
+      { code: "196170", yahooSymbol: "196170.KQ", name: "알테오젠", price: 320000, change: 18.52, diff: 50000, vol: "450만 주", relVol: "8.9배", amount: "1조 4,000억 원", market: "코스닥", isEtf: false },
+      { code: "000270", yahooSymbol: "000270.KS", name: "기아", price: 104500, change: 2.15, diff: 2200, vol: "185만 주", relVol: "2.3배", amount: "1,930억 원", market: "코스피", isEtf: false },
+      { code: "005490", yahooSymbol: "005490.KS", name: "POSCO홀딩스", price: 375000, change: -0.53, diff: -2000, vol: "32만 주", relVol: "1.3배", amount: "1,200억 원", market: "코스피", isEtf: false },
+      { code: "012450", yahooSymbol: "012450.KS", name: "한화에어로스페이스", price: 345000, change: 8.65, diff: 27500, vol: "120만 주", relVol: "6.4배", amount: "4,140억 원", market: "코스피", isEtf: false },
+      { code: "009540", yahooSymbol: "009540.KS", name: "HD한국조선해양", price: 198500, change: 5.12, diff: 9700, vol: "65만 주", relVol: "4.8배", amount: "1,290억 원", market: "코스피", isEtf: false }
     ];
 
     const US_STOCKS = [
-      { code: "NVDA", yahooSymbol: "NVDA", name: "엔비디아", price: 138.25, change: 4.82, diff: 6.36, vol: "8,240만 주", relVol: "7.8배", amount: "약 15.6조 원", market: "나스닥" },
-      { code: "TSLA", yahooSymbol: "TSLA", name: "테슬라", price: 221.40, change: 8.91, diff: 18.11, vol: "9,420만 주", relVol: "9.2배", amount: "약 28.5조 원", market: "나스닥" },
-      { code: "AAPL", yahooSymbol: "AAPL", name: "애플", price: 231.30, change: 1.25, diff: 2.85, vol: "4,810만 주", relVol: "2.1배", amount: "약 15.2조 원", market: "나스닥" },
-      { code: "TQQQ", yahooSymbol: "TQQQ", name: "TQQQ (나스닥 3배 레버리지)", price: 74.80, change: 6.42, diff: 4.51, vol: "6,420만 주", relVol: "6.5배", amount: "약 6.5조 원", market: "미국 ETF" },
-      { code: "SOXL", yahooSymbol: "SOXL", name: "SOXL (반도체 3배 레버리지)", price: 42.15, change: 14.22, diff: 5.25, vol: "7,890만 주", relVol: "8.6배", amount: "약 4.5조 원", market: "미국 ETF" },
-      { code: "MSFT", yahooSymbol: "MSFT", name: "마이크로소프트", price: 428.15, change: 1.15, diff: 4.87, vol: "2,140만 주", relVol: "1.8배", amount: "약 12.4조 원", market: "나스닥" },
-      { code: "AMZN", yahooSymbol: "AMZN", name: "아마존", price: 188.90, change: 2.45, diff: 4.52, vol: "3,450만 주", relVol: "2.5배", amount: "약 8.9조 원", market: "나스닥" },
-      { code: "META", yahooSymbol: "META", name: "메타 플랫폼스", price: 588.40, change: 3.12, diff: 17.80, vol: "1,820만 주", relVol: "3.4배", amount: "약 14.6조 원", market: "나스닥" },
-      { code: "PLTR", yahooSymbol: "PLTR", name: "팔란티어", price: 43.80, change: 16.80, diff: 6.30, vol: "8,820만 주", relVol: "10.4배", amount: "약 5.2조 원", market: "뉴욕증권거래소" },
-      { code: "SMCI", yahooSymbol: "SMCI", name: "슈퍼 마이크로 컴퓨터", price: 48.20, change: 22.40, diff: 8.82, vol: "5,210만 주", relVol: "9.9배", amount: "약 3.4조 원", market: "나스닥" },
-      { code: "COIN", yahooSymbol: "COIN", name: "코인베이스", price: 215.80, change: 11.20, diff: 21.72, vol: "1,840만 주", relVol: "6.9배", amount: "약 5.3조 원", market: "나스닥" }
+      { code: "NVDA", yahooSymbol: "NVDA", name: "엔비디아", price: 138.25, change: 4.82, diff: 6.36, vol: "8,240만 주", relVol: "7.8배", amount: "약 15.6조 원", market: "나스닥", isEtf: false },
+      { code: "TSLA", yahooSymbol: "TSLA", name: "테슬라", price: 221.40, change: 8.91, diff: 18.11, vol: "9,420만 주", relVol: "9.2배", amount: "약 28.5조 원", market: "나스닥", isEtf: false },
+      { code: "AAPL", yahooSymbol: "AAPL", name: "애플", price: 231.30, change: 1.25, diff: 2.85, vol: "4,810만 주", relVol: "2.1배", amount: "약 15.2조 원", market: "나스닥", isEtf: false },
+      { code: "AVGO", yahooSymbol: "AVGO", name: "브로드컴", price: 178.60, change: 6.42, diff: 10.77, vol: "2,420만 주", relVol: "5.8배", amount: "약 7.8조 원", market: "나스닥", isEtf: false },
+      { code: "AMD", yahooSymbol: "AMD", name: "AMD (어드밴스드 마이크로 디바이스)", price: 156.40, change: 7.35, diff: 10.71, vol: "5,890만 주", relVol: "6.9배", amount: "약 9.2조 원", market: "나스닥", isEtf: false },
+      { code: "MSFT", yahooSymbol: "MSFT", name: "마이크로소프트", price: 428.15, change: 1.15, diff: 4.87, vol: "2,140만 주", relVol: "1.8배", amount: "약 12.4조 원", market: "나스닥", isEtf: false },
+      { code: "AMZN", yahooSymbol: "AMZN", name: "아마존", price: 188.90, change: 2.45, diff: 4.52, vol: "3,450만 주", relVol: "2.5배", amount: "약 8.9조 원", market: "나스닥", isEtf: false },
+      { code: "META", yahooSymbol: "META", name: "메타 플랫폼스", price: 588.40, change: 3.12, diff: 17.80, vol: "1,820만 주", relVol: "3.4배", amount: "약 14.6조 원", market: "나스닥", isEtf: false },
+      { code: "PLTR", yahooSymbol: "PLTR", name: "팔란티어", price: 43.80, change: 16.80, diff: 6.30, vol: "8,820만 주", relVol: "10.4배", amount: "약 5.2조 원", market: "뉴욕증권거래소", isEtf: false },
+      { code: "SMCI", yahooSymbol: "SMCI", name: "슈퍼 마이크로 컴퓨터", price: 48.20, change: 22.40, diff: 8.82, vol: "5,210만 주", relVol: "9.9배", amount: "약 3.4조 원", market: "나스닥", isEtf: false },
+      { code: "COIN", yahooSymbol: "COIN", name: "코인베이스", price: 215.80, change: 11.20, diff: 21.72, vol: "1,840만 주", relVol: "6.9배", amount: "약 5.3조 원", market: "나스닥", isEtf: false },
+      { code: "GOOGL", yahooSymbol: "GOOGL", name: "알파벳 (구글)", price: 165.20, change: 1.84, diff: 2.98, vol: "2,840만 주", relVol: "2.2배", amount: "약 6.4조 원", market: "나스닥", isEtf: false },
+      { code: "ARM", yahooSymbol: "ARM", name: "ARM 홀딩스", price: 148.50, change: 9.30, diff: 12.63, vol: "3,120만 주", relVol: "7.1배", amount: "약 6.3조 원", market: "나스닥", isEtf: false },
+      { code: "MU", yahooSymbol: "MU", name: "마이크론 테크놀로지", price: 110.80, change: 6.20, diff: 6.47, vol: "4,150만 주", relVol: "5.4배", amount: "약 6.2조 원", market: "나스닥", isEtf: false },
+      { code: "LLY", yahooSymbol: "LLY", name: "일라이 릴리", price: 890.00, change: 3.50, diff: 30.10, vol: "340만 주", relVol: "3.1배", amount: "약 4.1조 원", market: "뉴욕증권거래소", isEtf: false }
     ];
 
     // 2. TradingView Lightweight Charts 인스턴스 초기화
@@ -772,13 +740,15 @@
       }
     }
 
-    // 5. 랭킹 뷰 생성
+    // 5. 랭킹 뷰 생성 (순수 개별주 전용, ETF 100% 필터링)
     function generateTop100List(baseList, tab) {
+      // ETF 필터링 적용
+      const pureBaseList = baseList.filter(item => !isEtfStock(item));
       let fullList = [];
-      const multiplier = Math.ceil(100 / baseList.length);
+      const multiplier = Math.ceil(100 / pureBaseList.length);
       
       for (let m = 0; m < multiplier; m++) {
-        baseList.forEach((item, idx) => {
+        pureBaseList.forEach((item, idx) => {
           if (fullList.length >= 100) return;
           const clone = { ...item };
           if (m > 0) {
@@ -971,19 +941,50 @@
       renderSearchResults(e.target.value.trim());
     });
 
+    // ETF 판별 함수 (ETF 명칭 키워드, 심볼, market 속성 필터링)
+    function isEtfStock(item) {
+      if (item.isEtf === true) return true;
+      if (item.market && item.market.toUpperCase().includes("ETF")) return true;
+      const lowerName = (item.name || "").toLowerCase();
+      const lowerCode = (item.code || "").toLowerCase();
+      const etfKeywords = ["etf", "kodex", "tiger", "ace", "sol", "kbstar", "arirang", "히어로즈", "tqqq", "soxl", "sqqq", "soxs", "spy", "qqq", "voo", "ivv", "schd", "vti", "dia", "iemg"];
+      return etfKeywords.some(kw => lowerName.includes(kw) || lowerCode === kw);
+    }
+
     function renderSearchResults(query) {
       searchResultsContainer.innerHTML = "";
-      const allStocks = [...KR_STOCKS, ...US_STOCKS];
+      // ETF는 검색 대상에서 철저히 제외
+      const pureStocks = [...KR_STOCKS, ...US_STOCKS].filter(s => !isEtfStock(s));
       const q = query.toLowerCase();
 
       const filtered = q === "" 
-        ? allStocks.slice(0, 8)
-        : allStocks.filter(s => s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q));
+        ? pureStocks.slice(0, 10)
+        : pureStocks.filter(s => !isEtfStock(s) && (s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q)));
 
       if (filtered.length === 0) {
+        // 검색 결과가 없더라도 사용자가 직접 입력한 심볼이 ETF인지 확인하여 안내
+        const isQueryEtf = isEtfStock({ name: q, code: q });
+        if (isQueryEtf) {
+          searchResultsContainer.innerHTML = `
+            <div class="p-5 text-center text-xs text-amber-400 bg-amber-500/10 rounded-xl m-2 border border-amber-500/20">
+              <i data-lucide="shield-alert" class="w-5 h-5 mx-auto mb-1 text-amber-400"></i>
+              <strong>ETF 종목 제외 알림</strong><br>
+              요청하신 조건에 따라 ETF(지수/레버리지 상품)는 조회 및 검색에서 제외되었습니다.<br>
+              개별 기업 주식명을 검색해 주세요. (예: 삼성전자, 애플, 테슬라, 엔비디아 등)
+            </div>
+          `;
+          lucide.createIcons();
+          return;
+        }
+
+        // 사용자가 심볼 직접 조회 가능하도록 버튼 제공 (개별주인 경우)
+        const upperQuery = query.toUpperCase();
         searchResultsContainer.innerHTML = `
-          <div class="p-4 text-center text-xs text-tossTextMuted">
-            일치하는 프리셋 종목이 없습니다. 심볼을 직접 입력하여 조회할 수 있습니다.
+          <div class="p-4 text-center text-xs text-tossTextMuted space-y-2">
+            <p>일치하는 프리셋 종목이 없습니다.</p>
+            <button onclick="searchCustomSymbol('${upperQuery}')" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition">
+              '${upperQuery}' 심볼 실시간 차트 직접 조회하기
+            </button>
           </div>
         `;
         return;
@@ -1010,25 +1011,24 @@
       });
     }
 
-    // 7. 한투 KIS 모달
-    const kisModal = document.getElementById("kis-modal");
-    function openKisModal() {
-      kisModal.classList.remove("hidden");
-      document.getElementById("kis-app-key").value = localStorage.getItem("KIS_APP_KEY") || "";
-      document.getElementById("kis-app-secret").value = localStorage.getItem("KIS_APP_SECRET") || "";
-    }
-
-    function closeKisModal() {
-      kisModal.classList.add("hidden");
-    }
-
-    function saveKisConfig() {
-      const key = document.getElementById("kis-app-key").value.trim();
-      const secret = document.getElementById("kis-app-secret").value.trim();
-      localStorage.setItem("KIS_APP_KEY", key);
-      localStorage.setItem("KIS_APP_SECRET", secret);
-      alert("한국투자증권(KIS) 연동 설정이 안전하게 로컬에 저장되었습니다.");
-      closeKisModal();
+    function searchCustomSymbol(symbol) {
+      if (isEtfStock({ name: symbol, code: symbol })) {
+        alert("ETF 종목은 조회 대상에서 제외되었습니다. 순수 개별 기업 주식을 입력해 주세요.");
+        return;
+      }
+      const customStock = {
+        code: symbol,
+        yahooSymbol: symbol,
+        name: symbol,
+        price: 100.00,
+        change: 0.00,
+        diff: 0.00,
+        vol: "실시간",
+        relVol: "1.0배",
+        market: "해외 주식",
+        isEtf: false
+      };
+      selectStockForDetail(customStock);
     }
 
     // 8. 초기 구동
