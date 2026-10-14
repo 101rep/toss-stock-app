@@ -90,7 +90,7 @@
           <div class="flex items-center gap-1.5 whitespace-nowrap">
             <span class="text-base font-extrabold tracking-tight text-white">TH증권</span>
             <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">실시간 PRO</span>
-            <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden xs:inline">v1.8.5</span>
+            <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden xs:inline">v1.8.6</span>
           </div>
         </div>
 
@@ -111,12 +111,8 @@
         </nav>
       </div>
 
-      <!-- 상단 우측: 매매기법 버튼 & 검색 버튼 (모바일 1줄 고정) -->
+      <!-- 상단 우측: 검색 버튼 (모바일 1줄 고정) -->
       <div class="flex items-center space-x-2 flex-shrink-0">
-        <button id="header-strategy-btn" onclick="openStrategyModal()" class="md:hidden px-2.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1 shadow whitespace-nowrap flex-shrink-0">
-          <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
-          <span>매매기법</span>
-        </button>
         <button onclick="openSearchModal()" class="p-2 rounded-xl hover:bg-tossCard text-slate-300 hover:text-white transition flex items-center gap-1.5 text-xs px-2.5 sm:px-3 bg-tossCard border border-tossBorder shadow-sm whitespace-nowrap flex-shrink-0">
           <i data-lucide="search" class="w-4 h-4 text-blue-400"></i>
           <span class="hidden sm:inline text-tossTextMuted">종목 검색</span>
@@ -133,7 +129,7 @@
     <section id="section-rankings" class="space-y-5">
       
       <!-- 2-1. 데이터 엔진 상태 안내 배너 (메인 화면에만 노출, 종목 선택/차트 시 100% 완전 숨김) -->
-      <div id="api-status-banner" class="bg-gradient-to-r from-blue-950/40 via-tossCard to-slate-900/60 border border-blue-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+      <div id="api-status-banner" class="bg-gradient-to-r from-blue-950/40 via-tossCard to-slate-900/60 border border-blue-500/30 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-lg">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
             <i data-lucide="cpu" class="w-5 h-5"></i>
@@ -150,10 +146,6 @@
             </p>
           </div>
         </div>
-        <button onclick="openStrategyModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs font-bold shadow-lg flex items-center gap-2 border border-red-400/30 flex-shrink-0 transition">
-          <i data-lucide="play-circle" class="w-4 h-4"></i>
-          <span>유튜브 매매기법 선택</span>
-        </button>
       </div>
       
       <!-- 상단 컨트롤: 시장 선택 및 검색식 분류 -->
@@ -595,7 +587,7 @@
           <div class="flex items-center space-x-2 text-white font-bold text-base">
             <i data-lucide="search" class="w-5 h-5 text-tossBlue"></i>
             <span id="modal-title-text">국내 · 미국 시장별 종목 검색 (11,094개)</span>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.8.5 최신</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.8.6 최신</span>
           </div>
           <p class="text-[11px] text-tossTextMuted mt-0.5">
             국내주식과 미국주식이 서로 섞이지 않도록 완전 분리하여 빠르고 정확하게 검색합니다.
@@ -2919,7 +2911,6 @@
       const sectionChart = document.getElementById("section-chart");
       const navRankings = document.getElementById("nav-rankings");
       const navChart = document.getElementById("nav-chart");
-      const headerStrategyBtn = document.getElementById("header-strategy-btn");
 
       // 화면 전환 시 무조건 최상단 맨 위부터 보이도록 스크롤 즉시 0 리셋 (사용자 요청: 푸터부터 보이는 문제 완벽 해결)
       window.scrollTo(0, 0);
@@ -2929,13 +2920,11 @@
       if (nav === 'rankings') {
         sectionRankings.classList.remove("hidden");
         sectionChart.classList.add("hidden");
-        if (headerStrategyBtn) headerStrategyBtn.classList.remove("hidden");
         navRankings.className = "text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5";
         navChart.className = "hover:text-white transition py-4 border-b-2 border-transparent text-tossTextMuted flex items-center gap-1.5";
       } else {
         sectionRankings.classList.add("hidden");
         sectionChart.classList.remove("hidden");
-        if (headerStrategyBtn) headerStrategyBtn.classList.add("hidden");
         navChart.className = "text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5";
         navRankings.className = "hover:text-white transition py-4 border-b-2 border-transparent text-tossTextMuted flex items-center gap-1.5";
         
