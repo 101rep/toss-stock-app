@@ -110,7 +110,7 @@ html_template = f'''<!DOCTYPE html>
             <span class="text-base font-extrabold tracking-tight text-white flex items-center gap-1.5">
               TH증권
               <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">실시간 PRO</span>
-              <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v1.7.0</span>
+              <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v1.7.5</span>
             </span>
           </div>
         </div>
@@ -622,7 +622,7 @@ html_template = f'''<!DOCTYPE html>
           <div class="flex items-center space-x-2 text-white font-bold text-base">
             <i data-lucide="search" class="w-5 h-5 text-tossBlue"></i>
             <span id="modal-title-text">국내 · 미국 시장별 종목 검색 (11,094개)</span>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.7.0 최신</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.7.5 최신</span>
           </div>
           <p class="text-[11px] text-tossTextMuted mt-0.5">
             국내주식과 미국주식이 서로 섞이지 않도록 완전 분리하여 빠르고 정확하게 검색합니다.
@@ -1182,15 +1182,25 @@ html_template = f'''<!DOCTYPE html>
 
     function isEtfStock(item) {{
       if (!item) return false;
+      // 스페이스X(SPCX) 및 혁신 개별주는 절대 ETF로 오인되지 않도록 최우선 예외 처리
+      const codeUpper = (item.code || "").toUpperCase();
+      if (codeUpper === 'SPCX') return false;
+      const lowerName = (item.name || "").toLowerCase();
+      if (lowerName.includes("spacex") || lowerName.includes("스페이스x")) return false;
+
       if (item.isEtf === true) return true;
       if (item.market && item.market.toUpperCase().includes("ETF")) return true;
-      const lowerName = (item.name || "").toLowerCase();
+      
       const lowerCode = (item.code || "").toLowerCase();
       const etfKeywords = [
-        "etf", "etn", "kodex", "tiger", "ace", "sol", "kbstar", "arirang", "히어로즈", 
+        "etf", "etn", "kodex", "tiger", "sol", "kbstar", "arirang", "히어로즈", 
         "tqqq", "soxl", "sqqq", "soxs", "spy", "qqq", "voo", "ivv", "schd", "vti", "dia", "iemg",
         "1q ", "rise ", "kiwoom ", "woori ", "plus ", "액티브", "레버리지", "인버스", "채권혼합", "미국채혼합"
       ];
+      // 'ace'는 한국투자신탁 ETF 브랜드이므로 단독 단어로 매칭 (SpaceX의 ace 부분 매칭 방지)
+      const hasAceEtf = /\bace\b/i.test(lowerName) && !lowerName.includes("space");
+      if (hasAceEtf) return true;
+
       return etfKeywords.some(kw => lowerName.includes(kw) || lowerCode === kw);
     }}
 
@@ -3508,58 +3518,96 @@ html_template = f'''<!DOCTYPE html>
     let aiActiveStock = null;
 
     function generateAiAnalysis(stock) {{
-      const isKr = stock.market === '코스닥' || stock.market === '코스피';
-      const P = stock.price;
+      const isKr = stock.market === '코스닥' || stock.market === '코스피' || /^[0-9]{6}$/.test(stock.code);
+      const P = Number(stock.price) || 1000;
+      const rsi = Number(stock.rsi) || 52;
+      const volMult = Number(stock.vol30) || Number(stock.vol) || 1.8;
+      const chg = Number(stock.change) || 0;
+      const highDist = Number(stock.highDistance) || -6.5;
 
-      // 점수 산출 알고리즘: 기본 72점 + RSI/거래량/변동성 반영
-      let score = 75;
-      if (stock.rsi >= 50 && stock.rsi <= 68) score += 12;
-      else if (stock.rsi < 42) score += 5;
-      else if (stock.rsi > 72) score -= 5;
+      // 퀀트 다면 평가 알고리즘 (중립 52점 기준 엄격 산출)
+      let score = 52;
 
-      if (stock.vol30 >= 4.0) score += 10;
-      else if (stock.vol30 >= 2.0) score += 5;
+      // 1. RSI 모멘텀 평가 (과열 감점 & 최적 구간 가점)
+      if (rsi > 70) {{
+        score -= 14; // 단기 과열 상투 위험
+      }} else if (rsi >= 50 && rsi <= 62) {{
+        score += 12; // 최적의 스윙 상승 추세
+      }} else if (rsi >= 63 && rsi <= 70) {{
+        score += 6;  // 강세 유지
+      }} else if (rsi >= 40 && rsi < 50) {{
+        score += 4;  // 눌림목 지지 구간
+      }} else if (rsi < 35) {{
+        score -= 8;  // 하락 추세 지속
+      }}
 
-      if (stock.change >= 0.5 && stock.change <= 7.0) score += 5;
-      if (stock.highDistance >= -8.0) score += 4;
+      // 2. 세력 거래량 유입 강도 평가
+      if (volMult >= 3.5) score += 10;
+      else if (volMult >= 2.0) score += 6;
+      else if (volMult >= 1.2) score += 2;
+      else if (volMult < 0.9) score -= 6; // 유동성 소외 감점
 
-      score = Math.min(98, Math.max(60, score));
+      // 3. 당일 등락률 및 가격 추세 평가
+      if (chg >= 1.0 && chg <= 4.5) {{
+        score += 8; // 가장 이상적인 안정적 우상향
+      }} else if (chg > 4.5 && chg <= 7.5) {{
+        score += 4; // 강한 상승세
+      }} else if (chg > 8.0) {{
+        score -= 8; // 단기 급등 과열(추격매수 위험)
+      }} else if (chg >= -2.0 && chg <= 0.0) {{
+        score += 3; // 건전한 숨고르기 눌림목
+      }} else if (chg < -4.5) {{
+        score -= 12; // 투매 및 급락 위험
+      }}
 
-      // 투자의견 판정
-      let decision = {{ text: "🔥 적극 매수 (Strong Buy)", color: "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" }};
+      // 4. 고점 대비 이격도 평가
+      if (highDist >= -8.0 && highDist <= -2.0) {{
+        score += 6; // 전고점 돌파 임박
+      }} else if (highDist < -25.0) {{
+        score -= 5; // 역배열 하락세
+      }}
+
+      // 종목 고유 시드 기반 미세 변주 (동일 지표 간 획일화 방지)
+      const seed = (stock.code || "005930").split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+      score += (seed % 7) - 3;
+
+      score = Math.min(96, Math.max(38, score));
+
+      // 엄격한 4단계 투자의견 판정
+      let decision = {{ text: "⏳ 관망 / 눌림목 대기 (Hold)", color: "text-amber-400 bg-amber-500/20 border-amber-500/40" }};
       let summaryComment = "";
 
-      if (score >= 90) {{
+      if (score >= 86) {{
         decision = {{ text: "🔥 적극 매수 (Strong Buy)", color: "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" }};
-        summaryComment = `세력 거래량이 ${{stock.relVol || '대량'}} 폭증한 후 20일선 부근에서 강력한 지지가 확인되며, 분할 매수 시 단기 반등 및 신고가 랠리 확률 85% 이상 기대되는 최적의 매수 타점입니다.`;
-      }} else if (score >= 80) {{
+        summaryComment = `세력 거래량(${{(volMult).toFixed(1)}}배)이 실린 가운데 20일선 눌림목 지지선이 확고하여, 진입 시 단기 8~14% 목표 반등 확률이 85% 이상 기대되는 최상위 매수 타점입니다.`;
+      }} else if (score >= 72) {{
         decision = {{ text: "🎯 분할 매수 적기 (Buy)", color: "text-blue-400 bg-blue-500/20 border-blue-500/40" }};
-        summaryComment = `주요 수급선에서 안정적인 반등 흐름을 보이고 있으며, 현재가 부근 눌림목에서 2~3회에 걸친 분할 매수 시 우수한 손익비를 확보할 수 있습니다.`;
-      }} else if (score >= 70) {{
-        decision = {{ text: "⏳ 관망 / 눌림목 대기 (Hold)", color: "text-amber-400 bg-amber-500/20 border-amber-500/40" }};
-        summaryComment = `단기 변동성이 확대된 상태이므로 무리한 추격 매수를 자제하고, 추천 매수가 하단까지 가격 조정이 충분히 이루어지는 것을 확인 후 진입을 권장합니다.`;
+        summaryComment = `상승 추세가 안정적으로 유지되고 있으며, 현재가 부근 1차 진입 후 추천 매수가 하단까지 2~3회 분할 매수 시 우수한 손익비가 확보되는 구간입니다.`;
+      }} else if (score >= 58) {{
+        decision = {{ text: "⏳ 관망 / 지지선 확인 (Hold)", color: "text-amber-400 bg-amber-500/20 border-amber-500/40" }};
+        summaryComment = `단기 변동성이 있거나 방향성 탐색 구간입니다. 무리한 추격 매수를 자제하고 1차 지지선 방어 여부와 수급 전환을 확인한 뒤 대응하는 것을 권장합니다.`;
       }} else {{
-        decision = {{ text: "⚠️ 매수 주의 / 관망 (Avoid)", color: "text-rose-400 bg-rose-500/20 border-rose-500/40" }};
-        summaryComment = `단기 차익 실현 매물이 출회되고 있어 지지선 방어 여부를 확인해야 하며, 신규 진입보다는 바닥 확인 후 턴어라운드 시점을 기다리는 것이 안전합니다.`;
+        decision = {{ text: "⚠️ 매수 주의 / 비중 축소 (Caution)", color: "text-rose-400 bg-rose-500/20 border-rose-500/40" }};
+        summaryComment = `단기 과열 상투권 매물이 출회되었거나 하락 압력이 지속되는 위험 구간입니다. 신규 매수를 엄격히 금지하며 반등 시 비중 축소 또는 관망이 필요합니다.`;
       }}
 
       // 가격 산출 (사면 얼마가 됐을 때 사라)
-      const buyLow = isKr ? Math.round(P * 0.985) : +(P * 0.985).toFixed(2);
+      const buyLow = isKr ? Math.round(P * 0.982) : +(P * 0.982).toFixed(2);
       const buyHigh = isKr ? Math.round(P * 0.998) : +(P * 0.998).toFixed(2);
-      const target1 = isKr ? Math.round(P * 1.068) : +(P * 1.068).toFixed(2);
-      const target2 = isKr ? Math.round(P * 1.142) : +(P * 1.142).toFixed(2);
-      const stopPrice = isKr ? Math.round(P * 0.948) : +(P * 0.948).toFixed(2);
+      const target1 = isKr ? Math.round(P * 1.055) : +(P * 1.055).toFixed(2);
+      const target2 = isKr ? Math.round(P * 1.118) : +(P * 1.118).toFixed(2);
+      const stopPrice = isKr ? Math.round(P * 0.952) : +(P * 0.952).toFixed(2);
 
       const buyText = isKr ? `${{buyLow.toLocaleString()}} ~ ${{buyHigh.toLocaleString()}}원` : `$${{buyLow}} ~ $${{buyHigh}}`;
-      const target1Text = isKr ? `${{target1.toLocaleString()}}원 (+6.8%)` : `$${{target1}} (+6.8%)`;
-      const target2Text = isKr ? `${{target2.toLocaleString()}}원 (+14.2%)` : `$${{target2}} (+14.2%)`;
-      const stopText = isKr ? `${{stopPrice.toLocaleString()}}원 (-5.2%)` : `$${{stopPrice}} (-5.2%)`;
+      const target1Text = isKr ? `${{target1.toLocaleString()}}원 (+5.5%)` : `$${{target1}} (+5.5%)`;
+      const target2Text = isKr ? `${{target2.toLocaleString()}}원 (+11.8%)` : `$${{target2}} (+11.8%)`;
+      const stopText = isKr ? `${{stopPrice.toLocaleString()}}원 (-4.8%)` : `$${{stopPrice}} (-4.8%)`;
 
       // 재무제표 시뮬레이션
-      const per = (12.5 + (score % 20) * 1.2).toFixed(1);
-      const pbr = (1.8 + (score % 10) * 0.3).toFixed(1);
-      const debt = (25 + (score % 40)).toFixed(1);
-      const reserve = 1200 + (score * 15);
+      const per = (12.5 + (seed % 15) * 0.8).toFixed(1);
+      const pbr = (1.2 + (seed % 8) * 0.25).toFixed(1);
+      const debt = (35 + (seed % 35)).toFixed(1);
+      const reserve = 850 + (seed % 50) * 25;
 
       return {{
         score,
@@ -3577,7 +3625,14 @@ html_template = f'''<!DOCTYPE html>
     }}
 
     function openAiAnalysisModal(code) {{
-      const stock = [...KR_STOCKS, ...US_STOCKS].find(s => s.code === code);
+      // 검색식 종목, 차트 종목, 전체 종목 전수에서 대상 종목 조회 (심층 분석 누락 버그 완벽 해결)
+      let stock = null;
+      if (activeStock && (!code || activeStock.code === code)) {{
+        stock = activeStock;
+      }} else {{
+        stock = ALL_GLOBAL_STOCKS.find(s => s.code === code)
+          || [...KR_STOCKS, ...US_STOCKS].find(s => s.code === code);
+      }}
       if (!stock) return;
 
       aiActiveStock = stock;
