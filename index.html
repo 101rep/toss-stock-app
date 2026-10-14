@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- 강력 브라우저 캐시 무력화 (최신 빌드 즉시 반영) -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>TH증권 실시간 주식 뷰어 & AI 조건검색식 | 유튜브 10대 실전 매매기법 & 일봉 차트</title>
   <meta name="description" content="TH증권 실시간 주식 뷰어 - 유튜브 고수 10대 실전 매매기법(매수/매도 공식), 30/60/90일 거래량 폭증 매집 검색식, TradingView Lightweight Charts 일봉 차트, 야후 파이낸스 실시간 시세 연동">
 
@@ -87,6 +91,7 @@
             <span class="text-base font-extrabold tracking-tight text-white flex items-center gap-1.5">
               TH증권
               <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">실시간 PRO</span>
+              <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v1.6.0-SPCX</span>
             </span>
           </div>
         </div>
@@ -580,6 +585,7 @@
           <div class="flex items-center space-x-2 text-white font-bold text-base">
             <i data-lucide="search" class="w-5 h-5 text-tossBlue"></i>
             <span id="modal-title-text">국내 · 미국 시장별 종목 검색 (11,094개)</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.6.0 최신 패치</span>
           </div>
           <p class="text-[11px] text-tossTextMuted mt-0.5">
             국내주식과 미국주식이 서로 섞이지 않도록 완전 분리하여 빠르고 정확하게 검색합니다.
@@ -616,17 +622,18 @@
           id="modal-search-input" 
           placeholder="국내 종목명 또는 6자리 코드 입력 (예: 신풍제약, 신풍제지, 삼성전자, 알테오젠, 005930...)"
           autocomplete="off"
-          class="w-full pl-4 pr-12 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-tossBlue transition"
+          class="w-full pl-4 pr-24 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-tossBlue transition"
         >
-        <!-- 활성화된 돋보기 검색 버튼 -->
+        <!-- 활성화된 직관적 돋보기 검색 버튼 -->
         <button 
           id="modal-search-btn" 
           onclick="executeModalSearch()" 
-          title="검색하기"
+          title="검색 실행"
           type="button"
-          class="absolute right-2 top-2 p-1.5 px-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center justify-center shadow hover:scale-105 active:scale-95 cursor-pointer"
+          class="absolute right-1.5 top-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md cursor-pointer border border-blue-400/40"
         >
-          <i data-lucide="search" class="w-4 h-4"></i>
+          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+          <span>검색</span>
         </button>
       </div>
 
@@ -3101,21 +3108,25 @@
     function executeModalSearch() {
       const query = modalInput.value.trim();
       renderSearchResults(query);
-      // 만약 검색 결과 리스트에 1개 이상의 종목이 있으면 엔터 시 즉시 첫 번째 종목으로 이동
-      const firstItem = searchResultsContainer.querySelector(".cursor-pointer");
-      if (firstItem && query.length >= 2) {
-        firstItem.click();
-      }
     }
 
     modalInput.addEventListener("input", (e) => {
       renderSearchResults(e.target.value.trim());
     });
 
-    modalInput.addEventListener("keydown", (e) => {
+    modalInput.addEventListener("compositionend", (e) => {
+      renderSearchResults(e.target.value.trim());
+    });
+
+    modalInput.addEventListener("keyup", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        executeModalSearch();
+        const firstItem = searchResultsContainer.querySelector(".cursor-pointer");
+        if (firstItem && modalInput.value.trim().length >= 1) {
+          firstItem.click();
+        }
+      } else {
+        renderSearchResults(e.target.value.trim());
       }
     });
 
@@ -3150,6 +3161,22 @@
         }
       }
 
+      // 만약 국내주식 검색 중인데 '스페이스' 또는 'spacex'를 검색했다면 최상단에 미국 스페이스X 안내 배너 삽입
+      if (currentMacroMarket === 'KR' && (q.includes("스페이스") || q.includes("space") || q.includes("spcx"))) {
+        const spBanner = document.createElement("div");
+        spBanner.className = "m-2 p-3 bg-gradient-to-r from-indigo-950/70 via-blue-950/60 to-purple-950/70 border border-indigo-500/40 rounded-xl flex items-center justify-between gap-2 shadow";
+        spBanner.innerHTML = `
+          <div class="flex items-center gap-2 text-xs text-indigo-200">
+            <span class="text-base">🚀</span>
+            <span>미국 나스닥 <strong>스페이스X (SPCX)</strong>를 찾으시나요?</span>
+          </div>
+          <button onclick="setMacroMarket('US'); modalInput.value='스페이스X'; renderSearchResults('스페이스X');" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition flex-shrink-0">
+            🇺🇸 미국 스페이스X 보기
+          </button>
+        `;
+        searchResultsContainer.appendChild(spBanner);
+      }
+
       let filtered = [];
 
       if (q === "") {
@@ -3177,9 +3204,12 @@
           if (isExact) {
             exactMatches.push(s);
           } else if (isStartsWith) {
-            startsWithMatches.push(s);
+            // 스페이스X(SPCX)에 가중치
+            if (s.code === 'SPCX') startsWithMatches.unshift(s);
+            else startsWithMatches.push(s);
           } else if (isContains) {
-            containsMatches.push(s);
+            if (s.code === 'SPCX') containsMatches.unshift(s);
+            else containsMatches.push(s);
           }
         }
         filtered = [...exactMatches, ...startsWithMatches, ...containsMatches].slice(0, 80);
