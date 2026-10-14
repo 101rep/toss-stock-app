@@ -4203,6 +4203,18 @@
   ],
   "us": [
     {
+      "code": "SPCX",
+      "name": "SpaceX (Space Exploration Technologies Corp.)",
+      "market": "NASDAQ",
+      "price": 156.54,
+      "change": -4.21,
+      "diff": -6.88,
+      "krName": "스페이스X",
+      "yahooSymbol": "SPCX",
+      "isEtf": false,
+      "vol30": 4.5
+    },
+    {
       "code": "NVDA",
       "yahooSymbol": "NVDA",
       "name": "엔비디아 (NVIDIA)",
