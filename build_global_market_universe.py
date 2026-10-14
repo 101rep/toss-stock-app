@@ -147,12 +147,87 @@ US_KR_NAMES = {
     "DNN": "데니슨 마인스 (우라늄)"
 }
 
-# 2. 한국 코스피 & 코스닥 로드
-with open("all_krx_stocks.json", "r", encoding="utf-8") as f:
-    kr_stocks = json.load(f)
+# 2. 한국 코스피(26페이지) & 코스닥(19페이지) 전 종목 전수 수집
+def is_etf_name(name):
+    name_lower = name.lower()
+    for kw in ['etf', 'kodex', 'tiger', 'ace', 'sol', 'kbstar', 'arirang', '히어로즈', 'tqqq', 'soxl']:
+        if kw in name_lower:
+            return True
+    return False
 
-# 3. 미국 NASDAQ, NYSE, AMEX 전 종목 수집
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+
+print("Collecting complete Korean stock universe...")
+clean_kr = []
+
+# KOSPI 26페이지 전수 수집
+print("- Fetching KOSPI (pages 1 to 26)...")
+for p in range(1, 27):
+    url = f'https://m.stock.naver.com/api/stocks/marketValue/KOSPI?page={p}&pageSize=100'
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            d = json.loads(resp.read().decode('utf-8'))
+            stocks = d.get('stocks', [])
+            if not stocks: break
+            for s in stocks:
+                name = s.get('stockName', '').strip()
+                code = s.get('itemCode', '').strip()
+                if not name or not code or is_etf_name(name): continue
+                price = float(str(s.get('closePriceRaw', s.get('closePrice', 0))).replace(',', ''))
+                diff = float(str(s.get('changePriceRaw', s.get('changePrice', 0))).replace(',', ''))
+                chg = float(str(s.get('fluctuationsRatio', 0)).replace(',', ''))
+                clean_kr.append({
+                    'code': code,
+                    'name': name,
+                    'market': '코스피',
+                    'price': price,
+                    'change': chg,
+                    'diff': diff,
+                    'vol': s.get('accumulatedTradingVolume', '0') + '주',
+                    'amount': s.get('accumulatedTradingValue', '0') + '원',
+                    'yahooSymbol': f'{code}.KS',
+                    'isEtf': False,
+                    'krName': ''
+                })
+    except Exception as e:
+        pass
+
+# KOSDAQ 19페이지 전수 수집
+print("- Fetching KOSDAQ (pages 1 to 19)...")
+for p in range(1, 20):
+    url = f'https://m.stock.naver.com/api/stocks/marketValue/KOSDAQ?page={p}&pageSize=100'
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            d = json.loads(resp.read().decode('utf-8'))
+            stocks = d.get('stocks', [])
+            if not stocks: break
+            for s in stocks:
+                name = s.get('stockName', '').strip()
+                code = s.get('itemCode', '').strip()
+                if not name or not code or is_etf_name(name): continue
+                price = float(str(s.get('closePriceRaw', s.get('closePrice', 0))).replace(',', ''))
+                diff = float(str(s.get('changePriceRaw', s.get('changePrice', 0))).replace(',', ''))
+                chg = float(str(s.get('fluctuationsRatio', 0)).replace(',', ''))
+                clean_kr.append({
+                    'code': code,
+                    'name': name,
+                    'market': '코스닥',
+                    'price': price,
+                    'change': chg,
+                    'diff': diff,
+                    'vol': s.get('accumulatedTradingVolume', '0') + '주',
+                    'amount': s.get('accumulatedTradingValue', '0') + '원',
+                    'yahooSymbol': f'{code}.KQ',
+                    'isEtf': False,
+                    'krName': ''
+                })
+    except Exception as e:
+        pass
+
+print(f"-> Total Korean stocks indexed: {len(clean_kr)} (KOSPI: {len([s for s in clean_kr if s['market'] == '코스피'])}, KOSDAQ: {len([s for s in clean_kr if s['market'] == '코스닥'])})")
+
 
 nasdaq_stocks = []
 print("1) Fetching NASDAQ symbols...")
@@ -224,21 +299,6 @@ for s in nasdaq_stocks + nyse_stocks + amex_stocks:
         s["diff"] = real["diff"]
         if not s["krName"] and real.get("name"):
             s["krName"] = real["name"]
-
-# 한국 종목 정규화
-clean_kr = []
-for s in kr_stocks:
-    clean_kr.append({
-        "code": s["code"],
-        "name": s["name"],
-        "market": s["market"], # 코스피 또는 코스닥
-        "price": s["price"],
-        "change": s["change"],
-        "diff": s["diff"],
-        "yahooSymbol": s.get("yahooSymbol") or (f"{s['code']}.KQ" if s["market"] == "코스닥" else f"{s['code']}.KS"),
-        "isEtf": False,
-        "krName": ""
-    })
 
 total_all = clean_kr + nasdaq_stocks + nyse_stocks + amex_stocks
 
