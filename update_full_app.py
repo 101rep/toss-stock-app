@@ -110,10 +110,16 @@ html_template = f'''<!DOCTYPE html>
             <span class="text-base font-extrabold tracking-tight text-white flex items-center gap-1.5">
               TH증권
               <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">실시간 PRO</span>
-              <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v1.6.0-SPCX</span>
+              <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v1.7.0</span>
             </span>
           </div>
         </div>
+
+        <!-- 차트 모드일 때 최상단 헤더에 항상 선명하게 노출되는 뒤로가기 버튼 -->
+        <button id="header-back-btn" onclick="switchNav('rankings')" class="hidden px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer border border-blue-400/40">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>◀ 뒤로가기</span>
+        </button>
 
         <nav class="hidden sm:flex items-center space-x-4 text-sm font-medium text-tossTextMuted">
           <button id="nav-rankings" onclick="switchNav('rankings')" class="text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5">
@@ -372,6 +378,18 @@ html_template = f'''<!DOCTYPE html>
     <!-- 2-3. 섹션 B: 실시간 일봉 차트 뷰어 (TradingView Lightweight Charts 연동) -->
     <section id="section-chart" class="hidden space-y-4">
       
+      <!-- 눈에 가장 잘 보이는 대형 뒤로가기 버튼 바 (사용자 요구 적극 반영) -->
+      <div class="flex items-center justify-between bg-gradient-to-r from-blue-950/60 via-tossCard to-slate-900 border border-blue-500/40 rounded-2xl p-3 sm:px-5 shadow-lg">
+        <button onclick="switchNav('rankings')" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-black text-sm shadow-md flex items-center gap-2 transition cursor-pointer border border-blue-400/50">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>◀ 뒤로가기 (메인 조건검색식 목록)</span>
+        </button>
+        <div class="flex items-center gap-2 text-xs text-tossTextMuted">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="font-medium text-slate-300 hidden sm:inline">실시간 캔들 차트 분석 모드</span>
+        </div>
+      </div>
+      
       <!-- 종목 상세 정보 헤더 -->
       <div class="bg-tossCard border border-tossBorder rounded-2xl p-5 space-y-4 shadow-xl">
         
@@ -604,14 +622,15 @@ html_template = f'''<!DOCTYPE html>
           <div class="flex items-center space-x-2 text-white font-bold text-base">
             <i data-lucide="search" class="w-5 h-5 text-tossBlue"></i>
             <span id="modal-title-text">국내 · 미국 시장별 종목 검색 (11,094개)</span>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.6.0 최신 패치</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.7.0 최신</span>
           </div>
           <p class="text-[11px] text-tossTextMuted mt-0.5">
             국내주식과 미국주식이 서로 섞이지 않도록 완전 분리하여 빠르고 정확하게 검색합니다.
           </p>
         </div>
-        <button onclick="closeSearchModal()" class="p-1 rounded-lg hover:bg-slate-800 text-tossTextMuted hover:text-white transition">
-          <i data-lucide="x" class="w-5 h-5"></i>
+        <button onclick="closeSearchModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 hover:text-white font-bold transition flex items-center gap-1.5 border border-slate-700 cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
+          <span>닫기 (뒤로)</span>
         </button>
       </div>
 
@@ -2917,15 +2936,18 @@ html_template = f'''<!DOCTYPE html>
       const sectionChart = document.getElementById("section-chart");
       const navRankings = document.getElementById("nav-rankings");
       const navChart = document.getElementById("nav-chart");
+      const headerBackBtn = document.getElementById("header-back-btn");
 
       if (nav === 'rankings') {{
         sectionRankings.classList.remove("hidden");
         sectionChart.classList.add("hidden");
+        if (headerBackBtn) headerBackBtn.classList.add("hidden");
         navRankings.className = "text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5";
         navChart.className = "hover:text-white transition py-4 border-b-2 border-transparent text-tossTextMuted flex items-center gap-1.5";
       }} else {{
         sectionRankings.classList.add("hidden");
         sectionChart.classList.remove("hidden");
+        if (headerBackBtn) headerBackBtn.classList.remove("hidden");
         navChart.className = "text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5";
         navRankings.className = "hover:text-white transition py-4 border-b-2 border-transparent text-tossTextMuted flex items-center gap-1.5";
         
@@ -3005,11 +3027,32 @@ html_template = f'''<!DOCTYPE html>
       modalInput.value = "";
       // 항상 국내주식(KR) 기본값으로 완벽 초기화
       setMacroMarket('KR');
+      renderSearchInitialState();
       setTimeout(() => modalInput.focus(), 50);
     }}
 
     function closeSearchModal() {{
       searchModal.classList.add("hidden");
+    }}
+
+    // 검색 실행 전 초기 깔끔한 안내 화면 (사용자 요구: 검색버튼 누르기 전에는 아래에 종목이 일절 안 뜨도록 완벽 차단)
+    function renderSearchInitialState() {{
+      const marketName = currentMacroMarket === 'KR' ? '국내 코스피·코스닥 3,638개 전수' : '미국 나스닥·NYSE·AMEX 7,456개 전수';
+      searchResultsContainer.innerHTML = `
+        <div class="py-12 px-4 text-center space-y-3">
+          <div class="w-12 h-12 mx-auto rounded-2xl bg-blue-600/10 text-blue-400 flex items-center justify-center border border-blue-500/20 shadow-inner">
+            <i data-lucide="search" class="w-6 h-6"></i>
+          </div>
+          <div class="space-y-1">
+            <p class="text-sm font-bold text-white">종목명을 입력하신 후 우측 [검색] 버튼을 눌러주세요</p>
+            <p class="text-xs text-tossTextMuted">${{marketName}} 검색 대상</p>
+          </div>
+          <p class="text-[11px] text-slate-500">
+            💡 또는 위의 인기 추천 검색어(🚀 스페이스X, 엔비디아, 테슬라 등)를 클릭하시면 즉시 검색됩니다.
+          </p>
+        </div>
+      `;
+      lucide.createIcons();
     }}
 
     // 국내주식 vs 미국주식 대분류 전환 함수
@@ -3030,12 +3073,17 @@ html_template = f'''<!DOCTYPE html>
         usTab.className = "py-2.5 rounded-lg text-xs sm:text-sm font-extrabold bg-teal-600 text-white shadow-md flex items-center justify-center gap-1.5 transition";
         krTab.className = "py-2.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition";
         if (titleEl) titleEl.innerText = "🇺🇸 미국주식 종목 검색 (나스닥 · NYSE · AMEX 7,456개 전수)";
-        modalInput.placeholder = "미국 종목명, 한글명 또는 티커 입력 (예: 엔비디아, 테슬라, NVDA, TSMC, UBER, AAPL...)";
+        modalInput.placeholder = "미국 종목명, 한글명 또는 티커 입력 (예: 스페이스X, 엔비디아, 테슬라, NVDA, TSMC, UBER, AAPL...)";
       }}
 
       renderModalSubTabs();
       renderQuickTags();
-      renderSearchResults(modalInput.value.trim());
+      const currentVal = modalInput.value.trim();
+      if (currentVal) {{
+        renderSearchResults(currentVal);
+      }} else {{
+        renderSearchInitialState();
+      }}
     }}
 
     // 하위 거래소 필터 탭 동적 렌더링
@@ -3120,32 +3168,30 @@ html_template = f'''<!DOCTYPE html>
 
     function quickSearch(keyword) {{
       modalInput.value = keyword;
-      renderSearchResults(keyword);
+      executeModalSearch();
     }}
 
-    // 돋보기 버튼 클릭 및 Enter 키 입력 시 검색 실행
+    // [검색] 버튼 클릭 및 Enter 키 입력 시에만 검색 실행 (사용자 요구: 타이핑 중 불필요한 종목 노출 원천 차단)
     function executeModalSearch() {{
       const query = modalInput.value.trim();
+      if (!query) {{
+        renderSearchInitialState();
+        return;
+      }}
       renderSearchResults(query);
     }}
 
+    // 검색창이 비워졌을 때는 초기 깔끔한 안내 상태로 복귀
     modalInput.addEventListener("input", (e) => {{
-      renderSearchResults(e.target.value.trim());
+      if (e.target.value.trim() === "") {{
+        renderSearchInitialState();
+      }}
     }});
 
-    modalInput.addEventListener("compositionend", (e) => {{
-      renderSearchResults(e.target.value.trim());
-    }});
-
-    modalInput.addEventListener("keyup", (e) => {{
+    modalInput.addEventListener("keydown", (e) => {{
       if (e.key === "Enter") {{
         e.preventDefault();
-        const firstItem = searchResultsContainer.querySelector(".cursor-pointer");
-        if (firstItem && modalInput.value.trim().length >= 1) {{
-          firstItem.click();
-        }}
-      }} else {{
-        renderSearchResults(e.target.value.trim());
+        executeModalSearch();
       }}
     }});
 
@@ -3154,6 +3200,11 @@ html_template = f'''<!DOCTYPE html>
       searchResultsContainer.innerHTML = "";
       const q = query.trim().toLowerCase();
       const qClean = q.replace(/[\s\-_]/g, ""); // 띄어쓰기 및 특수기호 정규화
+
+      if (q === "") {{
+        renderSearchInitialState();
+        return;
+      }}
 
       // 1. 국내주식 / 미국주식 대분류 기반 원천 풀 분리
       let pool = [];
@@ -3189,50 +3240,52 @@ html_template = f'''<!DOCTYPE html>
             <span class="text-base">🚀</span>
             <span>미국 나스닥 <strong>스페이스X (SPCX)</strong>를 찾으시나요?</span>
           </div>
-          <button onclick="setMacroMarket('US'); modalInput.value='스페이스X'; renderSearchResults('스페이스X');" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition flex-shrink-0">
+          <button onclick="setMacroMarket('US'); modalInput.value='스페이스X'; executeModalSearch();" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition flex-shrink-0">
             🇺🇸 미국 스페이스X 보기
           </button>
         `;
         searchResultsContainer.appendChild(spBanner);
       }}
 
-      let filtered = [];
+      // 선택된 시장 풀 내에서 검색 매칭 (국내/미국 혼입 절대 방지)
+      const exactMatches = [];
+      const startsWithMatches = [];
+      const containsMatches = [];
 
-      if (q === "") {{
-        // 검색어가 없을 때는 해당 시장 대표 종목 40개 노출
-        filtered = pool.slice(0, 40);
-      }} else {{
-        // 선택된 시장 풀 내에서만 검색 매칭 (국내/미국 혼입 절대 방지)
-        const exactMatches = [];
-        const startsWithMatches = [];
-        const containsMatches = [];
+      for (const s of pool) {{
+        const codeLower = (s.code || "").toLowerCase();
+        const nameLower = (s.name || "").toLowerCase();
+        const krLower = (s.krName || "").toLowerCase();
 
-        for (const s of pool) {{
-          const codeLower = (s.code || "").toLowerCase();
-          const nameLower = (s.name || "").toLowerCase();
-          const krLower = (s.krName || "").toLowerCase();
+        const codeClean = codeLower.replace(/[\s\-_]/g, "");
+        const nameClean = nameLower.replace(/[\s\-_]/g, "");
+        const krClean = krLower.replace(/[\s\-_]/g, "");
 
-          const codeClean = codeLower.replace(/[\s\-_]/g, "");
-          const nameClean = nameLower.replace(/[\s\-_]/g, "");
-          const krClean = krLower.replace(/[\s\-_]/g, "");
+        // 스페이스X (SPCX) 매칭 우선순위 극대화
+        const isSpcxMatch = (s.code === 'SPCX') && (
+          q.includes("스페이스") || q.includes("space") || q.includes("spcx") || 
+          qClean.includes("스페이스") || qClean.includes("spacex") || qClean.includes("spcx")
+        );
 
-          const isExact = (codeLower === q || nameLower === q || krLower === q || (qClean && (codeClean === qClean || nameClean === qClean || krClean === qClean)));
-          const isStartsWith = (codeLower.startsWith(q) || nameLower.startsWith(q) || krLower.startsWith(q) || (qClean && (codeClean.startsWith(qClean) || nameClean.startsWith(qClean) || krClean.startsWith(qClean))));
-          const isContains = (codeLower.includes(q) || nameLower.includes(q) || krLower.includes(q) || (qClean && (codeClean.includes(qClean) || nameClean.includes(qClean) || krClean.includes(qClean))));
-
-          if (isExact) {{
-            exactMatches.push(s);
-          }} else if (isStartsWith) {{
-            // 스페이스X(SPCX)에 가중치
-            if (s.code === 'SPCX') startsWithMatches.unshift(s);
-            else startsWithMatches.push(s);
-          }} else if (isContains) {{
-            if (s.code === 'SPCX') containsMatches.unshift(s);
-            else containsMatches.push(s);
-          }}
+        if (isSpcxMatch) {{
+          exactMatches.unshift(s);
+          continue;
         }}
-        filtered = [...exactMatches, ...startsWithMatches, ...containsMatches].slice(0, 80);
+
+        const isExact = (codeLower === q || nameLower === q || krLower === q || (qClean && (codeClean === qClean || nameClean === qClean || krClean === qClean)));
+        const isStartsWith = (codeLower.startsWith(q) || nameLower.startsWith(q) || krLower.startsWith(q) || (qClean && (codeClean.startsWith(qClean) || nameClean.startsWith(qClean) || krClean.startsWith(qClean))));
+        const isContains = (codeLower.includes(q) || nameLower.includes(q) || krLower.includes(q) || (qClean && (codeClean.includes(qClean) || nameClean.includes(qClean) || krClean.includes(qClean))));
+
+        if (isExact) {{
+          exactMatches.push(s);
+        }} else if (isStartsWith) {{
+          startsWithMatches.push(s);
+        }} else if (isContains) {{
+          containsMatches.push(s);
+        }}
       }}
+      
+      let filtered = [...exactMatches, ...startsWithMatches, ...containsMatches].slice(0, 80);
 
       // ETF 검색어인 경우
       const isQueryEtf = isEtfStock({{ name: q, code: q }});
@@ -3385,8 +3438,25 @@ html_template = f'''<!DOCTYPE html>
         return;
       }}
 
+      // 0. 스페이스X (SPCX) 직행 방어 로직 (절대 100달러 더미로 빠지지 않도록 보장)
+      const isSpcxQuery = cleanNorm.includes("스페이스") || cleanNorm.includes("spacex") || cleanSym.toUpperCase() === "SPCX";
+      if (isSpcxQuery) {{
+        const spcxStock = ALL_GLOBAL_STOCKS.find(s => s.code === 'SPCX') || {{
+          code: 'SPCX',
+          name: 'SpaceX (Space Exploration Technologies Corp.)',
+          krName: '스페이스X',
+          market: 'NASDAQ',
+          price: 156.54,
+          change: -4.21,
+          diff: -6.88,
+          yahooSymbol: 'SPCX',
+          isEtf: false
+        }};
+        selectStockForDetail(spcxStock);
+        return;
+      }}
+
       // 1. 만약 한글이나 일반 기업명으로 들어온 경우, ALL_GLOBAL_STOCKS에서 먼저 검색!
-      const cleanNorm = cleanSym.toLowerCase().replace(/[\s\-_]/g, "");
       const matched = ALL_GLOBAL_STOCKS.find(s => {{
         const nNorm = (s.name || "").toLowerCase().replace(/[\s\-_]/g, "");
         const kNorm = (s.krName || "").toLowerCase().replace(/[\s\-_]/g, "");
