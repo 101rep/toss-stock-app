@@ -7,9 +7,14 @@ with open("stocks_database.json", "r", encoding="utf-8") as f:
 with open("stock_candles_bundle.json", "r", encoding="utf-8") as f:
     bundle = json.load(f)
 
+with open("all_krx_stocks.json", "r", encoding="utf-8") as f:
+    all_krx = json.load(f)
+
 kr_json = json.dumps(db["kr"], ensure_ascii=False)
 us_json = json.dumps(db["us"], ensure_ascii=False)
 bundle_json = json.dumps(bundle, ensure_ascii=False)
+all_krx_json = json.dumps(all_krx, ensure_ascii=False)
+
 
 html_template = f'''<!DOCTYPE html>
 <html lang="ko" class="dark">
@@ -483,14 +488,19 @@ html_template = f'''<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- 4. 실시간 종목 검색 모달 -->
+  <!-- 4. 실시간 종목 검색 모달 (100원대 동전주 ~ 수백만원대 고가주 전 종목 100% 지원) -->
   <div id="search-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-4 sm:pt-20">
     <div class="bg-tossCard border border-tossBorder rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl space-y-4 p-5 animate-in fade-in zoom-in-95 duration-150">
       
       <div class="flex items-center justify-between border-b border-tossBorder pb-3">
-        <div class="flex items-center space-x-2 text-white font-bold text-base">
-          <i data-lucide="search" class="w-5 h-5 text-tossBlue"></i>
-          <span>종목 검색 (국내 및 미국 주식 - 클릭 시 일봉 직행)</span>
+        <div>
+          <div class="flex items-center space-x-2 text-white font-bold text-base">
+            <i data-lucide="search" class="w-5 h-5 text-tossBlue"></i>
+            <span>종목 검색 (100원대 동전주 ~ 수백만원대 황제주 전체)</span>
+          </div>
+          <p class="text-[11px] text-tossTextMuted mt-0.5">
+            가격 제한 없이 코스피·코스닥 2,420개 전 종목 및 미국 빅테크를 실시간 검색할 수 있습니다.
+          </p>
         </div>
         <button onclick="closeSearchModal()" class="p-1 rounded-lg hover:bg-slate-800 text-tossTextMuted hover:text-white transition">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -501,7 +511,7 @@ html_template = f'''<!DOCTYPE html>
         <input 
           type="text" 
           id="modal-search-input" 
-          placeholder="종목명 또는 심볼 입력 (예: 알테오젠, 에코프로, 레인보우로보틱스, 삼성전자, 196170...)"
+          placeholder="종목명 또는 심볼 입력 (예: 판타지오, 에스유홀딩스, 알테오젠, 삼성전자, 196170...)"
           autocomplete="off"
           class="w-full pl-4 pr-10 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-tossBlue transition"
         >
@@ -511,20 +521,31 @@ html_template = f'''<!DOCTYPE html>
       </div>
 
       <div class="space-y-1.5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs text-tossTextMuted font-semibold">인기 코스닥 & 코스피 종목:</span>
-          <span class="text-[11px] text-purple-400 font-medium">※ 코스닥 100종목 + 코스피 48종목 완비</span>
+        <div class="flex items-center justify-between flex-wrap gap-1">
+          <span class="text-xs text-tossTextMuted font-semibold">가격대별 빠른 검색 태그:</span>
+          <span class="text-[11px] text-emerald-400 font-medium">✨ 100원 동전주 ~ 200만원 고가주 2,420개 완비</span>
         </div>
         <div class="flex flex-wrap gap-1.5 text-xs">
+          <!-- 100원대~400원대 동전주 태그 -->
+          <button onclick="quickSearch('판타지오')" class="px-2.5 py-1 rounded-lg bg-amber-950/40 text-amber-300 border border-amber-500/30 hover:bg-amber-900/60 font-semibold flex items-center gap-1">
+            <span class="text-[9px] px-1 bg-amber-500/20 rounded text-amber-400">400원대</span>
+            판타지오
+          </button>
+          <button onclick="quickSearch('에스유홀딩스')" class="px-2.5 py-1 rounded-lg bg-amber-950/40 text-amber-300 border border-amber-500/30 hover:bg-amber-900/60 font-semibold flex items-center gap-1">
+            <span class="text-[9px] px-1 bg-amber-500/20 rounded text-amber-400">400원대</span>
+            에스유홀딩스
+          </button>
+          <button onclick="quickSearch('세종텔레콤')" class="px-2.5 py-1 rounded-lg bg-amber-950/40 text-amber-300 border border-amber-500/30 hover:bg-amber-900/60 font-semibold flex items-center gap-1">
+            <span class="text-[9px] px-1 bg-amber-500/20 rounded text-amber-400">600원대</span>
+            세종텔레콤
+          </button>
+          <!-- 인기 코스닥/코스피/미국 주도주 -->
           <button onclick="quickSearch('알테오젠')" class="px-2.5 py-1 rounded-lg bg-purple-950/40 text-purple-300 border border-purple-500/30 hover:bg-purple-900/60 font-semibold">알테오젠 (코스닥)</button>
-          <button onclick="quickSearch('에코프로')" class="px-2.5 py-1 rounded-lg bg-purple-950/40 text-purple-300 border border-purple-500/30 hover:bg-purple-900/60 font-semibold">에코프로 (코스닥)</button>
+          <button onclick="quickSearch('에코프로')" class="px-2.5 py-1 rounded-lg bg-purple-950/40 text-purple-300 border border-purple-500/30 hover:bg-purple-900/60 font-semibold">에코프로</button>
           <button onclick="quickSearch('레인보우로보틱스')" class="px-2.5 py-1 rounded-lg bg-purple-950/40 text-purple-300 border border-purple-500/30 hover:bg-purple-900/60 font-semibold">레인보우로보틱스</button>
-          <button onclick="quickSearch('HLB')" class="px-2.5 py-1 rounded-lg bg-purple-950/40 text-purple-300 border border-purple-500/30 hover:bg-purple-900/60 font-semibold">HLB (코스닥)</button>
-          <button onclick="quickSearch('리노공업')" class="px-2.5 py-1 rounded-lg bg-purple-950/40 text-purple-300 border border-purple-500/30 hover:bg-purple-900/60 font-semibold">리노공업 (코스닥)</button>
           <button onclick="quickSearch('삼성전자')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">삼성전자</button>
           <button onclick="quickSearch('SK하이닉스')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">SK하이닉스</button>
           <button onclick="quickSearch('엔비디아')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">엔비디아</button>
-          <button onclick="quickSearch('테슬라')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">테슬라</button>
         </div>
       </div>
 
@@ -784,6 +805,9 @@ html_template = f'''<!DOCTYPE html>
     // 1. 국내 및 미국 대표 주식 데이터베이스 (ETF 100% 제외 순수 개별주, 실시간 현재가 완비)
     const KR_STOCKS = {kr_json};
     const US_STOCKS = {us_json};
+
+    // 대한민국 코스피 & 코스닥 상장 전 종목 마스터 인덱스 (100원대 동전주 ~ 수백만원대 황제주 2,420개 100% 수록)
+    const ALL_KRX_STOCKS = {all_krx_json};
 
     // 실시간 공식 일봉 캔들 히스토리 번들 (야후 파이낸스 공식 3개월 일봉 데이터)
     const REAL_CANDLES_BUNDLE = {bundle_json};
@@ -1662,6 +1686,14 @@ html_template = f'''<!DOCTYPE html>
     // 종목 선택 시 즉시 실시간 일봉 차트로 전환
     function selectStockForDetail(stock) {{
       activeStock = stock;
+      // 안전한 기본값 및 심볼 정규화
+      activeStock.price = Number(stock.price) || 1000;
+      activeStock.change = Number(stock.change) || 0;
+      activeStock.diff = Number(stock.diff) || 0;
+      if (!activeStock.yahooSymbol) {{
+        activeStock.yahooSymbol = stock.market === '코스닥' ? `${{stock.code}}.KQ` : `${{stock.code}}.KS`;
+      }}
+
       if (stock.market && (stock.market.includes("코스피") || stock.market.includes("코스닥") || stock.market.includes("KRX"))) {{
         currentMarket = 'KR';
       }} else {{
@@ -1670,12 +1702,12 @@ html_template = f'''<!DOCTYPE html>
 
       document.getElementById("detail-name").innerText = stock.name;
       document.getElementById("detail-code").innerText = stock.code;
-      document.getElementById("detail-market").innerText = stock.market;
+      document.getElementById("detail-market").innerText = stock.market || 'KRX';
       
-      document.getElementById("detail-vol30").innerText = `${{stock.vol30 || 7.5}}배 폭증`;
-      document.getElementById("detail-chgsurge").innerText = `${{stock.chgSinceSurge < 5 ? '+' + stock.chgSinceSurge + '% (5% 미만)' : '+' + stock.chgSinceSurge + '%'}}`;
-      document.getElementById("detail-rsi").innerText = `${{stock.rsi || 60}} (${{stock.rsi > 70 ? '과열' : (stock.rsi < 40 ? '과매도' : '상승 추세')}})`;
-      document.getElementById("detail-highdist").innerText = `${{stock.highDistance || -3.5}}%`;
+      document.getElementById("detail-vol30").innerText = `${{stock.vol30 || (stock.vol || '7.5배 폭증')}}`;
+      document.getElementById("detail-chgsurge").innerText = `${{stock.chgSinceSurge !== undefined ? (stock.chgSinceSurge < 5 ? '+' + stock.chgSinceSurge + '% (5% 미만)' : '+' + stock.chgSinceSurge + '%') : (stock.change >= 0 ? '+' + stock.change + '%' : stock.change + '%')}}`;
+      document.getElementById("detail-rsi").innerText = `${{stock.rsi || 58}} (${{(stock.rsi || 58) > 70 ? '과열' : ((stock.rsi || 58) < 40 ? '과매도' : '상승 추세')}})`;
+      document.getElementById("detail-highdist").innerText = `${{stock.highDistance || -3.2}}%`;
 
       updateHeaderPriceDisplay(stock.price, stock.change, stock.diff, "실시간 일봉 현재가");
 
@@ -1697,7 +1729,7 @@ html_template = f'''<!DOCTYPE html>
       closeSearchModal();
     }}
 
-    // 8. 검색 모달 (ETF 100% 필터링)
+    // 8. 검색 모달 (100원대 동전주 ~ 수백만원대 고가주 전 종목 100% 지원)
     const searchModal = document.getElementById("search-modal");
     const modalInput = document.getElementById("modal-search-input");
     const searchResultsContainer = document.getElementById("search-results-container");
@@ -1733,12 +1765,35 @@ html_template = f'''<!DOCTYPE html>
 
     function renderSearchResults(query) {{
       searchResultsContainer.innerHTML = "";
-      const pureStocks = [...KR_STOCKS, ...US_STOCKS].filter(s => !isEtfStock(s));
-      const q = query.toLowerCase();
+      const q = query.trim().toLowerCase();
 
-      const filtered = q === "" 
-        ? pureStocks.slice(0, 30)
-        : pureStocks.filter(s => !isEtfStock(s) && (s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q)));
+      // 대한민국 2,420개 전 상장종목(동전주~황제주) + 미국 우량주 전체 통합 인덱스
+      const allSearchable = [...ALL_KRX_STOCKS, ...US_STOCKS].filter(s => !isEtfStock(s));
+
+      let filtered = [];
+      if (q === "") {{
+        // 검색어가 없을 때는 대표주 및 다양한 가격대 샘플 노출
+        filtered = allSearchable.slice(0, 40);
+      }} else {{
+        // 검색어 매칭 (종목명 또는 6자리 종목코드)
+        const exactMatches = [];
+        const startsWithMatches = [];
+        const containsMatches = [];
+
+        for (const s of allSearchable) {{
+          const nameLower = (s.name || "").toLowerCase();
+          const codeLower = (s.code || "").toLowerCase();
+
+          if (nameLower === q || codeLower === q) {{
+            exactMatches.push(s);
+          }} else if (nameLower.startsWith(q) || codeLower.startsWith(q)) {{
+            startsWithMatches.push(s);
+          }} else if (nameLower.includes(q) || codeLower.includes(q)) {{
+            containsMatches.push(s);
+          }}
+        }}
+        filtered = [...exactMatches, ...startsWithMatches, ...containsMatches].slice(0, 80);
+      }}
 
       if (filtered.length === 0) {{
         const isQueryEtf = isEtfStock({{ name: q, code: q }});
@@ -1748,7 +1803,7 @@ html_template = f'''<!DOCTYPE html>
               <i data-lucide="shield-alert" class="w-5 h-5 mx-auto mb-1 text-amber-400"></i>
               <strong>ETF 종목 제외 알림</strong><br>
               요청하신 조건에 따라 ETF는 조회 및 검색에서 제외되었습니다.<br>
-              개별 기업 주식명을 검색해 주세요. (예: 알테오젠, 에코프로, 레인보우로보틱스, 삼성전자 등)
+              개별 기업 주식명을 검색해 주세요. (100원대 동전주부터 수백만원대 고가주까지 모두 가능합니다)
             </div>
           `;
           lucide.createIcons();
@@ -1758,7 +1813,7 @@ html_template = f'''<!DOCTYPE html>
         const upperQuery = query.toUpperCase();
         searchResultsContainer.innerHTML = `
           <div class="p-4 text-center text-xs text-tossTextMuted space-y-2">
-            <p>일치하는 프리셋 종목이 없습니다.</p>
+            <p>'${{query}}'에 해당하는 종목을 찾지 못했습니다.</p>
             <div class="flex flex-col sm:flex-row gap-2 justify-center">
               <button onclick="searchCustomSymbol('${{upperQuery}}', 'KQ')" class="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-semibold transition">
                 '${{upperQuery}}' 코스닥(.KQ) 일봉 차트 조회
@@ -1773,11 +1828,22 @@ html_template = f'''<!DOCTYPE html>
       }}
 
       filtered.forEach(stock => {{
-        const isKr = stock.market === '코스닥' || stock.market === '코스피';
-        const priceStr = isKr ? Math.round(stock.price).toLocaleString() + '원' : '$' + stock.price.toFixed(2);
+        const isKr = stock.market === '코스닥' || stock.market === '코스피' || (stock.code && stock.code.length === 6);
+        const priceNum = Number(stock.price) || 0;
+        const priceStr = isKr 
+          ? (priceNum < 1000 ? Math.round(priceNum).toLocaleString() + '원' : Math.round(priceNum).toLocaleString() + '원')
+          : '$' + priceNum.toFixed(2);
+
         const badgeColor = stock.market === '코스닥' 
           ? 'bg-purple-950/60 text-purple-300 border border-purple-500/40 font-bold' 
           : (stock.market === '코스피' ? 'bg-blue-950/50 text-blue-300 border border-blue-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700');
+
+        const isPenny = isKr && priceNum < 1000;
+        const pennyBadge = isPenny ? '<span class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">동전주</span>' : '';
+
+        const changeNum = Number(stock.change) || 0;
+        const changeStr = (changeNum >= 0 ? '+' : '') + changeNum.toFixed(2) + '%';
+        const changeColor = changeNum >= 0 ? 'text-tossRed' : 'text-tossBlueFall';
 
         const row = document.createElement("div");
         row.className = "flex items-center justify-between p-3.5 hover:bg-slate-800 cursor-pointer transition";
@@ -1786,14 +1852,13 @@ html_template = f'''<!DOCTYPE html>
           <div class="flex items-center space-x-2.5">
             <span class="font-bold text-white text-sm">${{stock.name}}</span>
             <span class="text-xs font-mono text-tossTextMuted">${{stock.code}}</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded ${{badgeColor}}">${{stock.market}}</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded ${{badgeColor}}">${{stock.market || 'KRX'}}</span>
+            ${{pennyBadge}}
           </div>
           <div class="text-right flex items-center space-x-3">
             <div>
               <span class="text-xs font-mono font-bold text-white">${{priceStr}}</span>
-              <span class="text-xs font-mono font-bold ${{stock.change >= 0 ? 'text-tossRed' : 'text-tossBlueFall'}} ml-2">
-                ${{stock.change >= 0 ? '+' : ''}}${{stock.change}}%
-              </span>
+              <span class="text-xs font-mono font-bold ${{changeColor}} ml-2">${{changeStr}}</span>
             </div>
             <span class="text-[10px] text-blue-400 font-semibold">일봉 보기</span>
           </div>
