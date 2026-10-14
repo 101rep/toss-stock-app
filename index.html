@@ -412,20 +412,32 @@
 
         <!-- 보조지표 원클릭 토글 툴바 & 실시간 지표 범례 -->
         <div class="flex items-center justify-between border-t border-slate-800/80 pt-2.5 flex-wrap gap-2 text-xs">
-          <!-- 좌측: 보조지표 토글 버튼 -->
+          <!-- 좌측: 보조지표 설정 모달 오픈 버튼 & 주요 퀵 칩 -->
           <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-tossTextMuted text-[11px] font-semibold flex items-center gap-1 mr-1">
-              <i data-lucide="sliders" class="w-3.5 h-3.5 text-blue-400"></i>
-              보조지표:
-            </span>
+            <button onclick="openIndicatorModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-md transition flex items-center gap-1.5 border border-blue-400/30">
+              <i data-lucide="sliders" class="w-3.5 h-3.5 text-yellow-300"></i>
+              <span>⚙️ 보조지표 설정</span>
+              <span id="quick-active-count" class="px-1.5 py-0.2 rounded-full bg-black/40 text-[10px] text-blue-200">2개 ON</span>
+            </button>
+            <div class="w-[1px] h-4 bg-slate-800 mx-0.5 hidden sm:block"></div>
+            <!-- 주요 인기 퀵 토글 칩 -->
             <button id="btn-ind-volume" onclick="toggleIndicator('volume')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition flex items-center gap-1">
               <span>📊 거래량</span>
             </button>
-            <button id="btn-ind-ma" onclick="toggleIndicator('ma')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow transition flex items-center gap-1">
-              <span>📈 이평선 (5·20·60)</span>
+            <button id="btn-ind-sma" onclick="toggleIndicator('sma')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow transition flex items-center gap-1">
+              <span>📈 이동평균선(SMA)</span>
             </button>
-            <button id="btn-ind-rsi" onclick="toggleIndicator('rsi')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:text-white transition flex items-center gap-1">
-              <span>🎯 RSI (14)</span>
+            <button id="btn-ind-bb" onclick="toggleIndicator('bb')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition flex items-center gap-1">
+              <span>⚡ 볼린저밴드</span>
+            </button>
+            <button id="btn-ind-rsi" onclick="toggleIndicator('rsi')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition flex items-center gap-1">
+              <span>🎯 RSI</span>
+            </button>
+            <button id="btn-ind-macd" onclick="toggleIndicator('macd')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition flex items-center gap-1">
+              <span>🌊 MACD</span>
+            </button>
+            <button id="btn-ind-stoch" onclick="toggleIndicator('stoch')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition flex items-center gap-1">
+              <span>⚡ 스토캐스틱</span>
             </button>
           </div>
 
@@ -435,13 +447,14 @@
             <span id="legend-ma5" class="text-emerald-400 font-semibold">MA5: <strong>-</strong></span>
             <span id="legend-ma20" class="text-amber-400 font-bold">MA20: <strong>-</strong></span>
             <span id="legend-ma60" class="text-purple-400 font-semibold">MA60: <strong>-</strong></span>
-            <span id="legend-rsi" class="text-cyan-400 hidden font-semibold">RSI: <strong>-</strong></span>
+            <span id="legend-bb" class="text-sky-300 hidden font-semibold">BB: <strong>-</strong></span>
+            <span id="legend-osc" class="text-cyan-300 hidden font-semibold">지표: <strong>-</strong></span>
           </div>
         </div>
 
-        <!-- TradingView Lightweight Charts 메인 차트 + RSI 독립 서브 패널 -->
+        <!-- TradingView Lightweight Charts 메인 차트 + 하단 오실레이터 서브 패널 -->
         <div class="space-y-2">
-          <!-- 메인 캔들스틱 + 거래량 + 이평선 차트 -->
+          <!-- 메인 캔들스틱 + 거래량 + 이평선 + 볼린저밴드 차트 -->
           <div class="relative w-full h-[440px] bg-[#101012] rounded-xl overflow-hidden border border-slate-800/80">
             <div id="lw-chart-wrapper" class="w-full h-full"></div>
             <div id="chart-loading-overlay" class="hidden absolute top-3 right-3 bg-slate-900/90 text-xs text-white px-3 py-1.5 rounded-xl border border-slate-700 shadow-lg flex items-center gap-2">
@@ -450,16 +463,21 @@
             </div>
           </div>
 
-          <!-- RSI 독립 서브 패널 (토글 시 부드럽게 노출) -->
-          <div id="rsi-panel-wrapper" class="hidden relative w-full h-[130px] bg-[#101012] rounded-xl overflow-hidden border border-slate-800/80 p-2">
-            <div class="flex items-center justify-between text-[11px] px-2 py-0.5 border-b border-slate-800/60 mb-1">
-              <span class="text-cyan-400 font-bold flex items-center gap-1">
-                <span>🎯 RSI (14) 상대강도지수</span>
-                <span class="text-[10px] text-slate-500 font-normal">과열(70) / 침체(30)</span>
-              </span>
-              <span id="rsi-live-val" class="font-mono font-bold text-white">-</span>
+          <!-- 오실레이터 독립 서브 패널 (RSI, MACD, 스토캐스틱, CCI, OBV 탭 지원) -->
+          <div id="sub-oscillator-panel" class="hidden relative w-full h-[155px] bg-[#101012] rounded-xl overflow-hidden border border-slate-800/80 p-2 space-y-1.5">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-1 px-1">
+              <!-- 오실레이터 선택 탭 -->
+              <div class="flex items-center gap-1.5 text-xs font-semibold overflow-x-auto no-scrollbar">
+                <button id="osc-tab-rsi" onclick="switchActiveOscillator('rsi')" class="px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-cyan-600 text-white shadow transition">🎯 RSI (14)</button>
+                <button id="osc-tab-macd" onclick="switchActiveOscillator('macd')" class="px-2.5 py-0.5 rounded-lg text-[11px] text-slate-400 hover:text-white bg-slate-900 transition">🌊 MACD (12,26,9)</button>
+                <button id="osc-tab-stoch" onclick="switchActiveOscillator('stoch')" class="px-2.5 py-0.5 rounded-lg text-[11px] text-slate-400 hover:text-white bg-slate-900 transition">⚡ 스토캐스틱 (12,5,5)</button>
+                <button id="osc-tab-cci" onclick="switchActiveOscillator('cci')" class="px-2.5 py-0.5 rounded-lg text-[11px] text-slate-400 hover:text-white bg-slate-900 transition">📡 CCI (14)</button>
+                <button id="osc-tab-obv" onclick="switchActiveOscillator('obv')" class="px-2.5 py-0.5 rounded-lg text-[11px] text-slate-400 hover:text-white bg-slate-900 transition">📊 OBV</button>
+              </div>
+              <span id="osc-live-badge" class="text-[11px] font-mono font-bold text-white px-2 py-0.5 rounded bg-slate-900 border border-slate-800">-</span>
             </div>
-            <div id="lw-rsi-wrapper" class="w-full h-[95px]"></div>
+            <!-- 서브 차트 렌더링 래퍼 -->
+            <div id="lw-oscillator-wrapper" class="w-full h-[105px]"></div>
           </div>
         </div>
 
@@ -794,6 +812,59 @@
     </div>
   </div>
 
+  <!-- 4-2. 증권사 12대 핵심 기술적 보조지표 선택 & 설정 모달 -->
+  <div id="indicator-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 sm:pt-14 overflow-y-auto">
+    <div class="bg-tossCard border border-tossBorder rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-4 p-5 animate-in fade-in zoom-in-95 duration-150 my-auto">
+      
+      <div class="flex items-center justify-between border-b border-tossBorder pb-3">
+        <div>
+          <div class="flex items-center space-x-2 text-white font-bold text-base">
+            <i data-lucide="sliders" class="w-5 h-5 text-blue-400"></i>
+            <span>증권사 기술적 보조지표 설정</span>
+            <span id="indicator-active-badge" class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold border border-blue-500/30">2개 활성</span>
+          </div>
+          <p class="text-[11px] text-tossTextMuted mt-0.5">
+            국내외 증권사 실전 매매에서 가장 널리 쓰이는 12대 핵심 보조지표를 자유롭게 선택하여 차트에 적용할 수 있습니다.
+          </p>
+        </div>
+        <button onclick="closeIndicatorModal()" class="p-1 rounded-lg hover:bg-slate-800 text-tossTextMuted hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 카테고리 필터 탭 -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs border-b border-slate-800/80">
+        <button id="ind-cat-ALL" onclick="filterIndicatorCategory('ALL')" class="px-3 py-1.5 rounded-xl font-bold bg-blue-600 text-white shadow transition flex-shrink-0">전체 지표 (12종)</button>
+        <button id="ind-cat-TREND" onclick="filterIndicatorCategory('TREND')" class="px-3 py-1.5 rounded-xl font-medium bg-slate-900 text-tossTextMuted hover:text-white border border-slate-800 transition flex-shrink-0">📈 추세 지표 (5종)</button>
+        <button id="ind-cat-OSC" onclick="filterIndicatorCategory('OSC')" class="px-3 py-1.5 rounded-xl font-medium bg-slate-900 text-tossTextMuted hover:text-white border border-slate-800 transition flex-shrink-0">🎯 모멘텀 & 오실레이터 (5종)</button>
+        <button id="ind-cat-VOL" onclick="filterIndicatorCategory('VOL')" class="px-3 py-1.5 rounded-xl font-medium bg-slate-900 text-tossTextMuted hover:text-white border border-slate-800 transition flex-shrink-0">📊 거래량 지표 (2종)</button>
+      </div>
+
+      <!-- 지표 선택 카드 컨테이너 (스크롤) -->
+      <div id="indicator-cards-container" class="max-h-[380px] overflow-y-auto space-y-2 pr-1">
+        <!-- 자바스크립트로 12개 지표 카드 동적 렌더링 -->
+      </div>
+
+      <!-- 모달 하단 컨트롤 바 -->
+      <div class="border-t border-tossBorder pt-3.5 flex items-center justify-between text-xs flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <button onclick="resetIndicatorsDefault()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition flex items-center gap-1">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>기본 추천값 복원</span>
+          </button>
+          <button onclick="clearAllIndicators()" class="px-3 py-1.5 rounded-xl bg-slate-800/70 hover:bg-slate-800 text-rose-400 font-semibold transition">
+            전체 해제
+          </button>
+        </div>
+        <button onclick="closeIndicatorModal()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg transition flex items-center gap-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>적용 완료</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- 5. 푸터 (법적 필수 사업자 정보 완비) -->
   <footer class="bg-[#0b0b0d] border-t border-tossBorder/70 text-tossTextMuted text-xs py-10 mt-12">
     <div class="max-w-5xl mx-auto px-4 space-y-6">
@@ -837,21 +908,192 @@
     let isCandleMode = true; // 기본: 실시간 일봉 캔들 차트 즉시 표시
 
     let lwChart = null;
-    let lwRsiChart = null;
+    let lwOscChart = null;
     let currentSeries = null;
     let volumeSeries = null;
-    let ma5Series = null;
-    let ma20Series = null;
-    let ma60Series = null;
-    let rsiLineSeries = null;
-    let rawChartData = [];
+    let volMa5Series = null;
 
-    // 보조지표 상태 (거래량: 기본 ON, 이평선 5·20·60: 기본 ON, RSI 14: 토글)
+    // 메인 차트 오버레이 보조지표 시리즈
+    let sma5Series = null;
+    let sma20Series = null;
+    let sma60Series = null;
+    let sma120Series = null;
+    let ema12Series = null;
+    let ema26Series = null;
+    let bbUpperSeries = null;
+    let bbMiddleSeries = null;
+    let bbLowerSeries = null;
+    let envUpperSeries = null;
+    let envLowerSeries = null;
+    let ichimokuTenkanSeries = null;
+    let ichimokuKijunSeries = null;
+    let psarSeries = null;
+
+    // 하단 서브 오실레이터 패널 시리즈
+    let oscRsiSeries = null;
+    let oscMacdLineSeries = null;
+    let oscMacdSignalSeries = null;
+    let oscMacdHistSeries = null;
+    let oscStochKSeries = null;
+    let oscStochDSeries = null;
+    let oscCciSeries = null;
+    let oscObvSeries = null;
+
+    let rawChartData = [];
+    let currentIndicatorFilter = 'ALL';
+    let activeOscillatorTab = 'rsi'; // 'rsi', 'macd', 'stoch', 'cci', 'obv'
+
+    // 증권사 12대 핵심 보조지표 활성화 상태
     let indicatorsState = {
       volume: true,
-      ma: true,
-      rsi: false
+      sma: true,
+      ema: false,
+      bb: false,
+      env: false,
+      ichimoku: false,
+      psar: false,
+      rsi: false,
+      macd: false,
+      stoch: false,
+      cci: false,
+      obv: false
     };
+
+    // 증권사 12대 핵심 기술적 보조지표 메타데이터 카탈로그
+    const INDICATORS_CATALOG = [
+      {
+        id: 'sma',
+        name: '단순 이동평균선 (SMA)',
+        shortName: 'SMA',
+        category: 'TREND',
+        type: 'OVERLAY',
+        desc: '5, 20, 60, 120일 동안의 평균 가격을 연결한 가장 기본적이고 강력한 추세선입니다.',
+        params: '5(초록), 20(황금), 60(보라), 120(파랑)',
+        colors: ['#22c55e', '#eab308', '#a855f7', '#3b82f6'],
+        badge: '추세·골든크로스'
+      },
+      {
+        id: 'ema',
+        name: '지수 이동평균선 (EMA)',
+        shortName: 'EMA',
+        category: 'TREND',
+        type: 'OVERLAY',
+        desc: '최근 주가에 더 높은 가중치를 부여하여 추세 변화를 SMA보다 훨씬 빠르고 민감하게 포착합니다.',
+        params: '12일(청록), 26일(주황)',
+        colors: ['#06b6d4', '#f97316'],
+        badge: '급등주·추세전환'
+      },
+      {
+        id: 'bb',
+        name: '볼린저 밴드 (Bollinger Bands)',
+        shortName: '볼린저밴드',
+        category: 'TREND',
+        type: 'OVERLAY',
+        desc: '주가의 변동성을 표준편차(2.0σ)로 계산한 밴드입니다. 상단선 도달 시 과열, 하단선 도달 시 과매도를 판단합니다.',
+        params: '기간 20일, 승수 2.0σ (상·중·하단선)',
+        colors: ['#38bdf8', '#0284c7'],
+        badge: '변동성·밴드이탈'
+      },
+      {
+        id: 'env',
+        name: '엔벨로프 (Envelope)',
+        shortName: '엔벨로프',
+        category: 'TREND',
+        type: 'OVERLAY',
+        desc: '20일 이동평균선을 기준으로 일정 비율(±10%) 상하로 평행 이동시킨 밴드로, 낙폭과대 반등 매매에 최적화되어 있습니다.',
+        params: '중심선 20일, 상·하한선 ±10%',
+        colors: ['#fb7185', '#e11d48'],
+        badge: '낙폭과대·눌림목'
+      },
+      {
+        id: 'ichimoku',
+        name: '일목균형표 (Ichimoku Cloud)',
+        shortName: '일목균형표',
+        category: 'TREND',
+        type: 'OVERLAY',
+        desc: '시간론과 파동론을 집대성한 동양의 대표 지표입니다. 단기 전환선(9)과 중기 기준선(26)의 교차로 지지/저항을 포착합니다.',
+        params: '전환선(9: 빨강), 기준선(26: 파랑)',
+        colors: ['#ef4444', '#3b82f6'],
+        badge: '동양철학·지지저항'
+      },
+      {
+        id: 'psar',
+        name: '파라볼릭 SAR (Parabolic SAR)',
+        shortName: '파라볼릭',
+        category: 'TREND',
+        type: 'OVERLAY',
+        desc: '포물선(Parabolic) 형태로 추세의 지속과 반전을 명확한 점(Stop and Reverse)으로 제시하여 트레일링 스탑에 유용합니다.',
+        params: '가속변수 AF=0.02, Max AF=0.2',
+        colors: ['#facc15'],
+        badge: '추세지속·익절스탑'
+      },
+      {
+        id: 'volume',
+        name: '거래량 + 이동평균선 (Volume & MA)',
+        shortName: '거래량',
+        category: 'VOL',
+        type: 'OVERLAY_VOL',
+        desc: '주가 상승의 절대적 에너지인 거래량 히스토그램과 5일 거래량 이평선을 동시에 표기하여 세력 수급을 확인합니다.',
+        params: '당일 거래량 바 + Vol MA(5)',
+        colors: ['#f04452', '#3182f6'],
+        badge: '세력수급·거래대금'
+      },
+      {
+        id: 'obv',
+        name: 'OBV (On Balance Volume)',
+        shortName: 'OBV',
+        category: 'VOL',
+        type: 'OSCILLATOR',
+        desc: '주가 상승일의 거래량은 더하고 하락일의 거래량은 빼서 누적한 지표로, 세력의 은밀한 사전 매집을 탐지합니다.',
+        params: '누적 거래량 산출선',
+        colors: ['#818cf8'],
+        badge: '세력매집·다이버전스'
+      },
+      {
+        id: 'rsi',
+        name: 'RSI 상대강도지수 (Relative Strength Index)',
+        shortName: 'RSI',
+        category: 'OSC',
+        type: 'OSCILLATOR',
+        desc: '14일간 주가의 상승 압력과 하락 압력의 상대 강도를 측정합니다. 70 이상 과열 매도, 30 이하 침체 매수 신호입니다.',
+        params: '기간 14일 (과열 70 / 침체 30 기준선)',
+        colors: ['#06b6d4'],
+        badge: '과열침체·역발상매매'
+      },
+      {
+        id: 'macd',
+        name: 'MACD (이동평균수렴확산)',
+        shortName: 'MACD',
+        category: 'OSC',
+        type: 'OSCILLATOR',
+        desc: '단기(12)와 장기(26) 지수이평의 수렴과 확산을 추적합니다. MACD선이 Signal선을 상향 돌파할 때 골든크로스가 발생합니다.',
+        params: '단기 12, 장기 26, 시그널 9 (히스토그램 포함)',
+        colors: ['#38bdf8', '#f59e0b', '#ec4899'],
+        badge: '골든크로스·모멘텀'
+      },
+      {
+        id: 'stoch',
+        name: '스토캐스틱 슬로우 (Stochastic Slow)',
+        shortName: '스토캐스틱',
+        category: 'OSC',
+        type: 'OSCILLATOR',
+        desc: '최근 N일간의 최고가/최저가 범위 중 현재 주가의 상대적 위치를 측정합니다. 주가 둔화 구간에서 RSI보다 반등 타점을 빠르게 감지합니다.',
+        params: '%K(12), %D(5), Slow(5) (과열 80 / 침체 20)',
+        colors: ['#10b981', '#f43f5e'],
+        badge: '단기스윙·저점반등'
+      },
+      {
+        id: 'cci',
+        name: 'CCI (Commodity Channel Index)',
+        shortName: 'CCI',
+        category: 'OSC',
+        type: 'OSCILLATOR',
+        desc: '주가와 이동평균 간의 편차를 통계적으로 정규화한 지표로, +100 돌파 시 강력한 추세 발생, -100 복귀 시 단기 반등 매수점입니다.',
+        params: '기간 14일 (+100 과매수 / -100 과매도)',
+        colors: ['#e879f9'],
+        badge: '추세돌파·추세강도'
+      }
+    ];
 
     // 초고속 차트 로딩을 위한 인메모리 캐시 (한 번 조회한 종목은 0ms 즉시 오픈)
     const CHART_MEMORY_CACHE = {};
@@ -1042,14 +1284,15 @@
       { id: 'undervalued_surge_90', name: '🏆 90일 거래량 폭증 매집 확정주', desc: '90일 기준 대량 거래량 매집 후 폭발 직전인 잠룡 종목' }
     ];
 
-    // 3. 지표 계산 유틸리티 (MA 5·20·60일선 & RSI 14일선)
-    function calculateSMA(data, period) {
+    // 3. 증권사 12대 기술적 지표 수학 계산 알고리즘 엔진
+    function calculateSMA(data, period, sourceKey = 'close') {
+      if (!data || data.length < period) return [];
       const result = [];
       for (let i = 0; i < data.length; i++) {
         if (i < period - 1) continue;
         let sum = 0;
         for (let j = 0; j < period; j++) {
-          sum += data[i - j].close;
+          sum += (sourceKey === 'volume' ? (data[i - j].volume || 0) : data[i - j].close);
         }
         result.push({
           time: data[i].time,
@@ -1059,38 +1302,126 @@
       return result;
     }
 
-    function calculateRSI(data, period = 14) {
-      if (!data || data.length <= period) return [];
+    function calculateEMA(data, period) {
+      if (!data || data.length < period) return [];
       const result = [];
-      let gains = 0;
-      let losses = 0;
+      const k = 2 / (period + 1);
+      let sum = 0;
+      for (let i = 0; i < period; i++) sum += data[i].close;
+      let ema = sum / period;
+      result.push({ time: data[period - 1].time, value: +ema.toFixed(2) });
 
-      for (let i = 1; i <= period; i++) {
-        const diff = data[i].close - data[i - 1].close;
-        if (diff >= 0) gains += diff;
-        else losses += Math.abs(diff);
-      }
-
-      let avgGain = gains / period;
-      let avgLoss = losses / period;
-      let rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-      let rsi = 100 - (100 / (1 + rs));
-      result.push({ time: data[period].time, value: +rsi.toFixed(2) });
-
-      for (let i = period + 1; i < data.length; i++) {
-        const diff = data[i].close - data[i - 1].close;
-        const currentGain = diff > 0 ? diff : 0;
-        const currentLoss = diff < 0 ? Math.abs(diff) : 0;
-
-        avgGain = (avgGain * (period - 1) + currentGain) / period;
-        avgLoss = (avgLoss * (period - 1) + currentLoss) / period;
-        rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-        rsi = 100 - (100 / (1 + rs));
-        result.push({ time: data[i].time, value: +rsi.toFixed(2) });
+      for (let i = period; i < data.length; i++) {
+        ema = (data[i].close * k) + (ema * (1 - k));
+        result.push({ time: data[i].time, value: +ema.toFixed(2) });
       }
       return result;
     }
 
+    function calculateBollingerBands(data, period = 20, multiplier = 2.0) {
+      if (!data || data.length < period) return { upper: [], middle: [], lower: [] };
+      const upper = [], middle = [], lower = [];
+      for (let i = period - 1; i < data.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < period; j++) sum += data[i - j].close;
+        const ma = sum / period;
+        let variance = 0;
+        for (let j = 0; j < period; j++) variance += Math.pow(data[i - j].close - ma, 2);
+        const stdDev = Math.sqrt(variance / period);
+        const uVal = +(ma + (multiplier * stdDev)).toFixed(2);
+        const lVal = +(ma - (multiplier * stdDev)).toFixed(2);
+        const mVal = +ma.toFixed(2);
+        upper.push({ time: data[i].time, value: uVal });
+        middle.push({ time: data[i].time, value: mVal });
+        lower.push({ time: data[i].time, value: lVal });
+      }
+      return { upper, middle, lower };
+    }
+
+    function calculateEnvelope(data, period = 20, percent = 10) {
+      if (!data || data.length < period) return { upper: [], lower: [] };
+      const upper = [], lower = [];
+      const factor = percent / 100;
+      for (let i = period - 1; i < data.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < period; j++) sum += data[i - j].close;
+        const ma = sum / period;
+        upper.push({ time: data[i].time, value: +(ma * (1 + factor)).toFixed(2) });
+        lower.push({ time: data[i].time, value: +(ma * (1 - factor)).toFixed(2) });
+      }
+      return { upper, lower };
+    }
+
+    function calculateIchimoku(data) {
+      if (!data || data.length < 9) return { tenkan: [], kijun: [] };
+      const tenkan = [];
+      const kijun = [];
+
+      function getHighLowMid(startIndex, count) {
+        let high = -Infinity, low = Infinity;
+        for (let i = 0; i < count; i++) {
+          const item = data[startIndex - i];
+          if (item.high > high) high = item.high;
+          if (item.low < low) low = item.low;
+        }
+        return (high + low) / 2;
+      }
+
+      for (let i = 8; i < data.length; i++) {
+        tenkan.push({ time: data[i].time, value: +getHighLowMid(i, 9).toFixed(2) });
+      }
+      for (let i = 25; i < data.length; i++) {
+        kijun.push({ time: data[i].time, value: +getHighLowMid(i, 26).toFixed(2) });
+      }
+      return { tenkan, kijun };
+    }
+
+    function calculateParabolicSAR(data, step = 0.02, maxStep = 0.2) {
+      if (!data || data.length < 3) return [];
+      const result = [];
+      let isBull = (data[1].close >= data[0].close);
+      let af = step;
+      let ep = isBull ? data[1].high : data[1].low;
+      let sar = isBull ? data[0].low : data[0].high;
+
+      for (let i = 2; i < data.length; i++) {
+        const prev = data[i - 1];
+        const curr = data[i];
+        sar = sar + af * (ep - sar);
+
+        if (isBull) {
+          if (sar > prev.low) sar = prev.low;
+          if (sar > data[i - 2].low) sar = data[i - 2].low;
+          if (curr.low < sar) {
+            isBull = false;
+            sar = ep;
+            af = step;
+            ep = curr.low;
+          } else {
+            if (curr.high > ep) {
+              ep = curr.high;
+              af = Math.min(af + step, maxStep);
+            }
+          }
+        } else {
+          if (sar < prev.high) sar = prev.high;
+          if (sar < data[i - 2].high) sar = data[i - 2].high;
+          if (curr.high > sar) {
+            isBull = true;
+            sar = ep;
+            af = step;
+            ep = curr.high;
+          } else {
+            if (curr.low < ep) {
+              ep = curr.low;
+              af = Math.min(af + step, maxStep);
+            }
+          }
+        }
+        result.push({ time: curr.time, value: +sar.toFixed(2) });
+      }
+      return result;
+    }
     // 초고속 즉각 렌더링을 위한 0.01초 인스턴트 일봉 & 거래량 생성기
     function generateInstantCandles(stock, range) {
       const points = range === '1mo' ? 30 : (range === '3mo' ? 90 : (range === '1y' ? 250 : 30));
@@ -1128,8 +1459,10 @@
     }
 
     // 4. TradingView Lightweight Charts 인스턴스 초기화 (메인 차트 + 하단 거래량 오버레이)
+    // 4. TradingView Lightweight Charts 인스턴스 초기화 (메인 차트: 캔들 + 거래량 + 오버레이 6종)
     function initLightweightChart() {
       const container = document.getElementById("lw-chart-wrapper");
+      if (!container) return;
       container.innerHTML = "";
 
       lwChart = LightweightCharts.createChart(container, {
@@ -1167,13 +1500,13 @@
         rightPriceScale: {
           borderColor: '#28282e',
           scaleMargins: {
-            top: 0.12,
-            bottom: 0.25 // 하단 25%는 거래량 바 전용 영역 확보
+            top: 0.10,
+            bottom: 0.22 // 하단 22%는 거래량 히스토그램 전용 영역
           }
         }
       });
 
-      // 1. 거래량 히스토그램 시리즈 (하단 22% 토스 스타일 반투명 바)
+      // [1] 거래량 히스토그램 시리즈 & 거래량 5일 이평선
       volumeSeries = lwChart.addHistogramSeries({
         priceFormat: { type: 'volume' },
         priceScaleId: 'volume_scale',
@@ -1187,39 +1520,54 @@
         visible: false
       });
 
-      // 2. 이동평균선 시리즈 (5일선: 초록, 20일선: 황금선, 60일선: 보라)
-      ma5Series = lwChart.addLineSeries({
-        color: '#22c55e',
+      volMa5Series = lwChart.addLineSeries({
+        priceScaleId: 'volume_scale',
+        color: '#fbbf24',
         lineWidth: 1.5,
         priceLineVisible: false,
         crosshairMarkerVisible: false
       });
 
-      ma20Series = lwChart.addLineSeries({
-        color: '#eab308',
-        lineWidth: 2.0,
-        priceLineVisible: false,
-        crosshairMarkerVisible: false
-      });
+      // [2] 단순 이동평균선 (SMA: 5, 20, 60, 120)
+      sma5Series = lwChart.addLineSeries({ color: '#22c55e', lineWidth: 1.5, priceLineVisible: false, crosshairMarkerVisible: false });
+      sma20Series = lwChart.addLineSeries({ color: '#eab308', lineWidth: 2.0, priceLineVisible: false, crosshairMarkerVisible: false });
+      sma60Series = lwChart.addLineSeries({ color: '#a855f7', lineWidth: 1.5, priceLineVisible: false, crosshairMarkerVisible: false });
+      sma120Series = lwChart.addLineSeries({ color: '#3b82f6', lineWidth: 1.5, priceLineVisible: false, crosshairMarkerVisible: false });
 
-      ma60Series = lwChart.addLineSeries({
-        color: '#a855f7',
+      // [3] 지수 이동평균선 (EMA: 12, 26)
+      ema12Series = lwChart.addLineSeries({ color: '#06b6d4', lineWidth: 1.5, priceLineVisible: false, crosshairMarkerVisible: false });
+      ema26Series = lwChart.addLineSeries({ color: '#f97316', lineWidth: 1.5, priceLineVisible: false, crosshairMarkerVisible: false });
+
+      // [4] 볼린저 밴드 (20, 2.0σ 상·중·하단)
+      bbUpperSeries = lwChart.addLineSeries({ color: '#38bdf8', lineWidth: 1.5, lineStyle: LightweightCharts.LineStyle.Solid, priceLineVisible: false, crosshairMarkerVisible: false });
+      bbMiddleSeries = lwChart.addLineSeries({ color: '#0284c7', lineWidth: 1.0, lineStyle: LightweightCharts.LineStyle.Dashed, priceLineVisible: false, crosshairMarkerVisible: false });
+      bbLowerSeries = lwChart.addLineSeries({ color: '#38bdf8', lineWidth: 1.5, lineStyle: LightweightCharts.LineStyle.Solid, priceLineVisible: false, crosshairMarkerVisible: false });
+
+      // [5] 엔벨로프 (20, ±10% 상·하단)
+      envUpperSeries = lwChart.addLineSeries({ color: '#fb7185', lineWidth: 1.5, priceLineVisible: false, crosshairMarkerVisible: false });
+      envLowerSeries = lwChart.addLineSeries({ color: '#fb7185', lineWidth: 1.5, priceLineVisible: false, crosshairMarkerVisible: false });
+
+      // [6] 일목균형표 (전환선 9, 기준선 26)
+      ichimokuTenkanSeries = lwChart.addLineSeries({ color: '#ef4444', lineWidth: 1.5, priceLineVisible: false, crosshairMarkerVisible: false });
+      ichimokuKijunSeries = lwChart.addLineSeries({ color: '#3b82f6', lineWidth: 1.5, priceLineVisible: false, crosshairMarkerVisible: false });
+
+      // [7] 파라볼릭 SAR (AF 0.02, Max 0.2)
+      psarSeries = lwChart.addLineSeries({
+        color: '#facc15',
         lineWidth: 1.5,
+        lineStyle: LightweightCharts.LineStyle.Dotted,
         priceLineVisible: false,
         crosshairMarkerVisible: false
       });
 
+      // 리사이즈 이벤트
       window.addEventListener('resize', () => {
-        if (lwChart && container) {
-          lwChart.applyOptions({ width: container.clientWidth });
-        }
-        const rsiCont = document.getElementById("lw-rsi-wrapper");
-        if (lwRsiChart && rsiCont) {
-          lwRsiChart.applyOptions({ width: rsiCont.clientWidth });
-        }
+        if (lwChart && container) lwChart.applyOptions({ width: container.clientWidth });
+        const oscCont = document.getElementById("lw-oscillator-wrapper");
+        if (lwOscChart && oscCont) lwOscChart.applyOptions({ width: oscCont.clientWidth });
       });
 
-      // 마우스 호버 인터랙션 (한국어 일봉 날짜 및 거래량/이평선/RSI 실시간 수치 표기)
+      // 마우스 크로스헤어 호버 인터랙션 (실시간 일봉 가격 & 지표 범례 동기화)
       lwChart.subscribeCrosshairMove(param => {
         if (!param.time || !param.seriesData || !currentSeries) {
           updateHeaderPriceDisplay(activeStock.price, activeStock.change, activeStock.diff, "실시간 일봉 현재가");
@@ -1239,37 +1587,39 @@
           const dateStr = dateObj.toLocaleDateString('ko-KR', { 
             year: 'numeric', 
             month: 'long', 
-            day: 'numeric'
+            day: 'numeric' 
           });
 
           updateHeaderPriceDisplay(hoveredPrice, changePercent, diff, dateStr + " 일봉 종가");
 
           // 실시간 범례 데이터 추출
           const volData = volumeSeries ? param.seriesData.get(volumeSeries) : null;
-          const ma5Data = ma5Series ? param.seriesData.get(ma5Series) : null;
-          const ma20Data = ma20Series ? param.seriesData.get(ma20Series) : null;
-          const ma60Data = ma60Series ? param.seriesData.get(ma60Series) : null;
+          const ma5Data = sma5Series ? param.seriesData.get(sma5Series) : null;
+          const ma20Data = sma20Series ? param.seriesData.get(sma20Series) : null;
+          const ma60Data = sma60Series ? param.seriesData.get(sma60Series) : null;
+          const bbUpData = bbUpperSeries ? param.seriesData.get(bbUpperSeries) : null;
 
           updateLegendDisplay({
             volume: volData ? volData.value : null,
             ma5: ma5Data ? ma5Data.value : null,
             ma20: ma20Data ? ma20Data.value : null,
             ma60: ma60Data ? ma60Data.value : null,
+            bbUpper: bbUpData ? bbUpData.value : null,
             time: param.time
           });
         }
       });
     }
 
-    // 하단 독립 RSI 차트 초기화
-    function initLwRsiChart() {
-      const container = document.getElementById("lw-rsi-wrapper");
+    // 하단 다기능 서브 오실레이터 차트 초기화 (RSI, MACD, 스토캐스틱, CCI, OBV 탭 지원)
+    function initLwOscChart() {
+      const container = document.getElementById("lw-oscillator-wrapper");
       if (!container) return;
       container.innerHTML = "";
 
-      lwRsiChart = LightweightCharts.createChart(container, {
+      lwOscChart = LightweightCharts.createChart(container, {
         width: container.clientWidth,
-        height: 95,
+        height: 105,
         layout: {
           background: { type: 'solid', color: '#101012' },
           textColor: '#8b95a1',
@@ -1285,7 +1635,7 @@
           horzLine: { color: '#475569', width: 1, style: 3 }
         },
         timeScale: {
-          visible: false // 메인 차트와 타임스케일 동기화
+          visible: false // 메인 차트와 타임스케일 연동
         },
         rightPriceScale: {
           borderColor: '#28282e',
@@ -1293,78 +1643,287 @@
         }
       });
 
-      rsiLineSeries = lwRsiChart.addLineSeries({
-        color: '#06b6d4',
-        lineWidth: 1.5,
-        priceLineVisible: false
-      });
+      // 1. RSI 라인 시리즈 (과열 70 / 침체 30 기준선)
+      oscRsiSeries = lwOscChart.addLineSeries({ color: '#06b6d4', lineWidth: 1.5, priceLineVisible: false });
+      oscRsiSeries.createPriceLine({ price: 70, color: '#f04452', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: '과열 70' });
+      oscRsiSeries.createPriceLine({ price: 30, color: '#3182f6', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: '침체 30' });
 
-      // 70선 과열(빨강 점선) & 30선 침체(파랑 점선) 기준선 추가
-      rsiLineSeries.createPriceLine({
-        price: 70,
-        color: '#f04452',
-        lineWidth: 1,
-        lineStyle: LightweightCharts.LineStyle.Dashed,
-        axisLabelVisible: true,
-        title: '과열 70'
-      });
+      // 2. MACD 시리즈 (MACD선, Signal선, 히스토그램)
+      oscMacdLineSeries = lwOscChart.addLineSeries({ color: '#38bdf8', lineWidth: 1.5, priceLineVisible: false });
+      oscMacdSignalSeries = lwOscChart.addLineSeries({ color: '#f59e0b', lineWidth: 1.5, priceLineVisible: false });
+      oscMacdHistSeries = lwOscChart.addHistogramSeries({ priceLineVisible: false });
 
-      rsiLineSeries.createPriceLine({
-        price: 30,
-        color: '#3182f6',
-        lineWidth: 1,
-        lineStyle: LightweightCharts.LineStyle.Dashed,
-        axisLabelVisible: true,
-        title: '침체 30'
-      });
+      // 3. 스토캐스틱 슬로우 (%K선, %D선, 과열 80 / 침체 20 기준선)
+      oscStochKSeries = lwOscChart.addLineSeries({ color: '#10b981', lineWidth: 1.5, priceLineVisible: false });
+      oscStochDSeries = lwOscChart.addLineSeries({ color: '#f43f5e', lineWidth: 1.5, priceLineVisible: false });
+      oscStochKSeries.createPriceLine({ price: 80, color: '#f04452', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: '과열 80' });
+      oscStochKSeries.createPriceLine({ price: 20, color: '#3182f6', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: '침체 20' });
 
-      // 메인 차트와 RSI 차트의 스크롤 동기화
+      // 4. CCI 시리즈 (+100 과매수 / -100 과매도)
+      oscCciSeries = lwOscChart.addLineSeries({ color: '#e879f9', lineWidth: 1.5, priceLineVisible: false });
+      oscCciSeries.createPriceLine({ price: 100, color: '#f04452', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: '+100' });
+      oscCciSeries.createPriceLine({ price: -100, color: '#3182f6', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: '-100' });
+
+      // 5. OBV 시리즈
+      oscObvSeries = lwOscChart.addLineSeries({ color: '#818cf8', lineWidth: 1.5, priceLineVisible: false });
+
+      // 메인 차트와 오실레이터 차트 간 실시간 스크롤/줌 동기화
       if (lwChart) {
         lwChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
-          if (lwRsiChart && range) {
-            lwRsiChart.timeScale().setVisibleLogicalRange(range);
+          if (lwOscChart && range) {
+            lwOscChart.timeScale().setVisibleLogicalRange(range);
           }
         });
       }
     }
 
-    // 보조지표 ON/OFF 토글
-    function toggleIndicator(ind) {
-      indicatorsState[ind] = !indicatorsState[ind];
+    // 하단 서브 패널에서 오실레이터 지표 탭 전환
+    function switchActiveOscillator(tabId) {
+      activeOscillatorTab = tabId;
 
-      const btn = document.getElementById(`btn-ind-${ind}`);
-      if (btn) {
-        if (indicatorsState[ind]) {
-          if (ind === 'volume') btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition flex items-center gap-1";
-          else if (ind === 'ma') btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow transition flex items-center gap-1";
-          else if (ind === 'rsi') btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-600 text-white shadow transition flex items-center gap-1";
-        } else {
-          btn.className = "px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition flex items-center gap-1";
+      // 탭 버튼 스타일 업데이트
+      ['rsi', 'macd', 'stoch', 'cci', 'obv'].forEach(id => {
+        const btn = document.getElementById(`osc-tab-${id}`);
+        if (btn) {
+          if (id === tabId) {
+            btn.className = "px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-cyan-600 text-white shadow transition";
+          } else {
+            btn.className = "px-2.5 py-0.5 rounded-lg text-[11px] text-slate-400 hover:text-white bg-slate-900 transition";
+          }
+        }
+      });
+
+      updateOscillatorDataOnChart();
+    }
+
+    // 오실레이터 서브 차트 렌더링 데이터 주입
+    function updateOscillatorDataOnChart() {
+      if (!lwOscChart) initLwOscChart();
+      if (!rawChartData || rawChartData.length === 0) return;
+
+      // 모든 오실레이터 시리즈 초기화 (안 보이게 빈 배열)
+      if (oscRsiSeries) oscRsiSeries.setData([]);
+      if (oscMacdLineSeries) oscMacdLineSeries.setData([]);
+      if (oscMacdSignalSeries) oscMacdSignalSeries.setData([]);
+      if (oscMacdHistSeries) oscMacdHistSeries.setData([]);
+      if (oscStochKSeries) oscStochKSeries.setData([]);
+      if (oscStochDSeries) oscStochDSeries.setData([]);
+      if (oscCciSeries) oscCciSeries.setData([]);
+      if (oscObvSeries) oscObvSeries.setData([]);
+
+      const liveBadge = document.getElementById("osc-live-badge");
+
+      if (activeOscillatorTab === 'rsi') {
+        const rsiData = calculateRSI(rawChartData, 14);
+        if (oscRsiSeries) oscRsiSeries.setData(rsiData);
+        if (rsiData.length > 0 && liveBadge) {
+          const lastRsi = rsiData[rsiData.length - 1].value;
+          liveBadge.innerText = `RSI: ${lastRsi}`;
+          liveBadge.className = `text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 ${lastRsi >= 70 ? 'text-tossRed' : (lastRsi <= 30 ? 'text-tossBlue' : 'text-cyan-400')}`;
+        }
+      } else if (activeOscillatorTab === 'macd') {
+        const macdRes = calculateMACD(rawChartData, 12, 26, 9);
+        if (oscMacdLineSeries) oscMacdLineSeries.setData(macdRes.macd);
+        if (oscMacdSignalSeries) oscMacdSignalSeries.setData(macdRes.signal);
+        if (oscMacdHistSeries) oscMacdHistSeries.setData(macdRes.hist);
+        if (macdRes.macd.length > 0 && liveBadge) {
+          const lastM = macdRes.macd[macdRes.macd.length - 1].value;
+          const lastS = macdRes.signal[macdRes.signal.length - 1]?.value || 0;
+          liveBadge.innerText = `MACD: ${lastM} | Sig: ${lastS}`;
+          liveBadge.className = `text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 ${lastM >= lastS ? 'text-tossRed' : 'text-tossBlue'}`;
+        }
+      } else if (activeOscillatorTab === 'stoch') {
+        const stochRes = calculateStochasticSlow(rawChartData, 12, 5, 5);
+        if (oscStochKSeries) oscStochKSeries.setData(stochRes.k);
+        if (oscStochDSeries) oscStochDSeries.setData(stochRes.d);
+        if (stochRes.k.length > 0 && liveBadge) {
+          const lastK = stochRes.k[stochRes.k.length - 1].value;
+          const lastD = stochRes.d[stochRes.d.length - 1]?.value || 0;
+          liveBadge.innerText = `%K: ${lastK} | %D: ${lastD}`;
+          liveBadge.className = `text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 ${lastK >= 80 ? 'text-tossRed' : (lastK <= 20 ? 'text-tossBlue' : 'text-emerald-400')}`;
+        }
+      } else if (activeOscillatorTab === 'cci') {
+        const cciData = calculateCCI(rawChartData, 14);
+        if (oscCciSeries) oscCciSeries.setData(cciData);
+        if (cciData.length > 0 && liveBadge) {
+          const lastCci = cciData[cciData.length - 1].value;
+          liveBadge.innerText = `CCI: ${lastCci}`;
+          liveBadge.className = `text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 ${lastCci >= 100 ? 'text-tossRed' : (lastCci <= -100 ? 'text-tossBlue' : 'text-fuchsia-400')}`;
+        }
+      } else if (activeOscillatorTab === 'obv') {
+        const obvData = calculateOBV(rawChartData);
+        if (oscObvSeries) oscObvSeries.setData(obvData);
+        if (obvData.length > 0 && liveBadge) {
+          const lastObv = obvData[obvData.length - 1].value;
+          liveBadge.innerText = `OBV: ${Math.round(lastObv).toLocaleString()}`;
+          liveBadge.className = `text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-indigo-300`;
         }
       }
 
-      // RSI 패널 노출 여부
-      const rsiPanel = document.getElementById("rsi-panel-wrapper");
-      const legendRsi = document.getElementById("legend-rsi");
-      if (ind === 'rsi') {
-        if (indicatorsState.rsi) {
-          rsiPanel.classList.remove("hidden");
-          legendRsi.classList.remove("hidden");
-          if (!lwRsiChart) initLwRsiChart();
-        } else {
-          rsiPanel.classList.add("hidden");
-          legendRsi.classList.add("hidden");
+      if (lwOscChart && lwChart) {
+        lwOscChart.timeScale().fitContent();
+      }
+    }
+
+    // 보조지표 설정 모달 열기 & 닫기
+    function openIndicatorModal() {
+      const modal = document.getElementById("indicator-modal");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+      renderIndicatorCards();
+      lucide.createIcons();
+    }
+
+    function closeIndicatorModal() {
+      const modal = document.getElementById("indicator-modal");
+      if (!modal) return;
+      modal.classList.add("hidden");
+    }
+
+    // 모달 내 카테고리 필터링 (ALL, TREND, OSC, VOL)
+    function filterIndicatorCategory(cat) {
+      currentIndicatorFilter = cat;
+      ['ALL', 'TREND', 'OSC', 'VOL'].forEach(c => {
+        const btn = document.getElementById(`ind-cat-${c}`);
+        if (btn) {
+          if (c === cat) {
+            btn.className = "px-3 py-1.5 rounded-xl font-bold bg-blue-600 text-white shadow transition flex-shrink-0";
+          } else {
+            btn.className = "px-3 py-1.5 rounded-xl font-medium bg-slate-900 text-tossTextMuted hover:text-white border border-slate-800 transition flex-shrink-0";
+          }
         }
+      });
+      renderIndicatorCards();
+      lucide.createIcons();
+    }
+
+    // 모달 내 12종 지표 카드 동적 렌더링
+    function renderIndicatorCards() {
+      const container = document.getElementById("indicator-cards-container");
+      if (!container) return;
+
+      const filtered = INDICATORS_CATALOG.filter(ind => {
+        if (currentIndicatorFilter === 'ALL') return true;
+        return ind.category === currentIndicatorFilter;
+      });
+
+      let html = '';
+      filtered.forEach(ind => {
+        const isOn = !!indicatorsState[ind.id];
+        const categoryLabel = ind.category === 'TREND' ? '추세 지표' : (ind.category === 'OSC' ? '오실레이터' : '거래량');
+        const categoryColor = ind.category === 'TREND' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : (ind.category === 'OSC' ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30');
+
+        html += `
+          <div class="p-3.5 rounded-xl border transition flex items-center justify-between gap-3 ${isOn ? 'bg-blue-600/10 border-blue-500/40' : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700'}">
+            <div class="space-y-1 flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-sm font-bold text-white flex items-center gap-1.5">
+                  ${ind.name}
+                </span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full border ${categoryColor} font-semibold">
+                  ${categoryLabel}
+                </span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                  ${ind.params}
+                </span>
+              </div>
+              <p class="text-xs text-tossTextMuted line-clamp-2 leading-relaxed">
+                ${ind.desc}
+              </p>
+            </div>
+            
+            <!-- 온오프 토글 스위치 -->
+            <button onclick="toggleIndicator('${ind.id}')" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isOn ? 'bg-blue-600' : 'bg-slate-700'}">
+              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isOn ? 'translate-x-5' : 'translate-x-0'}"></span>
+            </button>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      updateQuickActiveCount();
+    }
+
+    // 보조지표 ON/OFF 통합 토글 (모달 스위치 + 상단 퀵 칩 공용)
+    function toggleIndicator(indId) {
+      indicatorsState[indId] = !indicatorsState[indId];
+
+      // 상단 퀵 버튼 스타일 갱신
+      const quickBtn = document.getElementById(`btn-ind-${indId}`);
+      if (quickBtn) {
+        if (indicatorsState[indId]) {
+          if (indId === 'volume') quickBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition flex items-center gap-1";
+          else if (indId === 'sma') quickBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow transition flex items-center gap-1";
+          else if (indId === 'bb') quickBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow transition flex items-center gap-1";
+          else if (indId === 'rsi') quickBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-600 text-white shadow transition flex items-center gap-1";
+          else if (indId === 'macd') quickBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white shadow transition flex items-center gap-1";
+          else if (indId === 'stoch') quickBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow transition flex items-center gap-1";
+        } else {
+          quickBtn.className = "px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition flex items-center gap-1";
+        }
+      }
+
+      // 만약 켜진 지표가 오실레이터(rsi, macd, stoch, cci, obv)라면 즉시 해당 탭으로 포커스
+      const oscList = ['rsi', 'macd', 'stoch', 'cci', 'obv'];
+      if (indicatorsState[indId] && oscList.includes(indId)) {
+        activeOscillatorTab = indId;
       }
 
       updateIndicatorsOnChart();
+      renderIndicatorCards();
+      updateQuickActiveCount();
     }
 
-    // 차트 위 보조지표 데이터 세팅 및 렌더링
+    // 기본 추천값 복원 (거래량 ON, SMA ON, 나머지 OFF)
+    function resetIndicatorsDefault() {
+      Object.keys(indicatorsState).forEach(k => {
+        indicatorsState[k] = (k === 'volume' || k === 'sma');
+      });
+      ['volume', 'sma', 'bb', 'rsi', 'macd', 'stoch'].forEach(id => {
+        const btn = document.getElementById(`btn-ind-${id}`);
+        if (btn) {
+          if (indicatorsState[id]) {
+            if (id === 'volume') btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition flex items-center gap-1";
+            else if (id === 'sma') btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow transition flex items-center gap-1";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition flex items-center gap-1";
+          }
+        }
+      });
+      activeOscillatorTab = 'rsi';
+      updateIndicatorsOnChart();
+      renderIndicatorCards();
+      updateQuickActiveCount();
+    }
+
+    // 전체 지표 해제
+    function clearAllIndicators() {
+      Object.keys(indicatorsState).forEach(k => {
+        indicatorsState[k] = false;
+      });
+      ['volume', 'sma', 'bb', 'rsi', 'macd', 'stoch'].forEach(id => {
+        const btn = document.getElementById(`btn-ind-${id}`);
+        if (btn) btn.className = "px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-900 text-slate-400 border border-slate-800 hover:text-white transition flex items-center gap-1";
+      });
+      updateIndicatorsOnChart();
+      renderIndicatorCards();
+      updateQuickActiveCount();
+    }
+
+    // 활성 지표 개수 뱃지 카운트 업데이트
+    function updateQuickActiveCount() {
+      const count = Object.values(indicatorsState).filter(Boolean).length;
+      const qBadge = document.getElementById("quick-active-count");
+      const mBadge = document.getElementById("indicator-active-badge");
+      if (qBadge) qBadge.innerText = `${count}개 ON`;
+      if (mBadge) mBadge.innerText = `${count}개 활성`;
+    }
+
+    // 메인 차트 및 서브 패널 위 보조지표 데이터 세팅 및 렌더링
     function updateIndicatorsOnChart() {
       if (!rawChartData || rawChartData.length === 0) return;
 
-      // 1. 거래량 시리즈
+      // 1. 거래량 히스토그램 & 5일 거래량 이평선
       if (volumeSeries) {
         if (indicatorsState.volume) {
           const volData = rawChartData.map(d => ({
@@ -1373,50 +1932,111 @@
             color: d.close >= d.open ? 'rgba(240, 68, 82, 0.45)' : 'rgba(49, 130, 246, 0.45)'
           }));
           volumeSeries.setData(volData);
-          document.getElementById("legend-vol").classList.remove("hidden");
+          if (volMa5Series) volMa5Series.setData(calculateSMA(rawChartData, 5, 'volume'));
+          document.getElementById("legend-vol")?.classList.remove("hidden");
         } else {
           volumeSeries.setData([]);
-          document.getElementById("legend-vol").classList.add("hidden");
+          if (volMa5Series) volMa5Series.setData([]);
+          document.getElementById("legend-vol")?.classList.add("hidden");
         }
       }
 
-      // 2. 이동평균선 5·20·60
-      if (ma5Series && ma20Series && ma60Series) {
-        if (indicatorsState.ma) {
-          ma5Series.setData(calculateSMA(rawChartData, 5));
-          ma20Series.setData(calculateSMA(rawChartData, 20));
-          ma60Series.setData(calculateSMA(rawChartData, 60));
-          document.getElementById("legend-ma5").classList.remove("hidden");
-          document.getElementById("legend-ma20").classList.remove("hidden");
-          document.getElementById("legend-ma60").classList.remove("hidden");
+      // 2. 단순 이동평균선 (SMA: 5, 20, 60, 120)
+      if (sma5Series && sma20Series && sma60Series && sma120Series) {
+        if (indicatorsState.sma) {
+          sma5Series.setData(calculateSMA(rawChartData, 5));
+          sma20Series.setData(calculateSMA(rawChartData, 20));
+          sma60Series.setData(calculateSMA(rawChartData, 60));
+          sma120Series.setData(calculateSMA(rawChartData, 120));
+          document.getElementById("legend-ma5")?.classList.remove("hidden");
+          document.getElementById("legend-ma20")?.classList.remove("hidden");
+          document.getElementById("legend-ma60")?.classList.remove("hidden");
         } else {
-          ma5Series.setData([]);
-          ma20Series.setData([]);
-          ma60Series.setData([]);
-          document.getElementById("legend-ma5").classList.add("hidden");
-          document.getElementById("legend-ma20").classList.add("hidden");
-          document.getElementById("legend-ma60").classList.add("hidden");
+          sma5Series.setData([]);
+          sma20Series.setData([]);
+          sma60Series.setData([]);
+          sma120Series.setData([]);
+          document.getElementById("legend-ma5")?.classList.add("hidden");
+          document.getElementById("legend-ma20")?.classList.add("hidden");
+          document.getElementById("legend-ma60")?.classList.add("hidden");
         }
       }
 
-      // 3. RSI
-      if (indicatorsState.rsi) {
-        if (!lwRsiChart) initLwRsiChart();
-        const rsiData = calculateRSI(rawChartData, 14);
-        if (rsiLineSeries) {
-          rsiLineSeries.setData(rsiData);
-          if (rsiData.length > 0) {
-            const lastRsi = rsiData[rsiData.length - 1].value;
-            const liveEl = document.getElementById("rsi-live-val");
-            if (liveEl) {
-              liveEl.innerText = lastRsi;
-              liveEl.className = `font-mono font-bold ${lastRsi >= 70 ? 'text-tossRed' : (lastRsi <= 30 ? 'text-tossBlue' : 'text-cyan-400')}`;
-            }
-          }
+      // 3. 지수 이동평균선 (EMA: 12, 26)
+      if (ema12Series && ema26Series) {
+        if (indicatorsState.ema) {
+          ema12Series.setData(calculateEMA(rawChartData, 12));
+          ema26Series.setData(calculateEMA(rawChartData, 26));
+        } else {
+          ema12Series.setData([]);
+          ema26Series.setData([]);
         }
-        if (lwRsiChart && lwChart) {
-          lwRsiChart.timeScale().fitContent();
+      }
+
+      // 4. 볼린저 밴드 (20, 2.0σ)
+      if (bbUpperSeries && bbMiddleSeries && bbLowerSeries) {
+        if (indicatorsState.bb) {
+          const bb = calculateBollingerBands(rawChartData, 20, 2.0);
+          bbUpperSeries.setData(bb.upper);
+          bbMiddleSeries.setData(bb.middle);
+          bbLowerSeries.setData(bb.lower);
+          document.getElementById("legend-bb")?.classList.remove("hidden");
+        } else {
+          bbUpperSeries.setData([]);
+          bbMiddleSeries.setData([]);
+          bbLowerSeries.setData([]);
+          document.getElementById("legend-bb")?.classList.add("hidden");
         }
+      }
+
+      // 5. 엔벨로프 (20, ±10%)
+      if (envUpperSeries && envLowerSeries) {
+        if (indicatorsState.env) {
+          const env = calculateEnvelope(rawChartData, 20, 10);
+          envUpperSeries.setData(env.upper);
+          envLowerSeries.setData(env.lower);
+        } else {
+          envUpperSeries.setData([]);
+          envLowerSeries.setData([]);
+        }
+      }
+
+      // 6. 일목균형표 (전환선 9, 기준선 26)
+      if (ichimokuTenkanSeries && ichimokuKijunSeries) {
+        if (indicatorsState.ichimoku) {
+          const ichi = calculateIchimoku(rawChartData);
+          ichimokuTenkanSeries.setData(ichi.tenkan);
+          ichimokuKijunSeries.setData(ichi.kijun);
+        } else {
+          ichimokuTenkanSeries.setData([]);
+          ichimokuKijunSeries.setData([]);
+        }
+      }
+
+      // 7. 파라볼릭 SAR
+      if (psarSeries) {
+        if (indicatorsState.psar) {
+          psarSeries.setData(calculateParabolicSAR(rawChartData));
+        } else {
+          psarSeries.setData([]);
+        }
+      }
+
+      // 8. 오실레이터 서브 패널 노출 여부 (RSI, MACD, 스토캐스틱, CCI, OBV 중 하나라도 켜져 있는지 확인)
+      const oscList = ['rsi', 'macd', 'stoch', 'cci', 'obv'];
+      const hasAnyOsc = oscList.some(k => indicatorsState[k]);
+      const oscPanel = document.getElementById("sub-oscillator-panel");
+
+      if (hasAnyOsc) {
+        if (oscPanel) oscPanel.classList.remove("hidden");
+        // 현재 activeOscillatorTab이 꺼져 있다면 켜져 있는 첫 번째 오실레이터로 변경
+        if (!indicatorsState[activeOscillatorTab]) {
+          const firstActive = oscList.find(k => indicatorsState[k]) || 'rsi';
+          activeOscillatorTab = firstActive;
+        }
+        switchActiveOscillator(activeOscillatorTab);
+      } else {
+        if (oscPanel) oscPanel.classList.add("hidden");
       }
 
       updateLegendDisplay(null);
@@ -1427,6 +2047,7 @@
       if (!rawChartData || rawChartData.length === 0) return;
       const last = rawChartData[rawChartData.length - 1];
       const isKr = activeStock.market === '코스피' || activeStock.market === '코스닥';
+      const formatVal = val => val ? (isKr ? Math.round(val).toLocaleString() + '원' : '$' + val.toFixed(2)) : '-';
 
       // 거래량
       const volEl = document.getElementById("legend-vol");
@@ -1435,28 +2056,59 @@
         volEl.innerHTML = `거래량: <strong class="text-white">${Math.round(v).toLocaleString()}주</strong>`;
       }
 
-      // 이평선
+      // 이평선 MA5, MA20, MA60
       const ma5El = document.getElementById("legend-ma5");
       const ma20El = document.getElementById("legend-ma20");
       const ma60El = document.getElementById("legend-ma60");
-
-      if (indicatorsState.ma) {
-        const formatVal = val => val ? (isKr ? Math.round(val).toLocaleString() + '원' : '$' + val.toFixed(2)) : '-';
+      if (indicatorsState.sma) {
         if (ma5El) ma5El.innerHTML = `MA5: <strong>${formatVal(hoverInfo ? hoverInfo.ma5 : (calculateSMA(rawChartData, 5).slice(-1)[0]?.value))}</strong>`;
         if (ma20El) ma20El.innerHTML = `MA20: <strong>${formatVal(hoverInfo ? hoverInfo.ma20 : (calculateSMA(rawChartData, 20).slice(-1)[0]?.value))}</strong>`;
         if (ma60El) ma60El.innerHTML = `MA60: <strong>${formatVal(hoverInfo ? hoverInfo.ma60 : (calculateSMA(rawChartData, 60).slice(-1)[0]?.value))}</strong>`;
       }
 
-      // RSI
-      const rsiEl = document.getElementById("legend-rsi");
-      if (rsiEl && indicatorsState.rsi) {
-        const rsiArr = calculateRSI(rawChartData, 14);
-        let rVal = rsiArr.slice(-1)[0]?.value || 58;
+      // 볼린저밴드 상단
+      const bbEl = document.getElementById("legend-bb");
+      if (bbEl && indicatorsState.bb) {
+        const bbArr = calculateBollingerBands(rawChartData, 20, 2.0).upper;
+        let bVal = bbArr.slice(-1)[0]?.value;
         if (hoverInfo && hoverInfo.time) {
-          const matched = rsiArr.find(r => r.time === hoverInfo.time);
-          if (matched) rVal = matched.value;
+          const matched = bbArr.find(b => b.time === hoverInfo.time);
+          if (matched) bVal = matched.value;
         }
-        rsiEl.innerHTML = `RSI(14): <strong class="${rVal >= 70 ? 'text-tossRed' : (rVal <= 30 ? 'text-tossBlue' : 'text-cyan-300')}">${rVal}</strong>`;
+        bbEl.innerHTML = `BB상단: <strong>${formatVal(bVal)}</strong>`;
+      }
+
+      // 오실레이터 범례
+      const oscEl = document.getElementById("legend-osc");
+      const oscList = ['rsi', 'macd', 'stoch', 'cci', 'obv'];
+      const hasAnyOsc = oscList.some(k => indicatorsState[k]);
+      if (oscEl) {
+        if (hasAnyOsc) {
+          oscEl.classList.remove("hidden");
+          if (activeOscillatorTab === 'rsi') {
+            const rsiArr = calculateRSI(rawChartData, 14);
+            const rVal = rsiArr.slice(-1)[0]?.value || 50;
+            oscEl.innerHTML = `RSI: <strong class="${rVal >= 70 ? 'text-tossRed' : (rVal <= 30 ? 'text-tossBlue' : 'text-cyan-300')}">${rVal}</strong>`;
+          } else if (activeOscillatorTab === 'macd') {
+            const macdRes = calculateMACD(rawChartData, 12, 26, 9);
+            const mLast = macdRes.macd.slice(-1)[0]?.value || 0;
+            oscEl.innerHTML = `MACD: <strong class="text-cyan-300">${mLast}</strong>`;
+          } else if (activeOscillatorTab === 'stoch') {
+            const stochRes = calculateStochasticSlow(rawChartData, 12, 5, 5);
+            const kLast = stochRes.k.slice(-1)[0]?.value || 50;
+            oscEl.innerHTML = `스토%K: <strong class="text-emerald-300">${kLast}</strong>`;
+          } else if (activeOscillatorTab === 'cci') {
+            const cciArr = calculateCCI(rawChartData, 14);
+            const cLast = cciArr.slice(-1)[0]?.value || 0;
+            oscEl.innerHTML = `CCI: <strong class="text-fuchsia-300">${cLast}</strong>`;
+          } else if (activeOscillatorTab === 'obv') {
+            const obvArr = calculateOBV(rawChartData);
+            const oLast = obvArr.slice(-1)[0]?.value || 0;
+            oscEl.innerHTML = `OBV: <strong class="text-indigo-300">${Math.round(oLast).toLocaleString()}</strong>`;
+          }
+        } else {
+          oscEl.classList.add("hidden");
+        }
       }
     }
 
