@@ -79,30 +79,22 @@
 
   <!-- 1. 앱 최상단 내비게이션 바 -->
   <header class="sticky top-0 z-50 bg-[#101012]/95 backdrop-blur-md border-b border-tossBorder/70">
-    <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+    <div class="max-w-5xl mx-auto px-3 sm:px-4 h-14 flex items-center justify-between gap-2">
       
       <!-- 로고 및 탭 네비게이션 -->
-      <div class="flex items-center space-x-6">
-        <div class="flex items-center space-x-2.5 cursor-pointer" onclick="switchNav('rankings')">
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25">
+      <div class="flex items-center space-x-3 sm:space-x-6 min-w-0 flex-shrink-0">
+        <div class="flex items-center space-x-2 cursor-pointer whitespace-nowrap" onclick="switchNav('rankings')">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 flex-shrink-0">
             <span class="font-extrabold text-sm tracking-tighter">TH</span>
           </div>
-          <div class="flex flex-col">
-            <span class="text-base font-extrabold tracking-tight text-white flex items-center gap-1.5">
-              TH증권
-              <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">실시간 PRO</span>
-              <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">v1.7.5</span>
-            </span>
+          <div class="flex items-center gap-1.5 whitespace-nowrap">
+            <span class="text-base font-extrabold tracking-tight text-white">TH증권</span>
+            <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">실시간 PRO</span>
+            <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden xs:inline">v1.8.0</span>
           </div>
         </div>
 
-        <!-- 차트 모드일 때 최상단 헤더에 항상 선명하게 노출되는 뒤로가기 버튼 -->
-        <button id="header-back-btn" onclick="switchNav('rankings')" class="hidden px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer border border-blue-400/40">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-          <span>◀ 뒤로가기</span>
-        </button>
-
-        <nav class="hidden sm:flex items-center space-x-4 text-sm font-medium text-tossTextMuted">
+        <nav class="hidden md:flex items-center space-x-4 text-sm font-medium text-tossTextMuted">
           <button id="nav-rankings" onclick="switchNav('rankings')" class="text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5">
             <i data-lucide="layout-grid" class="w-4 h-4"></i>
             조건검색식 & 랭킹
@@ -119,15 +111,15 @@
         </nav>
       </div>
 
-      <!-- 상단 우측: 매매기법 버튼 & 검색 버튼 -->
-      <div class="flex items-center space-x-2">
-        <button onclick="openStrategyModal()" class="sm:hidden px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1 shadow">
+      <!-- 상단 우측: 매매기법 버튼 & 검색 버튼 (모바일 1줄 고정) -->
+      <div class="flex items-center space-x-2 flex-shrink-0">
+        <button id="header-strategy-btn" onclick="openStrategyModal()" class="md:hidden px-2.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1 shadow whitespace-nowrap flex-shrink-0">
           <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
-          매매기법
+          <span>매매기법</span>
         </button>
-        <button onclick="openSearchModal()" class="p-2 rounded-full hover:bg-tossCard text-slate-300 hover:text-white transition flex items-center gap-1.5 text-xs px-3 bg-tossCard border border-tossBorder shadow-sm">
-          <i data-lucide="search" class="w-4 h-4 text-tossTextMuted"></i>
-          <span class="hidden md:inline text-tossTextMuted">종목명 또는 심볼 검색</span>
+        <button onclick="openSearchModal()" class="p-2 rounded-xl hover:bg-tossCard text-slate-300 hover:text-white transition flex items-center gap-1.5 text-xs px-2.5 sm:px-3 bg-tossCard border border-tossBorder shadow-sm whitespace-nowrap flex-shrink-0">
+          <i data-lucide="search" class="w-4 h-4 text-blue-400"></i>
+          <span class="hidden sm:inline text-tossTextMuted">종목 검색</span>
         </button>
       </div>
 
@@ -135,34 +127,34 @@
   </header>
 
   <!-- 2. 메인 컨테이너 -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-5 space-y-6">
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-4 sm:py-5 space-y-5">
 
-    <!-- 2-1. 데이터 엔진 상태 안내 배너 -->
-    <div id="api-status-banner" class="bg-gradient-to-r from-blue-950/40 via-tossCard to-slate-900/60 border border-blue-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
-          <i data-lucide="cpu" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-sm font-bold text-white">TH증권 퀀트 엔진 & 실시간 거래소 동기화</span>
-            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              실시간 호가 피드 가동
-            </span>
-          </div>
-          <p class="text-xs text-tossTextMuted mt-0.5">
-            국내 코스피·코스닥 및 미국 빅테크의 실시간 실제 체결가와 공식 3개월 일봉 캔들 데이터가 실시간 연동됩니다.
-          </p>
-        </div>
-      </div>
-      <button onclick="openStrategyModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs font-bold shadow-lg flex items-center gap-2 border border-red-400/30 flex-shrink-0 transition">
-        <i data-lucide="play-circle" class="w-4 h-4"></i>
-        <span>유튜브 매매기법 선택</span>
-      </button>
-    </div>
-
-    <!-- 2-2. 섹션 A: 조건검색식 및 랭킹 탐색기 -->
+    <!-- 2-2. 섹션 A: 조건검색식 및 랭킹 탐색기 (메인 화면 전용) -->
     <section id="section-rankings" class="space-y-5">
+      
+      <!-- 2-1. 데이터 엔진 상태 안내 배너 (메인 화면에만 노출, 종목 선택/차트 시 100% 완전 숨김) -->
+      <div id="api-status-banner" class="bg-gradient-to-r from-blue-950/40 via-tossCard to-slate-900/60 border border-blue-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="cpu" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-bold text-white">TH증권 퀀트 엔진 & 실시간 거래소 동기화</span>
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                실시간 호가 피드 가동
+              </span>
+            </div>
+            <p class="text-xs text-tossTextMuted mt-0.5">
+              국내 코스피·코스닥 및 미국 빅테크의 실시간 실제 체결가와 공식 3개월 일봉 캔들 데이터가 실시간 연동됩니다.
+            </p>
+          </div>
+        </div>
+        <button onclick="openStrategyModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs font-bold shadow-lg flex items-center gap-2 border border-red-400/30 flex-shrink-0 transition">
+          <i data-lucide="play-circle" class="w-4 h-4"></i>
+          <span>유튜브 매매기법 선택</span>
+        </button>
+      </div>
       
       <!-- 상단 컨트롤: 시장 선택 및 검색식 분류 -->
       <div class="flex flex-col gap-3 border-b border-tossBorder pb-4">
@@ -2927,18 +2919,18 @@
       const sectionChart = document.getElementById("section-chart");
       const navRankings = document.getElementById("nav-rankings");
       const navChart = document.getElementById("nav-chart");
-      const headerBackBtn = document.getElementById("header-back-btn");
+      const headerStrategyBtn = document.getElementById("header-strategy-btn");
 
       if (nav === 'rankings') {
         sectionRankings.classList.remove("hidden");
         sectionChart.classList.add("hidden");
-        if (headerBackBtn) headerBackBtn.classList.add("hidden");
+        if (headerStrategyBtn) headerStrategyBtn.classList.remove("hidden");
         navRankings.className = "text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5";
         navChart.className = "hover:text-white transition py-4 border-b-2 border-transparent text-tossTextMuted flex items-center gap-1.5";
       } else {
         sectionRankings.classList.add("hidden");
         sectionChart.classList.remove("hidden");
-        if (headerBackBtn) headerBackBtn.classList.remove("hidden");
+        if (headerStrategyBtn) headerStrategyBtn.classList.add("hidden");
         navChart.className = "text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5";
         navRankings.className = "hover:text-white transition py-4 border-b-2 border-transparent text-tossTextMuted flex items-center gap-1.5";
         
