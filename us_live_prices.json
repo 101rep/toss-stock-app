@@ -1,0 +1,152 @@
+{
+  "NVDA": {
+    "price": 228.52,
+    "prev": 226.32,
+    "change": 0.97,
+    "diff": 2.2
+  },
+  "TSLA": {
+    "price": 375.23,
+    "prev": 378.03,
+    "change": -0.74,
+    "diff": -2.8
+  },
+  "AAPL": {
+    "price": 341.27,
+    "prev": 340.97,
+    "change": 0.09,
+    "diff": 0.3
+  },
+  "AVGO": {
+    "price": 357.31,
+    "prev": 354.73,
+    "change": 0.73,
+    "diff": 2.58
+  },
+  "AMD": {
+    "price": 605.53,
+    "prev": 594.24,
+    "change": 1.9,
+    "diff": 11.29
+  },
+  "MSFT": {
+    "price": 543.45,
+    "prev": 541.15,
+    "change": 0.43,
+    "diff": 2.3
+  },
+  "AMZN": {
+    "price": 258.58,
+    "prev": 259.53,
+    "change": -0.37,
+    "diff": -0.95
+  },
+  "META": {
+    "price": 762.5,
+    "prev": 742.96,
+    "change": 2.63,
+    "diff": 19.54
+  },
+  "PLTR": {
+    "price": 208.67,
+    "prev": 209.0,
+    "change": -0.16,
+    "diff": -0.33
+  },
+  "SMCI": {
+    "price": 39.07,
+    "prev": 39.98,
+    "change": -2.28,
+    "diff": -0.91
+  },
+  "COIN": {
+    "price": 181.79,
+    "prev": 180.39,
+    "change": 0.78,
+    "diff": 1.4
+  },
+  "GOOGL": {
+    "price": 353.78,
+    "prev": 352.72,
+    "change": 0.3,
+    "diff": 1.06
+  },
+  "ARM": {
+    "price": 255.39,
+    "prev": 255.24,
+    "change": 0.06,
+    "diff": 0.15
+  },
+  "MU": {
+    "price": 953.19,
+    "prev": 989.04,
+    "change": -3.62,
+    "diff": -35.85
+  },
+  "LLY": {
+    "price": 1166.51,
+    "prev": 1182.62,
+    "change": -1.36,
+    "diff": -16.11
+  },
+  "TSM": {
+    "price": 445.12,
+    "prev": 444.35,
+    "change": 0.17,
+    "diff": 0.77
+  },
+  "INTC": {
+    "price": 102.81,
+    "prev": 101.35,
+    "change": 1.44,
+    "diff": 1.46
+  },
+  "QCOM": {
+    "price": 176.86,
+    "prev": 174.43,
+    "change": 1.39,
+    "diff": 2.43
+  },
+  "ASML": {
+    "price": 1717.76,
+    "prev": 1750.24,
+    "change": -1.86,
+    "diff": -32.48
+  },
+  "ORCL": {
+    "price": 143.2,
+    "prev": 137.39,
+    "change": 4.23,
+    "diff": 5.81
+  },
+  "CSCO": {
+    "price": 115.07,
+    "prev": 115.34,
+    "change": -0.23,
+    "diff": -0.27
+  },
+  "PFE": {
+    "price": 28.37,
+    "prev": 28.4,
+    "change": -0.11,
+    "diff": -0.03
+  },
+  "NKE": {
+    "price": 35.33,
+    "prev": 35.35,
+    "change": -0.06,
+    "diff": -0.02
+  },
+  "PYPL": {
+    "price": 56.17,
+    "prev": 56.05,
+    "change": 0.21,
+    "diff": 0.12
+  },
+  "UBER": {
+    "price": 71.32,
+    "prev": 71.5,
+    "change": -0.25,
+    "diff": -0.18
+  }
+}
