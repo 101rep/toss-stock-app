@@ -628,18 +628,25 @@ html_template = f'''<!DOCTYPE html>
         <!-- 동적 주입 -->
       </div>
 
-      <!-- 3단계: 검색 입력창 -->
-      <div class="relative">
+      <!-- 3단계: 검색 입력창 & 활성화된 돋보기 검색 버튼 -->
+      <div class="relative flex items-center">
         <input 
           type="text" 
           id="modal-search-input" 
           placeholder="국내 종목명 또는 6자리 코드 입력 (예: 신풍제약, 신풍제지, 삼성전자, 알테오젠, 005930...)"
           autocomplete="off"
-          class="w-full pl-4 pr-10 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-tossBlue transition"
+          class="w-full pl-4 pr-12 py-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-tossBlue transition"
         >
-        <div class="absolute right-3 top-3.5 text-tossTextMuted pointer-events-none">
+        <!-- 활성화된 돋보기 검색 버튼 -->
+        <button 
+          id="modal-search-btn" 
+          onclick="executeModalSearch()" 
+          title="검색하기"
+          type="button"
+          class="absolute right-2 top-2 p-1.5 px-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center justify-center shadow hover:scale-105 active:scale-95 cursor-pointer"
+        >
           <i data-lucide="search" class="w-4 h-4"></i>
-        </div>
+        </button>
       </div>
 
       <!-- 4단계: 인기/추천 검색어 (국내/미국 모드에 따라 분리) -->
@@ -3084,6 +3091,7 @@ html_template = f'''<!DOCTYPE html>
         ];
       }} else {{
         items = [
+          {{ label: '🚀 스페이스X (SPCX)', keyword: '스페이스X', tag: '나스닥', color: 'bg-indigo-950/50 text-indigo-300 border-indigo-500/40 font-bold' }},
           {{ label: '엔비디아 (NVDA)', keyword: '엔비디아', tag: '나스닥', color: 'bg-teal-950/40 text-teal-300 border-teal-500/30' }},
           {{ label: '테슬라 (TSLA)', keyword: '테슬라', tag: '나스닥', color: 'bg-teal-950/40 text-teal-300 border-teal-500/30' }},
           {{ label: '애플 (AAPL)', keyword: '애플', tag: '나스닥', color: 'bg-teal-950/40 text-teal-300 border-teal-500/30' }},
@@ -3108,14 +3116,33 @@ html_template = f'''<!DOCTYPE html>
       renderSearchResults(keyword);
     }}
 
+    // 돋보기 버튼 클릭 및 Enter 키 입력 시 검색 실행
+    function executeModalSearch() {{
+      const query = modalInput.value.trim();
+      renderSearchResults(query);
+      // 만약 검색 결과 리스트에 1개 이상의 종목이 있으면 엔터 시 즉시 첫 번째 종목으로 이동
+      const firstItem = searchResultsContainer.querySelector(".cursor-pointer");
+      if (firstItem && query.length >= 2) {{
+        firstItem.click();
+      }}
+    }}
+
     modalInput.addEventListener("input", (e) => {{
       renderSearchResults(e.target.value.trim());
+    }});
+
+    modalInput.addEventListener("keydown", (e) => {{
+      if (e.key === "Enter") {{
+        e.preventDefault();
+        executeModalSearch();
+      }}
     }});
 
     // 검색 결과 렌더링: 국내주식과 미국주식을 원천적으로 격리하여 검색
     function renderSearchResults(query) {{
       searchResultsContainer.innerHTML = "";
       const q = query.trim().toLowerCase();
+      const qClean = q.replace(/[\s\-_]/g, ""); // 띄어쓰기 및 특수기호 정규화
 
       // 1. 국내주식 / 미국주식 대분류 기반 원천 풀 분리
       let pool = [];
@@ -3158,11 +3185,19 @@ html_template = f'''<!DOCTYPE html>
           const nameLower = (s.name || "").toLowerCase();
           const krLower = (s.krName || "").toLowerCase();
 
-          if (codeLower === q || nameLower === q || krLower === q) {{
+          const codeClean = codeLower.replace(/[\s\-_]/g, "");
+          const nameClean = nameLower.replace(/[\s\-_]/g, "");
+          const krClean = krLower.replace(/[\s\-_]/g, "");
+
+          const isExact = (codeLower === q || nameLower === q || krLower === q || (qClean && (codeClean === qClean || nameClean === qClean || krClean === qClean)));
+          const isStartsWith = (codeLower.startsWith(q) || nameLower.startsWith(q) || krLower.startsWith(q) || (qClean && (codeClean.startsWith(qClean) || nameClean.startsWith(qClean) || krClean.startsWith(qClean))));
+          const isContains = (codeLower.includes(q) || nameLower.includes(q) || krLower.includes(q) || (qClean && (codeClean.includes(qClean) || nameClean.includes(qClean) || krClean.includes(qClean))));
+
+          if (isExact) {{
             exactMatches.push(s);
-          }} else if (codeLower.startsWith(q) || nameLower.startsWith(q) || krLower.startsWith(q)) {{
+          }} else if (isStartsWith) {{
             startsWithMatches.push(s);
-          }} else if (codeLower.includes(q) || nameLower.includes(q) || krLower.includes(q)) {{
+          }} else if (isContains) {{
             containsMatches.push(s);
           }}
         }}
@@ -3321,11 +3356,14 @@ html_template = f'''<!DOCTYPE html>
       }}
 
       // 1. 만약 한글이나 일반 기업명으로 들어온 경우, ALL_GLOBAL_STOCKS에서 먼저 검색!
-      const matched = ALL_GLOBAL_STOCKS.find(s => 
-        s.name.toLowerCase().includes(cleanSym.toLowerCase()) || 
-        (s.krName && s.krName.toLowerCase().includes(cleanSym.toLowerCase())) ||
-        s.code.toUpperCase() === cleanSym.toUpperCase()
-      );
+      const cleanNorm = cleanSym.toLowerCase().replace(/[\s\-_]/g, "");
+      const matched = ALL_GLOBAL_STOCKS.find(s => {{
+        const nNorm = (s.name || "").toLowerCase().replace(/[\s\-_]/g, "");
+        const kNorm = (s.krName || "").toLowerCase().replace(/[\s\-_]/g, "");
+        const cNorm = (s.code || "").toLowerCase();
+        return (cleanNorm && (nNorm.includes(cleanNorm) || kNorm.includes(cleanNorm) || cNorm === cleanNorm)) ||
+          s.code.toUpperCase() === cleanSym.toUpperCase();
+      }});
 
       if (matched) {{
         selectStockForDetail(matched);
