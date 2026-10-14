@@ -16,8 +16,8 @@ html_template = f'''<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TH증권 실시간 주식 뷰어 & AI 조건검색식 | 국내 & 미국 주식 일봉 차트</title>
-  <meta name="description" content="TH증권 실시간 주식 뷰어 - 30/60/90일 거래량 폭증 매집 검색식, 수십 가지 퀀트 조건식, TradingView Lightweight Charts 실시간 일봉 차트, 야후 파이낸스 실시간 시세 연동">
+  <title>TH증권 실시간 주식 뷰어 & AI 조건검색식 | 유튜브 10대 실전 매매기법 & 일봉 차트</title>
+  <meta name="description" content="TH증권 실시간 주식 뷰어 - 유튜브 고수 10대 실전 매매기법(매수/매도 공식), 30/60/90일 거래량 폭증 매집 검색식, TradingView Lightweight Charts 일봉 차트, 야후 파이낸스 실시간 시세 연동">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -58,38 +58,8 @@ html_template = f'''<!DOCTYPE html>
     body {{
       font-family: 'Pretendard', -apple-system, sans-serif;
       background-color: #101012;
-      color: #f9fafb;
-      -webkit-tap-highlight-color: transparent;
-    }}
-    
-    ::-webkit-scrollbar {{
-      width: 4px;
-      height: 4px;
-    }}
-    ::-webkit-scrollbar-track {{
-      background: #101012;
-    }}
-    ::-webkit-scrollbar-thumb {{
-      background: #28282e;
-      border-radius: 4px;
-    }}
-    ::-webkit-scrollbar-thumb:hover {{
-      background: #3b3b45;
-    }}
-
-    @keyframes priceUp {{
-      0% {{ background-color: rgba(240, 68, 82, 0.35); }}
-      100% {{ background-color: transparent; }}
-    }}
-    @keyframes priceDown {{
-      0% {{ background-color: rgba(49, 130, 246, 0.35); }}
-      100% {{ background-color: transparent; }}
-    }}
-    .flash-up {{
-      animation: priceUp 0.8s ease-out;
-    }}
-    .flash-down {{
-      animation: priceDown 0.8s ease-out;
+      color: #f2f4f6;
+      -webkit-font-smoothing: antialiased;
     }}
     .no-scrollbar::-webkit-scrollbar {{
       display: none;
@@ -97,6 +67,20 @@ html_template = f'''<!DOCTYPE html>
     .no-scrollbar {{
       -ms-overflow-style: none;
       scrollbar-width: none;
+    }}
+    @keyframes flashUp {{
+      0% {{ background-color: rgba(240, 68, 82, 0.28); }}
+      100% {{ background-color: transparent; }}
+    }}
+    @keyframes flashDown {{
+      0% {{ background-color: rgba(49, 130, 246, 0.28); }}
+      100% {{ background-color: transparent; }}
+    }}
+    .flash-up {{
+      animation: flashUp 0.8s ease-out;
+    }}
+    .flash-down {{
+      animation: flashDown 0.8s ease-out;
     }}
   </style>
 </head>
@@ -120,10 +104,15 @@ html_template = f'''<!DOCTYPE html>
           </div>
         </div>
 
-        <nav class="hidden sm:flex items-center space-x-5 text-sm font-medium text-tossTextMuted">
+        <nav class="hidden sm:flex items-center space-x-4 text-sm font-medium text-tossTextMuted">
           <button id="nav-rankings" onclick="switchNav('rankings')" class="text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5">
             <i data-lucide="layout-grid" class="w-4 h-4"></i>
             조건검색식 & 랭킹
+          </button>
+          <button onclick="openStrategyModal()" class="hover:text-amber-400 text-amber-300 transition py-4 border-b-2 border-transparent flex items-center gap-1.5 font-bold">
+            <i data-lucide="play-circle" class="w-4 h-4 text-amber-400"></i>
+            <span>유튜브 매매기법</span>
+            <span class="bg-red-500/20 text-red-400 text-[10px] px-1.5 py-0.5 rounded-full border border-red-500/30">매수·매도 공식</span>
           </button>
           <button id="nav-chart" onclick="switchNav('chart')" class="hover:text-white transition py-4 border-b-2 border-transparent flex items-center gap-1.5">
             <i data-lucide="candlestick-chart" class="w-4 h-4"></i>
@@ -132,8 +121,12 @@ html_template = f'''<!DOCTYPE html>
         </nav>
       </div>
 
-      <!-- 상단 우측: 검색 버튼 -->
+      <!-- 상단 우측: 매매기법 버튼 & 검색 버튼 -->
       <div class="flex items-center space-x-2">
+        <button onclick="openStrategyModal()" class="sm:hidden px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1 shadow">
+          <i data-lucide="play-circle" class="w-3.5 h-3.5"></i>
+          매매기법
+        </button>
         <button onclick="openSearchModal()" class="p-2 rounded-full hover:bg-tossCard text-slate-300 hover:text-white transition flex items-center gap-1.5 text-xs px-3 bg-tossCard border border-tossBorder shadow-sm">
           <i data-lucide="search" class="w-4 h-4 text-tossTextMuted"></i>
           <span class="hidden md:inline text-tossTextMuted">종목명 또는 심볼 검색</span>
@@ -154,20 +147,20 @@ html_template = f'''<!DOCTYPE html>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-sm font-bold text-white">TH증권 퀀트 엔진 & 야후 파이낸스 실시간 시세 연동</span>
+            <span class="text-sm font-bold text-white">TH증권 퀀트 엔진 & 실시간 거래소 동기화</span>
             <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              실시간 거래소 동기화 완료
+              실시간 호가 피드 가동
             </span>
           </div>
           <p class="text-xs text-tossTextMuted mt-0.5">
-            삼성전자, SK하이닉스 및 미국 빅테크의 실시간 실제 체결가와 공식 3개월 일봉 캔들 데이터가 실시간으로 반영됩니다.
+            국내 코스피·코스닥 및 미국 빅테크의 실시간 실제 체결가와 공식 3개월 일봉 캔들 데이터가 실시간 연동됩니다.
           </p>
         </div>
       </div>
-      <div class="flex items-center gap-2 text-xs text-emerald-400 font-medium px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex-shrink-0">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-        <span>실시간 호가 피드 활성화</span>
-      </div>
+      <button onclick="openStrategyModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs font-bold shadow-lg flex items-center gap-2 border border-red-400/30 flex-shrink-0 transition">
+        <i data-lucide="play-circle" class="w-4 h-4"></i>
+        <span>유튜브 매매기법 선택</span>
+      </button>
     </div>
 
     <!-- 2-2. 섹션 A: 조건검색식 및 랭킹 탐색기 -->
@@ -187,10 +180,89 @@ html_template = f'''<!DOCTYPE html>
             </button>
           </div>
 
-          <!-- ETF 완전 제외 배너 -->
-          <div class="flex items-center gap-2 text-xs text-slate-300 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800">
-            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-            <span class="font-medium">ETF 제외 순수 개별주 전용</span>
+          <!-- 유튜브 매매기법 전체보기 버튼 -->
+          <div class="flex items-center gap-2">
+            <button onclick="openStrategyModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-red-600/90 via-rose-600/90 to-amber-600/90 hover:from-red-500 hover:to-amber-500 text-white text-xs font-bold shadow flex items-center gap-1.5 border border-red-500/30 transition">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-yellow-300"></i>
+              <span>🎬 유튜브 10대 실전 매매기법 모음</span>
+            </button>
+            <!-- ETF 완전 제외 배너 -->
+            <div class="flex items-center gap-1.5 text-xs text-slate-300 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span class="font-medium">ETF 제외 순수 개별주 전용</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 유튜브 실전 매매기법 공략 가이드 카드 (선택된 기법에 따라 동적 변경) -->
+        <div id="strategy-guide-panel" class="bg-gradient-to-br from-slate-900 via-tossCard to-slate-900/90 border border-amber-500/40 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span id="guide-badge-tag" class="px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+                  🎬 유튜브 실전 고수 매매법
+                </span>
+                <span id="guide-channel" class="text-xs text-amber-300 font-semibold flex items-center gap-1">
+                  <i data-lucide="youtube" class="w-3.5 h-3.5 text-red-500"></i>
+                  출처 채널
+                </span>
+              </div>
+              <h3 id="guide-title" class="text-base sm:text-lg font-extrabold text-white">
+                매매기법 이름
+              </h3>
+              <p id="guide-desc" class="text-xs text-slate-300 leading-relaxed">
+                매매기법 핵심 설명
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <a id="guide-video-link" href="#" target="_blank" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 flex items-center gap-1.5 transition">
+                <i data-lucide="external-link" class="w-3.5 h-3.5 text-blue-400"></i>
+                <span>원본 영상</span>
+              </a>
+              <button onclick="openStrategyModal()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow flex items-center gap-1.5 transition">
+                <i data-lucide="list-filter" class="w-3.5 h-3.5"></i>
+                <span>기법 변경</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3대 실전 전략 가이드 박스: 어떤 식으로 구매하고 / 어떻게 됐을 때 팔아라 -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            
+            <!-- 1. 매수 방법 (어떤 식으로 구매하라) -->
+            <div class="bg-emerald-950/20 border border-emerald-500/30 rounded-xl p-3.5 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-emerald-400 font-bold text-xs">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>🛒 어떤 식으로 구매하라 (매수 타점)</span>
+              </div>
+              <p id="guide-buy" class="text-slate-300 leading-relaxed text-[11px] sm:text-xs">
+                매수 타점 및 분할 매수 비중
+              </p>
+            </div>
+
+            <!-- 2. 매도 방법 - 익절 (어떻게 됐을 때 팔아라) -->
+            <div class="bg-blue-950/20 border border-blue-500/30 rounded-xl p-3.5 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-blue-400 font-bold text-xs">
+                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                <span>🚀 어떻게 됐을 때 팔아라 (목표가 & 익절)</span>
+              </div>
+              <p id="guide-sell" class="text-slate-300 leading-relaxed text-[11px] sm:text-xs">
+                1차/2차 목표가 및 분할 익절 타이밍
+              </p>
+            </div>
+
+            <!-- 3. 매도 방법 - 손절 (어떻게 됐을 때 팔아라) -->
+            <div class="bg-rose-950/20 border border-rose-500/30 rounded-xl p-3.5 space-y-1.5">
+              <div class="flex items-center gap-1.5 text-rose-400 font-bold text-xs">
+                <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                <span>⛔ 어떻게 됐을 때 팔아라 (리스크 관리 & 손절)</span>
+              </div>
+              <p id="guide-stop" class="text-slate-300 leading-relaxed text-[11px] sm:text-xs">
+                기준선 이탈 시 칼손절 규칙
+              </p>
+            </div>
+
           </div>
         </div>
 
@@ -231,7 +303,7 @@ html_template = f'''<!DOCTYPE html>
         <!-- 수십 가지 다양한 조건 검색식 카테고리 칩 -->
         <div class="space-y-2 pt-1">
           <div class="flex items-center justify-between text-[11px] text-tossTextMuted font-semibold px-0.5">
-            <span>수십 가지 프로 퀀트 검색식 (클릭 시 즉시 필터링):</span>
+            <span>실전 매매기법 & 퀀트 검색식 (클릭 시 즉시 필터링):</span>
             <span id="filtered-count" class="text-blue-400 font-bold">총 30개 종목 발굴</span>
           </div>
           
@@ -246,7 +318,7 @@ html_template = f'''<!DOCTYPE html>
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-tossTextMuted px-1">
         <div id="ranking-description" class="flex items-center gap-1.5 font-medium text-slate-200">
           <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-          30일 평균 대비 거래량이 5~10배 이상 폭발했으나 아직 5% 미만으로 출발하지 않은 세력 매집 종목입니다.
+          현재 조건에 부합하는 종목들 중 많이 오른 순서대로 표시됩니다.
         </div>
         <div class="flex items-center gap-3 text-[11px]">
           <span class="text-slate-400">종목 터치 시 <strong class="text-emerald-400">실시간 일봉 차트</strong> 즉시 표시</span>
@@ -257,43 +329,40 @@ html_template = f'''<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- TH증권 TOP 100 종목 리스트 카드 -->
-      <div class="bg-tossCard border border-tossBorder rounded-2xl overflow-hidden shadow-xl">
+      <!-- TH증권 종목 리스트 카드 -->
+      <div class="bg-tossCard border border-tossBorder rounded-2xl overflow-hidden shadow-lg">
+        
         <div class="divide-y divide-tossBorder/60" id="stock-list-container">
-          <!-- 동적으로 검색식 결과 종목 리스트 주입 -->
+          <!-- 자바스크립트로 종목 리스트 동적 주입 -->
         </div>
+
       </div>
 
     </section>
 
-    <!-- 2-3. 섹션 B: TH증권 실시간 일봉 차트 화면 -->
-    <section id="section-chart" class="hidden space-y-5">
+    <!-- 2-3. 섹션 B: 실시간 일봉 차트 뷰어 (TradingView Lightweight Charts 연동) -->
+    <section id="section-chart" class="hidden space-y-4">
       
-      <!-- 선택 종목 헤더 정보 카드 (일봉 자동 적용 & 호버 연동) -->
-      <div class="bg-tossCard border border-tossBorder rounded-2xl p-5 shadow-xl space-y-4">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
+      <!-- 종목 상세 정보 헤더 -->
+      <div class="bg-tossCard border border-tossBorder rounded-2xl p-5 space-y-4 shadow-xl">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="space-y-1">
             <div class="flex items-center space-x-2">
-              <span id="detail-name" class="text-xl sm:text-2xl font-bold text-white tracking-tight">삼성전자</span>
-              <span id="detail-code" class="text-xs px-2 py-0.5 rounded bg-slate-800 text-tossTextMuted font-mono">005930</span>
-              <span id="detail-market" class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-medium">코스피</span>
-              <span id="detail-chart-badge" class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold flex items-center gap-1">
-                <i data-lucide="calendar" class="w-3 h-3"></i>
-                실시간 일봉 차트
+              <span id="detail-market" class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono border border-slate-700">코스피</span>
+              <span id="detail-code" class="text-xs text-tossTextMuted font-mono">005930</span>
+              <span class="text-[11px] text-emerald-400 font-semibold">● 실시간 일봉</span>
+            </div>
+            <h2 id="detail-name" class="text-2xl font-extrabold text-white tracking-tight">삼성전자</h2>
+            <div class="flex items-baseline space-x-3 pt-1">
+              <span id="detail-price" class="text-3xl font-extrabold font-mono text-white tracking-tight">238,500원</span>
+              <span id="detail-price-won" class="text-xs text-slate-400 font-mono"></span>
+              <span id="detail-change" class="text-base font-bold text-tossRed flex items-center font-mono">
+                ▲ 3,500원 (+1.49%)
               </span>
             </div>
-            
-            <div class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span id="detail-price" class="text-2xl sm:text-4xl font-extrabold text-tossRed tracking-tight font-mono transition-all">
-                238,500원
-              </span>
-              <span id="detail-price-won" class="text-sm sm:text-base font-semibold text-slate-300 font-mono"></span>
-              <span id="detail-change" class="text-sm sm:text-base font-bold text-tossRed flex items-center font-mono">
-                ▲ 6,500원 (+2.81%)
-              </span>
-            </div>
-            <div id="detail-hover-date" class="text-xs text-tossTextMuted mt-1">
-              실시간 일봉 현재가
+            <div class="text-[11px] text-tossTextMuted" id="detail-hover-date">
+              실시간 일봉 현재가 (호버 시 해당 일봉 종가 표시)
             </div>
           </div>
 
@@ -369,7 +438,41 @@ html_template = f'''<!DOCTYPE html>
 
   </main>
 
-  <!-- 3. 실시간 종목 검색 모달 -->
+  <!-- 3. 유튜브 고수 10대 실전 매매기법 모달 -->
+  <div id="strategy-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-start justify-center p-4 sm:pt-14 overflow-y-auto">
+    <div class="bg-tossCard border border-amber-500/40 rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl space-y-4 p-5 animate-in fade-in zoom-in-95 duration-150 my-6">
+      
+      <div class="flex items-center justify-between border-b border-tossBorder pb-4">
+        <div>
+          <div class="flex items-center space-x-2 text-white font-extrabold text-lg">
+            <i data-lucide="play-circle" class="w-6 h-6 text-red-500"></i>
+            <span>유튜브 고수 10대 실전 매매기법 공략집</span>
+          </div>
+          <p class="text-xs text-tossTextMuted mt-1">
+            원하시는 매매기법을 선택하시면 조건에 일치하는 종목들을 발굴하고, <strong class="text-amber-400">구체적인 매수 타점과 매도(익절·손절) 공식</strong>을 안내해 드립니다.
+          </p>
+        </div>
+        <button onclick="closeStrategyModal()" class="p-1.5 rounded-lg hover:bg-slate-800 text-tossTextMuted hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 10대 매매기법 카드 리스트 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 max-h-[70vh] overflow-y-auto pr-1" id="strategy-modal-cards">
+        <!-- 동적 주입 -->
+      </div>
+
+      <div class="border-t border-tossBorder/70 pt-3 flex items-center justify-between text-xs text-tossTextMuted">
+        <span>※ 기법을 선택하면 해당 조건에 부합하는 종목들이 많이 오른 순으로 정렬됩니다.</span>
+        <button onclick="closeStrategyModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold transition">
+          닫기
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 4. 실시간 종목 검색 모달 -->
   <div id="search-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-4 sm:pt-20">
     <div class="bg-tossCard border border-tossBorder rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl space-y-4 p-5 animate-in fade-in zoom-in-95 duration-150">
       
@@ -423,10 +526,10 @@ html_template = f'''<!DOCTYPE html>
     <div class="max-w-5xl mx-auto px-4 space-y-6">
 
       <div class="bg-tossCard/60 border border-tossBorder rounded-xl p-4 text-[11px] leading-relaxed">
-        <p class="font-semibold text-slate-300 mb-1"> 금융 데이터 라이선스 및 투자 면책 고지</p>
+        <p class="font-semibold text-slate-300 mb-1">📢 금융 데이터 라이선스 및 투자 면책 고지</p>
         <p>
           본 서비스의 차트는 TradingView Lightweight Charts 공식 오픈소스 라이브러리와 Yahoo Finance 공개 API를 기반으로 제공됩니다.
-          본 서비스는 모의 모니터링 및 학술 퀀트 연구용으로 제공되며, 특정 금융 상품의 매매 권유가 아닙니다.
+          본 서비스에서 제공하는 유튜브 매매기법 및 퀀트 지표는 모의 모니터링 및 학술 연구용으로 제공되며, 특정 금융 상품의 매매 권유나 원금 보장이 아닙니다.
         </p>
       </div>
 
@@ -449,13 +552,13 @@ html_template = f'''<!DOCTYPE html>
     </div>
   </footer>
 
-  <!-- 6. 클라이언트 스크립트: Lightweight Charts & Yahoo Finance API & 수십개 조건식 엔진 -->
+  <!-- 6. 클라이언트 스크립트: Lightweight Charts & Yahoo Finance API & 유튜브 10대 실전 매매기법 엔진 -->
   <script>
     lucide.createIcons();
 
     const USD_KRW_RATE = 1370; // 원/달러 기준 환율
     let currentMarket = 'KR';
-    let currentStrategy = 'vol_burst_undervalued'; // 기본: 거래량 5~10배 폭증 + 5% 미만 미상승
+    let currentStrategy = 'yt_ma_trend'; // 기본: 20·60일선 정배열 눌림목 매매법
     let currentSurgePeriod = 30; // 30, 60, 90일
     let currentTimeframe = {{ range: '1mo', interval: '1d', key: '1m' }}; // 기본: 일봉 차트 (1개월 일봉)
     let isCandleMode = true; // 기본: 실시간 일봉 캔들 차트 즉시 표시
@@ -473,8 +576,133 @@ html_template = f'''<!DOCTYPE html>
 
     let activeStock = KR_STOCKS[0]; // 기본: 삼성전자
 
-    // 2. 수십 가지 조건검색식 프리셋 정의 (30개 대표 퀀트 검색식)
+    // 2. 유튜브 고수 10대 실전 매매기법 정의 (구체적인 매수·매도 공식 탑재)
+    const YOUTUBE_STRATEGIES = [
+      {{
+        id: 'yt_ma_trend',
+        name: '📈 20·60일선 정배열 눌림목 매매법',
+        shortName: '20·60일선 눌림목',
+        channel: '코인슈타인 (700억 고수)',
+        tag: '이평선 추세추종 / 스윙',
+        desc: '주가가 20일선과 60일선 정배열 추세에 안착한 뒤, 일시적 눌림목에서 20일선을 터치하고 반등하는 타이밍을 포착합니다.',
+        buyGuide: '상승 추세 중 20일 이동평균선에 닿거나 살짝 아래꼬리를 달 때 1차 분할 매수(50%), 다음 날 양봉 캔들로 지지가 확인될 때 2차 매수(50%)를 집행합니다.',
+        sellGuide: '직전 전고점 저항대 도달 시 50% 분할 익절하여 수익을 챙기고, 나머지 50%는 5일 이동평균선을 종가로 깰 때까지 추세를 끝까지 끌고 가며 전량 익절합니다.',
+        stopGuide: '20일 이동평균선을 종가 기준으로 -2% 이상 하향 이탈하거나 60일선을 위협할 경우 즉시 미련 없이 전량 손절합니다.',
+        videoUrl: 'https://www.youtube.com/watch?v=bARF75QgOtM'
+      }},
+      {{
+        id: 'yt_bb_breakout',
+        name: '⚡ 볼린저밴드 수축 후 상단 돌파 매매법',
+        shortName: '볼린저밴드 돌파',
+        channel: '김직선 단타 강의',
+        tag: '수축-확장 / 단타',
+        desc: '장기간 박스권 횡보로 볼린저밴드가 좁아진(수축) 후 대량 거래량이 터지며 상단 밴드를 뚫고 올라가는 순간을 공략합니다.',
+        buyGuide: '볼린저밴드 상단 밴드를 거래량 급증과 함께 장대양봉으로 강하게 돌파하는 시점(또는 시초가 갭상승 3분봉 지지 확인 시) 불타기/돌파 매수를 감행합니다.',
+        sellGuide: '상단 밴드를 타고 급등할 때 +4%~+8% 구간에서 1차 절반 익절하고, 윗꼬리 긴 음봉이 발생하거나 당일 고점을 갱신하지 못할 때 전량 매도합니다.',
+        stopGuide: '돌파 기준봉의 시가(당일 시초가)를 주가가 아래로 깨뜨리면 페이크 돌파로 판단하고 즉시 전량 손절합니다.',
+        videoUrl: 'https://www.youtube.com/watch?v=dzF9cCAW1OE'
+      }},
+      {{
+        id: 'yt_ma20_first_touch',
+        name: '🎯 20일선 첫 터치 지지 반등 매매법',
+        shortName: '20일선 첫 반등',
+        channel: '실전 차트 쇼츠 특강',
+        tag: '지지반등 / 초보 추천',
+        desc: '바닥에서 강하게 솟아오른 주도주가 처음으로 20일선까지 건강한 가격 조정을 받을 때 발생하는 기술적 급반등을 노립니다.',
+        buyGuide: '급등 후 첫 20일선 접촉 시 음봉에서 바로 잡지 말고, 20일선에서 아래꼬리를 달거나 다음 날 시초가 양봉 턴어라운드를 확인할 때 매수합니다.',
+        sellGuide: '20일선 반등 파동으로 +3%~+5% 도달 시 절반 매도, 이후 직전 고점 부근(신고가 직전)에서 나머지 전량을 매도하여 안전 마진을 확보합니다.',
+        stopGuide: '20일선을 음봉으로 뚜렷하게 붕괴시키며 종가를 마감할 경우 반등 실패로 규정하고 칼같이 손절합니다.',
+        videoUrl: 'https://www.youtube.com/shorts/ieASCa8QYTA'
+      }},
+      {{
+        id: 'yt_candle_center',
+        name: '🏛️ 기준봉 장대양봉 중심값(허리) 지지 매매법',
+        shortName: '장대양봉 중심값',
+        channel: '크몽 주식 1% 멘토',
+        tag: '세력단가 / 스윙',
+        desc: '대량 거래량이 실린 기준봉(장대양봉)의 정중앙(50% 중심값)은 세력의 평균 매수가이므로 결코 쉽게 깨지지 않는 강력한 방어선입니다.',
+        buyGuide: '대량 거래량 기준봉 발생 후 2~4일간 거래량이 줄어들며 기준봉 몸통의 1/2(중심선)까지 하락했을 때 분할 매수로 담습니다.',
+        sellGuide: '중심선 지지 후 재차 거래량이 붙으며 2차 상승 파동이 나올 때 +5%~+8% 구간에서 절반 익절, 기준봉 고점 돌파 시 잔량 전량 매도합니다.',
+        stopGuide: '장대양봉의 중심값을 거래량 실린 음봉으로 종가상 이탈하거나 기준봉 시가를 위협하면 세력 이탈로 보고 즉시 손절합니다.',
+        videoUrl: 'https://www.youtube.com/shorts/19S2Bokd3us'
+      }},
+      {{
+        id: 'yt_hanriver_retest',
+        name: '🚀 전고점 돌파 & 리테스트 눌림 매매법',
+        shortName: '전고점 리테스트',
+        channel: '한강트레이딩 (@hanriver_trading)',
+        tag: '전업투자자 / 돌파·눌림',
+        desc: '강력한 매물대인 전고점을 대량 거래로 돌파한 종목이, 다시 전고점 가격대까지 살짝 내려와 지지를 확인(리테스트)할 때 진입합니다.',
+        buyGuide: '전고점 돌파 당일 추격 매수하지 말고, 다음날 전고점 지지선 부근으로 주가가 눌림을 줄 때 분봉상 아래꼬리를 확인하고 분할 매수합니다.',
+        sellGuide: '리테스트 성공 후 신고가 랠리가 시작되면 +5%에서 1차 분할 익절, 볼린저밴드 상단을 이탈하거나 거래량 터진 음봉 발생 시 전량 매도합니다.',
+        stopGuide: '돌파했던 전고점 라인을 지키지 못하고 다시 이전 박스권 안으로 종가가 밀려 내려오면 실패로 인정하고 과감히 손절합니다.',
+        videoUrl: 'https://www.youtube.com/@hanriver_trading'
+      }},
+      {{
+        id: 'yt_vol_dry_drop',
+        name: '💧 거래량 폭증 후 거래량 급감 첫 음봉 줍줍',
+        shortName: '거래량 급감 첫 음봉',
+        channel: '엘리트 강사 차트연구소',
+        tag: '거래량 비밀 / 눌림목',
+        desc: '전일 거래량이 평소의 5~10배 터진 양봉 뒤에, 거래량이 1/3 이하로 바짝 마르면서 주가가 덜 빠진 날은 세력이 나가지 않고 개미만 털린 자리입니다.',
+        buyGuide: '거래량이 전일 대비 70% 이상 급감하면서 주가는 5일선 위에서 횡보하는 오후 2시 30분~3시 장마감 직전 종가 베팅으로 매수합니다.',
+        sellGuide: '다음 날 시초가 갭상승 또는 거래량이 다시 붙으며 양봉이 솟구칠 때 +3%~+6% 구간에서 빠르게 분할 매도하여 확정 수익을 챙깁니다.',
+        stopGuide: '전일 대량 거래량 양봉의 시가를 하향 이탈하거나, 음봉에 대량 거래량이 실리기 시작하면 즉시 전량 손절합니다.',
+        videoUrl: 'https://www.youtube.com/watch?v=WccmygdxRUo'
+      }},
+      {{
+        id: 'yt_smart_swing',
+        name: '💎 외인·기관 쌍끌이 순매수 5일선 스윙 매매법',
+        shortName: '외인·기관 쌍끌이',
+        channel: '수급단타왕 주식솔루션',
+        tag: '직장인 최적 / 메이저 수급',
+        desc: '메이저 주포인 기관과 외국인이 동시에 대량 순매수 중인 종목을 5일선 부근에서 모아가 안정적인 스윙 수익을 냅니다.',
+        buyGuide: '장중 외인·기관 양매수 집계가 확인되는 우량주를 5일 이동평균선에 주가가 수렴할 때 2~3일에 걸쳐 분할 매수합니다.',
+        sellGuide: '양매수가 지속되는 한 5일선을 종가로 깨지 않으면 계속 보유하며, 목표 수익률 +7%~+15% 구간에서 분할 매도로 수익을 극대화합니다.',
+        stopGuide: '외국인 또는 기관 중 한쪽이 대량 매도로 돌아서거나 10일 이동평균선을 종가상 명확히 이탈할 때 전량 손절합니다.',
+        videoUrl: 'https://www.youtube.com/watch?v=V-Xdqbkph3I'
+      }},
+      {{
+        id: 'yt_amount_leader',
+        name: '💰 거래대금 1,000억 주도주 첫 눌림목 반등 타점',
+        shortName: '1,000억 주도주 눌림',
+        channel: '실전 단타 연구소',
+        tag: '시장 주도주 / 당일 단타',
+        desc: '시장 전체 거래대금이 1,000억 원 이상 몰린 핵심 대장주는 풍부한 유동성 덕분에 첫 눌림목에서 반드시 기술적 반등 파동이 발생합니다.',
+        buyGuide: '오전 9시~9시 30분 거래대금 1~3위 주도주를 선정하고, 첫 급등 후 첫 번째 눌림목(오전 9시 40분~10시 20분) 지지 캔들 발생 시 매수합니다.',
+        sellGuide: '당일 고점 돌파 재시도 구간에서 +3%~+5% 신속하게 분할 매도하여 당일 수익을 확정 짓습니다.',
+        stopGuide: '당일 저점(장중 최저가)을 깨고 내려가면 추세 훼손이므로 지체 없이 칼손절합니다.',
+        videoUrl: 'https://www.youtube.com/shorts/Ij93E0XgLFs'
+      }},
+      {{
+        id: 'yt_yoon_trend',
+        name: '🏢 시장 주도 1등 우량주 밸류에이션 추세추종',
+        shortName: '1등 우량주 추세추종',
+        channel: '팀더윤쎈 (삼쩜삼캠퍼스 윤지호)',
+        tag: '탑다운 정석 / 중기 스윙',
+        desc: '잡주를 배제하고 글로벌 경쟁력을 가진 섹터 1위 대장주 중 전고점 근처에서 신고가를 넘보는 진짜 우량주에 편승합니다.',
+        buyGuide: '코스피/나스닥 1등 우량주가 20일선 부근에서 숨고르기를 할 때 2~3회에 걸쳐 적립식 분할 매수로 진입합니다.',
+        sellGuide: '분기 실적 발표 시즌 및 목표 밸류에이션 도달 시까지 중기 보유하며, +15%~+30% 이상 추세 랠리를 끝까지 누리며 분할 매도합니다.',
+        stopGuide: '기업의 본질적인 실적 펀더멘털이 훼손되거나 60일 이동평균선을 거래량 실려 붕괴할 때 포트폴리오를 교체합니다.',
+        videoUrl: 'https://www.3o3campus.co.kr/event/theyoonplus_earlybird'
+      }},
+      {{
+        id: 'yt_limit_runner',
+        name: '🔥 10% 이상 장대양봉 후 3일선·5일선 타기 매매법',
+        shortName: '급등주 3·5일선 타기',
+        channel: '실전 급등주 단타',
+        tag: '초단기 급등 / 고수 추천',
+        desc: '당일 10% 이상 폭등하거나 상한가를 기록한 강한 수급주는 단기 관성력이 매우 커서 3일선 또는 5일선에서 번개 같은 2차 급반등이 나옵니다.',
+        buyGuide: '급등 다음 날 시초가 갭하락 음봉에서 기다렸다가 3일선 또는 5일선에 닿으며 분봉상 턴어라운드 캔들이 뜰 때 1차 진입합니다.',
+        sellGuide: '장중 반등 파동이 솟구칠 때 +4%~+8% 구간에서 전량 수익 실현하며 빠른 회전율을 유지합니다.',
+        stopGuide: '진입 당일의 시가를 이탈하거나 5일선을 하향 붕괴하면 추가 급락이 발생할 수 있으므로 무조건 칼손절합니다.',
+        videoUrl: 'https://www.youtube.com/shorts/r6hb8MMs3_4'
+      }}
+    ];
+
+    // 기존 및 추가 퀀트 조건검색식 프리셋
     const PRESETS = [
+      ...YOUTUBE_STRATEGIES.map(s => ({{ id: s.id, name: `🎬 ${{s.shortName}}`, desc: s.desc, isYt: true }})),
       {{ id: 'vol_burst_undervalued', name: '🔥 거래량 5~10배 폭증 & 5% 미만 미상승 (세력 매집)', desc: '지정 기간(30/60/90일) 내 거래량이 5~10배 이상 터졌는데도 주가가 아직 5% 미만으로 출발하지 않은 세력 매집 시그니처 종목입니다.' }},
       {{ id: 'vol_burst_all', name: '⚡ 거래량 5배 이상 폭발주 전체', desc: '최근 평균 거래량 대비 500% 이상 폭증한 수급 집중 종목 전체' }},
       {{ id: 'smart_money_dual', name: '💎 외국인 & 기관 양매수 쌍끌이', desc: '기관과 외국인이 동시에 대량 순매수 중인 수급 주도주' }},
@@ -615,7 +843,6 @@ html_template = f'''<!DOCTYPE html>
         showLoading(false);
         document.getElementById("data-source-status").innerText = "야후 파이낸스 실시간 공식 일봉 연동";
         const bundleData = REAL_CANDLES_BUNDLE[symbol];
-        // 마지막 봉을 activeStock 실시간 현재가와 동기화
         if (bundleData.length > 0 && activeStock.price) {{
           bundleData[bundleData.length - 1].close = activeStock.price;
           bundleData[bundleData.length - 1].value = activeStock.price;
@@ -701,7 +928,7 @@ html_template = f'''<!DOCTYPE html>
       return result;
     }}
 
-    // 5. 차트 렌더링 (일봉 기본)
+    // 5. 차트 렌더링 (일봉 캔들 기본)
     async function renderLightweightChart() {{
       if (!lwChart) initLightweightChart();
 
@@ -779,7 +1006,7 @@ html_template = f'''<!DOCTYPE html>
       }}
     }}
 
-    // 6. 조건식 필터링 엔진 (30/60/90일 거래량 5~10배 + 5% 미만 미상승 및 30가지 퀀트 조건식)
+    // 6. 조건식 필터링 엔진 (유튜브 10대 실전 매매기법 + 30/60/90일 거래량 폭증 및 퀀트 조건식)
     function applyConditionFilter(stockList, strategyId, surgePeriod) {{
       return stockList.filter(s => {{
         if (isEtfStock(s)) return false;
@@ -787,8 +1014,49 @@ html_template = f'''<!DOCTYPE html>
         const volMult = surgePeriod === 60 ? s.vol60 : (surgePeriod === 90 ? s.vol90 : s.vol30);
 
         switch (strategyId) {{
+          // --- 유튜브 10대 실전 매매기법 ---
+          case 'yt_ma_trend':
+            // 20·60일선 정배열 눌림목: 건강한 상승 추세 속 안정적 RSI와 지지선
+            return s.rsi >= 48 && s.rsi <= 65 && s.change >= -1.5 && volMult >= 2.0;
+
+          case 'yt_bb_breakout':
+            // 볼린저밴드 수축 후 상단 돌파: 대량 거래량 폭증 + 강한 양봉
+            return volMult >= 4.0 && s.change >= 2.5 && s.rsi >= 58;
+
+          case 'yt_ma20_first_touch':
+            // 20일선 첫 터치 지지 반등: 급등 후 20일선 눌림목 반등 타점
+            return s.rsi >= 45 && s.rsi <= 56 && s.highDistance >= -18.0 && s.highDistance <= -3.0;
+
+          case 'yt_candle_center':
+            // 기준봉 장대양봉 중심값 지지: 폭증 후 5% 미만 횡보하며 세력 평균 단가 수호
+            return volMult >= 3.5 && s.chgSinceSurge >= 0.0 && s.chgSinceSurge <= 4.5 && s.change >= -1.0;
+
+          case 'yt_hanriver_retest':
+            // 한강트레이딩 전고점 돌파 & 리테스트 눌림: 52주 고점/전고점 4% 이내 안착
+            return s.highDistance >= -4.5 && s.highDistance <= 0.5 && s.change >= 0.5;
+
+          case 'yt_vol_dry_drop':
+            // 엘리트강사 거래량 폭증 후 거래량 급감 첫 음봉 줍줍: 거래량 5배 폭증 후 등락 ±3% 이내
+            return volMult >= 4.5 && s.chgSinceSurge < 5.0 && Math.abs(s.change) <= 3.0;
+
+          case 'yt_smart_swing':
+            // 수급단타왕 외인·기관 쌍끌이 5일선 스윙: 외인 & 기관 양매수
+            return s.instNet > 0 && s.foreignNet > 0 && s.rsi >= 50;
+
+          case 'yt_amount_leader':
+            // 거래대금 1,000억 주도주 첫 눌림목 반등: 대형 주도주 중 상승 탄력
+            return (s.amount.includes("조") || parseFloat(s.amount) >= 1000) && s.change >= 0.5;
+
+          case 'yt_yoon_trend':
+            // 팀더윤쎈 1등 우량주 밸류에이션 추세추종: 코스피/나스닥 대형주 중 고점권 유지
+            return (s.market.includes("코스피") || s.market.includes("나스닥")) && s.highDistance >= -10.0 && s.rsi >= 50;
+
+          case 'yt_limit_runner':
+            // 급등주 10% 이상 장대양봉 후 3·5일선 타기: 6% 이상 급등주
+            return s.change >= 6.0 && volMult >= 2.5;
+
+          // --- 기존 퀀트 조건식 ---
           case 'vol_burst_undervalued':
-            // 핵심 요구조건: 30/60/90일 거래량이 5~10배 터졌는데도 5% 미만으로 오른 종목
             return volMult >= 5.0 && volMult <= 10.5 && s.chgSinceSurge < 5.0;
 
           case 'vol_burst_all':
@@ -871,6 +1139,7 @@ html_template = f'''<!DOCTYPE html>
 
       renderPresetChips();
       renderFilteredStockList();
+      updateStrategyGuidePanel();
       lucide.createIcons();
     }}
 
@@ -878,6 +1147,39 @@ html_template = f'''<!DOCTYPE html>
       currentStrategy = strategyId;
       renderPresetChips();
       renderFilteredStockList();
+      updateStrategyGuidePanel();
+      closeStrategyModal();
+    }}
+
+    function updateStrategyGuidePanel() {{
+      const ytStrat = YOUTUBE_STRATEGIES.find(s => s.id === currentStrategy);
+      const panel = document.getElementById("strategy-guide-panel");
+      
+      if (ytStrat) {{
+        panel.classList.remove("hidden");
+        document.getElementById("guide-badge-tag").innerText = ytStrat.tag;
+        document.getElementById("guide-channel").innerHTML = `<i data-lucide="youtube" class="w-3.5 h-3.5 text-red-500"></i> ${{ytStrat.channel}}`;
+        document.getElementById("guide-title").innerText = ytStrat.name;
+        document.getElementById("guide-desc").innerText = ytStrat.desc;
+        document.getElementById("guide-buy").innerText = ytStrat.buyGuide;
+        document.getElementById("guide-sell").innerText = ytStrat.sellGuide;
+        document.getElementById("guide-stop").innerText = ytStrat.stopGuide;
+        document.getElementById("guide-video-link").href = ytStrat.videoUrl;
+        document.getElementById("guide-video-link").classList.remove("hidden");
+      }} else {{
+        // 일반 검색식인 경우에도 직관적인 기본 매매 가이드 제공
+        const p = PRESETS.find(pr => pr.id === currentStrategy);
+        panel.classList.remove("hidden");
+        document.getElementById("guide-badge-tag").innerText = "TH 퀀트 조건식";
+        document.getElementById("guide-channel").innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i> TH증권 알고리즘 엔진`;
+        document.getElementById("guide-title").innerText = p ? p.name : "실시간 조건검색식";
+        document.getElementById("guide-desc").innerText = p ? p.desc : "조건식에 맞는 종목을 발굴합니다.";
+        document.getElementById("guide-buy").innerText = "발굴 종목 중 당일 거래량이 직전 5일 평균 대비 200% 이상 실리며 5일선 지지를 받는 눌림목에서 분할 매수합니다.";
+        document.getElementById("guide-sell").innerText = "단기 +4%~+7% 상승 도달 시 1차 50% 분할 익절하고, 전고점 돌파 실패 시 잔량을 전량 매도하여 수익을 보존합니다.";
+        document.getElementById("guide-stop").innerText = "진입 당일의 시가를 이탈하거나 -3% 이상 손실 발생 시 지체 없이 칼손절합니다.";
+        document.getElementById("guide-video-link").classList.add("hidden");
+      }}
+      lucide.createIcons();
     }}
 
     function renderPresetChips() {{
@@ -891,6 +1193,8 @@ html_template = f'''<!DOCTYPE html>
 
         if (isActive) {{
           btn.className = "px-3.5 py-1.5 rounded-full font-bold bg-white text-slate-900 shadow transition flex-shrink-0 flex items-center gap-1 border border-white";
+        }} else if (p.isYt) {{
+          btn.className = "px-3.5 py-1.5 rounded-full font-semibold bg-red-950/40 text-red-300 hover:text-white hover:bg-red-900/60 transition flex-shrink-0 flex items-center gap-1 border border-red-500/30";
         }} else {{
           btn.className = "px-3.5 py-1.5 rounded-full font-medium bg-tossCard text-tossTextMuted hover:text-white transition flex-shrink-0 flex items-center gap-1 border border-tossBorder";
         }}
@@ -899,11 +1203,87 @@ html_template = f'''<!DOCTYPE html>
       }});
     }}
 
+    // 7. 실전 매매기법 모달 렌더링
+    function openStrategyModal() {{
+      const modal = document.getElementById("strategy-modal");
+      modal.classList.remove("hidden");
+
+      const container = document.getElementById("strategy-modal-cards");
+      container.innerHTML = "";
+
+      YOUTUBE_STRATEGIES.forEach((s, idx) => {{
+        const isCurrent = currentStrategy === s.id;
+        const card = document.createElement("div");
+        card.className = `p-4 rounded-xl border transition space-y-3 ${{isCurrent ? 'bg-amber-950/20 border-amber-500 ring-1 ring-amber-500/50' : 'bg-slate-900/70 border-slate-800 hover:border-slate-700 hover:bg-slate-900'}}`;
+        
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
+                  ${{s.tag}}
+                </span>
+                <span class="text-xs text-amber-300 font-semibold flex items-center gap-1">
+                  <i data-lucide="youtube" class="w-3 h-3 text-red-500"></i>
+                  ${{s.channel}}
+                </span>
+              </div>
+              <h4 class="font-extrabold text-white text-sm sm:text-base mt-1.5">
+                ${{s.name}}
+              </h4>
+            </div>
+            ${{isCurrent ? '<span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-bold flex-shrink-0">현재 적용 중</span>' : ''}}
+          </div>
+
+          <p class="text-xs text-slate-300 leading-relaxed">
+            ${{s.desc}}
+          </p>
+
+          <div class="space-y-1.5 bg-black/40 p-2.5 rounded-lg text-[11px]">
+            <div class="text-emerald-400 flex items-start gap-1">
+              <strong class="flex-shrink-0">🛒 매수 공식:</strong>
+              <span class="text-slate-300">${{s.buyGuide}}</span>
+            </div>
+            <div class="text-blue-400 flex items-start gap-1">
+              <strong class="flex-shrink-0">🚀 익절 공식:</strong>
+              <span class="text-slate-300">${{s.sellGuide}}</span>
+            </div>
+            <div class="text-rose-400 flex items-start gap-1">
+              <strong class="flex-shrink-0">⛔ 손절 공식:</strong>
+              <span class="text-slate-300">${{s.stopGuide}}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-1">
+            <a href="${{s.videoUrl}}" target="_blank" class="text-[11px] text-slate-400 hover:text-white flex items-center gap-1 transition">
+              <i data-lucide="play" class="w-3 h-3 text-red-400"></i>
+              유튜브 원본 영상
+            </a>
+            <button onclick="selectStrategy('${{s.id}}')" class="px-3.5 py-1.5 rounded-xl font-bold text-xs ${{isCurrent ? 'bg-amber-400 text-slate-950' : 'bg-blue-600 hover:bg-blue-500 text-white'}} shadow transition flex items-center gap-1">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              이 매매기법 종목 보기
+            </button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      }});
+
+      lucide.createIcons();
+    }}
+
+    function closeStrategyModal() {{
+      const modal = document.getElementById("strategy-modal");
+      modal.classList.add("hidden");
+    }}
+
     function renderFilteredStockList() {{
       const base = currentMarket === 'KR' ? KR_STOCKS : US_STOCKS;
       const matched = applyConditionFilter(base, currentStrategy, currentSurgePeriod);
-      // 많이 오른 순서대로(당일 상승률 내림차순) 정렬
+      
+      // 사용자 요청: 많이 오른 순서대로(당일 상승률 내림차순) 정렬
       matched.sort((a, b) => b.change - a.change);
+      
       const container = document.getElementById("stock-list-container");
       container.innerHTML = "";
 
@@ -919,8 +1299,8 @@ html_template = f'''<!DOCTYPE html>
         container.innerHTML = `
           <div class="p-10 text-center text-xs text-tossTextMuted space-y-2">
             <i data-lucide="filter" class="w-8 h-8 mx-auto text-slate-600 mb-2"></i>
-            <p class="text-sm font-semibold text-slate-300">해당 검색식 조건에 부합하는 종목이 현재 없습니다.</p>
-            <p>상단의 다른 조건검색식 또는 시장(국내/미국)을 전환해 보세요.</p>
+            <p class="text-sm font-semibold text-slate-300">해당 매매기법/검색식 조건에 부합하는 종목이 현재 없습니다.</p>
+            <p>상단의 다른 매매기법 또는 시장(국내/미국)을 전환해 보세요.</p>
           </div>
         `;
         lucide.createIcons();
@@ -1023,6 +1403,7 @@ html_template = f'''<!DOCTYPE html>
         sectionChart.classList.remove("hidden");
         navChart.className = "text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5";
         navRankings.className = "hover:text-white transition py-4 border-b-2 border-transparent text-tossTextMuted flex items-center gap-1.5";
+        
         // 차트 누르면 바로 일봉 캔들 차트로 보여지게 설정
         isCandleMode = true;
         const toggleText = document.getElementById("chart-type-text");
@@ -1079,7 +1460,7 @@ html_template = f'''<!DOCTYPE html>
       closeSearchModal();
     }}
 
-    // 7. 검색 모달 (ETF 100% 필터링)
+    // 8. 검색 모달 (ETF 100% 필터링)
     const searchModal = document.getElementById("search-modal");
     const modalInput = document.getElementById("modal-search-input");
     const searchResultsContainer = document.getElementById("search-results-container");
@@ -1181,7 +1562,6 @@ html_template = f'''<!DOCTYPE html>
         return;
       }}
 
-      // 6자리 숫자로 구성된 한국 종목코드인 경우 (코스피/코스닥 자동 식별)
       const isKrCode = /^[0-9]{{6}}$/.test(cleanSym) || cleanSym.endsWith(".KS") || cleanSym.endsWith(".KQ");
       let yahooSym = cleanSym;
       let marketName = "미국 거래소 (나스닥/NYSE/AMEX)";
@@ -1218,8 +1598,9 @@ html_template = f'''<!DOCTYPE html>
       selectStockForDetail(customStock);
     }}
 
-    // 8. 초기 구동
+    // 9. 초기 구동
     renderPresetChips();
+    updateStrategyGuidePanel();
     renderFilteredStockList();
 
     // 3초마다 일부 종목 틱 애니메이션
@@ -1244,4 +1625,4 @@ html_template = f'''<!DOCTYPE html>
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html_template)
 
-print("Generated updated index.html with live real prices and authentic 3-month daily candles bundle!")
+print("Generated updated index.html with 10 YouTube Master Strategies and Buy/Sell Rule Sets!")
