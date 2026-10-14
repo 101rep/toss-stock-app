@@ -109,7 +109,7 @@ html_template = f'''<!DOCTYPE html>
           <div class="flex items-center gap-1.5 whitespace-nowrap">
             <span class="text-base font-extrabold tracking-tight text-white">TH증권</span>
             <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">실시간 PRO</span>
-            <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden xs:inline">v1.8.0</span>
+            <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden xs:inline">v1.8.5</span>
           </div>
         </div>
 
@@ -614,7 +614,7 @@ html_template = f'''<!DOCTYPE html>
           <div class="flex items-center space-x-2 text-white font-bold text-base">
             <i data-lucide="search" class="w-5 h-5 text-tossBlue"></i>
             <span id="modal-title-text">국내 · 미국 시장별 종목 검색 (11,094개)</span>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.7.5 최신</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.8.5 최신</span>
           </div>
           <p class="text-[11px] text-tossTextMuted mt-0.5">
             국내주식과 미국주식이 서로 섞이지 않도록 완전 분리하여 빠르고 정확하게 검색합니다.
@@ -2940,6 +2940,11 @@ html_template = f'''<!DOCTYPE html>
       const navChart = document.getElementById("nav-chart");
       const headerStrategyBtn = document.getElementById("header-strategy-btn");
 
+      // 화면 전환 시 무조건 최상단 맨 위부터 보이도록 스크롤 즉시 0 리셋 (사용자 요청: 푸터부터 보이는 문제 완벽 해결)
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+
       if (nav === 'rankings') {{
         sectionRankings.classList.remove("hidden");
         sectionChart.classList.add("hidden");
@@ -2969,6 +2974,13 @@ html_template = f'''<!DOCTYPE html>
 
         renderLightweightChart();
       }}
+
+      // 모바일 비동기 렌더링 타이밍 방어
+      setTimeout(() => {{
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }}, 30);
     }}
 
     // 종목 선택 시 즉시 실시간 일봉 차트로 전환
@@ -3015,6 +3027,16 @@ html_template = f'''<!DOCTYPE html>
 
       switchNav('chart');
       closeSearchModal();
+
+      // 종목 선택 후 화면 최상단(차트 헤더 & 뒤로가기 버튼)으로 즉시 스크롤 리셋
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      setTimeout(() => {{
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }}, 50);
     }}
 
     // 8. 검색 모달 (국내주식 / 미국주식 원천 분리 검색 엔진)
