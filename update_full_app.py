@@ -301,7 +301,7 @@ html_template = f'''<!DOCTYPE html>
           <div class="flex items-center gap-2">
             <button id="chart-type-toggle" onclick="toggleChartType()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
               <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-blue-400"></i>
-              <span id="chart-type-text">캔들로 보기</span>
+              <span id="chart-type-text">라인으로 보기</span>
             </button>
             <button onclick="openSearchModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700 transition flex items-center gap-1.5">
               <i data-lucide="search" class="w-3.5 h-3.5"></i>
@@ -458,7 +458,7 @@ html_template = f'''<!DOCTYPE html>
     let currentStrategy = 'vol_burst_undervalued'; // 기본: 거래량 5~10배 폭증 + 5% 미만 미상승
     let currentSurgePeriod = 30; // 30, 60, 90일
     let currentTimeframe = {{ range: '1mo', interval: '1d', key: '1m' }}; // 기본: 일봉 차트 (1개월 일봉)
-    let isCandleMode = false;
+    let isCandleMode = true; // 기본: 실시간 일봉 캔들 차트 즉시 표시
 
     let lwChart = null;
     let currentSeries = null;
@@ -749,7 +749,7 @@ html_template = f'''<!DOCTYPE html>
     function toggleChartType() {{
       isCandleMode = !isCandleMode;
       const toggleText = document.getElementById("chart-type-text");
-      toggleText.innerText = isCandleMode ? "토스 라인으로 보기" : "캔들로 보기";
+      toggleText.innerText = isCandleMode ? "라인으로 보기" : "캔들로 보기";
       renderLightweightChart();
     }}
 
@@ -902,6 +902,8 @@ html_template = f'''<!DOCTYPE html>
     function renderFilteredStockList() {{
       const base = currentMarket === 'KR' ? KR_STOCKS : US_STOCKS;
       const matched = applyConditionFilter(base, currentStrategy, currentSurgePeriod);
+      // 많이 오른 순서대로(당일 상승률 내림차순) 정렬
+      matched.sort((a, b) => b.change - a.change);
       const container = document.getElementById("stock-list-container");
       container.innerHTML = "";
 
@@ -1021,6 +1023,20 @@ html_template = f'''<!DOCTYPE html>
         sectionChart.classList.remove("hidden");
         navChart.className = "text-white font-bold transition py-4 border-b-2 border-white flex items-center gap-1.5";
         navRankings.className = "hover:text-white transition py-4 border-b-2 border-transparent text-tossTextMuted flex items-center gap-1.5";
+        // 차트 누르면 바로 일봉 캔들 차트로 보여지게 설정
+        isCandleMode = true;
+        const toggleText = document.getElementById("chart-type-text");
+        if (toggleText) toggleText.innerText = "라인으로 보기";
+
+        currentTimeframe = {{ range: '1mo', interval: '1d', key: '1m' }};
+        const timeframes = ['1m', '3m', '1y', '1d', '1w', '5y'];
+        timeframes.forEach(tf => {{
+          const btn = document.getElementById(`timeframe-${{tf}}`);
+          if (btn) btn.className = "px-3 py-1 rounded-lg text-tossTextMuted hover:text-white transition";
+        }});
+        const defaultTfBtn = document.getElementById("timeframe-1m");
+        if (defaultTfBtn) defaultTfBtn.className = "px-3 py-1 rounded-lg bg-white text-slate-900 shadow font-bold";
+
         renderLightweightChart();
       }}
     }}
@@ -1045,7 +1061,11 @@ html_template = f'''<!DOCTYPE html>
 
       updateHeaderPriceDisplay(stock.price, stock.change, stock.diff, "실시간 일봉 현재가");
 
-      // 일봉 차트(1달 일봉)를 디폴트 타임프레임으로 자동 설정
+      // 일봉 캔들 차트(1달 일봉)를 디폴트로 자동 설정
+      isCandleMode = true;
+      const toggleText = document.getElementById("chart-type-text");
+      if (toggleText) toggleText.innerText = "라인으로 보기";
+
       currentTimeframe = {{ range: '1mo', interval: '1d', key: '1m' }};
       const timeframes = ['1m', '3m', '1y', '1d', '1w', '5y'];
       timeframes.forEach(tf => {{
