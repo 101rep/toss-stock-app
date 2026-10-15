@@ -109,7 +109,7 @@ html_template = f'''<!DOCTYPE html>
           <div class="flex items-center gap-1.5 whitespace-nowrap">
             <span class="text-base font-extrabold tracking-tight text-white">TH증권</span>
             <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">실시간 PRO</span>
-            <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden xs:inline">v1.9.0</span>
+            <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hidden xs:inline">v1.9.1</span>
           </div>
         </div>
 
@@ -683,7 +683,7 @@ html_template = f'''<!DOCTYPE html>
           <div class="flex items-center space-x-2 text-white font-bold text-base">
             <i data-lucide="search" class="w-5 h-5 text-tossBlue"></i>
             <span id="modal-title-text">국내 · 미국 시장별 종목 검색 (11,094개)</span>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.9.0 최신</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">v1.9.1 최신</span>
           </div>
           <p class="text-[11px] text-tossTextMuted mt-0.5">
             국내주식과 미국주식이 서로 섞이지 않도록 완전 분리하여 빠르고 정확하게 검색합니다.
@@ -4016,7 +4016,7 @@ html_template = f'''<!DOCTYPE html>
           type: "GOOD",
           source: "Bloomberg",
           time: "42분 전",
-          title: "젠슨 황 CEO \"AI 추론 시장 규모, 기존 모델 학습 시장의 100배에 달할 것\"",
+          title: "젠슨 황 CEO 'AI 추론 시장 규모, 기존 모델 학습 시장의 100배에 달할 것'",
           desc: "글로벌 소프트웨어 전반에 생성형 AI가 결합되는 추론(Inference) 단계에 진입함에 따라 엔비디아 GPU 수요 수명이 획기적으로 연장되고 있습니다.",
           tags: ["#젠슨황", "#추론시장100배", "#AI생태계"],
           url: "https://www.bloomberg.com/search?query=nvidia"
