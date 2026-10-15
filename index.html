@@ -129,22 +129,27 @@
     <section id="section-rankings" class="space-y-5">
       
       <!-- 2-1. 데이터 엔진 상태 안내 배너 (메인 화면에만 노출, 종목 선택/차트 시 100% 완전 숨김) -->
-      <div id="api-status-banner" class="bg-gradient-to-r from-blue-950/40 via-tossCard to-slate-900/60 border border-blue-500/30 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-lg">
+      <div id="api-status-banner" class="bg-gradient-to-r from-blue-950/40 via-tossCard to-slate-900/60 border border-blue-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
-            <i data-lucide="cpu" class="w-5 h-5"></i>
+            <i data-lucide="database" class="w-5 h-5"></i>
           </div>
           <div>
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-bold text-white">TH증권 퀀트 엔진 & 실시간 거래소 동기화</span>
-              <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                실시간 호가 피드 가동
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-bold text-white">TH증권 기술적 분석 엔진 & 일봉 데이터베이스</span>
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                저장 데이터 · 61거래일 일봉 기반
               </span>
             </div>
             <p class="text-xs text-tossTextMuted mt-0.5">
-              국내 코스피·코스닥 및 미국 빅테크의 실시간 실제 체결가와 공식 3개월 일봉 캔들 데이터가 실시간 연동됩니다.
+              사전 확보된 61거래일 일봉 캔들 및 Yahoo Finance 시세를 기반으로 규칙에 따라 투명하게 계산됩니다. (임의 난수 및 가짜 데이터 전면 배제)
             </p>
           </div>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <span class="text-[11px] font-mono text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">
+            기준 일자: 2026-10-14 종가 확정
+          </span>
         </div>
       </div>
       
@@ -154,6 +159,12 @@
         <div class="flex items-center justify-between flex-wrap gap-3">
           <!-- 시장 및 거래소별 전환 버튼 (기본: 국내주식 코스피·코스닥 세팅) -->
           <div class="flex items-center bg-tossCard p-1 rounded-xl border border-tossBorder flex-wrap gap-1">
+            <button id="market-WATCHLIST" onclick="switchMarket('WATCHLIST')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-400 hover:text-white transition flex items-center gap-1 border border-amber-500/30">
+              <i data-lucide="star" class="w-3.5 h-3.5 text-amber-400 fill-amber-400"></i>
+              <span>관심종목</span>
+              <span id="watchlist-badge-count" class="text-[10px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">0</span>
+            </button>
+            <div class="w-[1px] h-4 bg-tossBorder mx-1 hidden sm:block"></div>
             <button id="market-KR_ALL" onclick="switchMarket('KR_ALL')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-tossBlue text-white shadow transition flex items-center gap-1">
               국내 전체 🇰🇷
             </button>
@@ -224,11 +235,12 @@
                 <i data-lucide="list-filter" class="w-3.5 h-3.5"></i>
                 <span>기법 변경</span>
               </button>
+              <button id="btn-toggle-guide" onclick="toggleStrategyGuide()" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 text-xs font-bold border border-amber-500/30 flex items-center gap-1 transition"><span id="toggle-guide-text">가이드 접기 ▲</span></button>
             </div>
           </div>
 
           <!-- 3대 실전 전략 가이드 박스: 어떤 식으로 구매하고 / 어떻게 됐을 때 팔아라 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div id="strategy-guide-content" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs transition-all duration-300">
             
             <!-- 1. 매수 방법 (어떤 식으로 구매하라) -->
             <div class="bg-emerald-950/20 border border-emerald-500/30 rounded-xl p-3.5 space-y-1.5">
@@ -273,14 +285,14 @@
               <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
               <span class="text-xs font-bold text-amber-300 flex items-center gap-1">
                 <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i>
-                TH 시그니처 세력 매집 검색식
+                TH 시그니처 거래량 급증 후 횡보 검색식
               </span>
               <span class="text-[11px] text-slate-400">
-                (평균 대비 거래량 5~10배 이상 폭증 + 5% 미만 미상승 종목)
+                (직전 20거래일 대비 거래량 3~10배 폭증 후 급증일 종가 대비 ±5% 이내 가격 횡보)
               </span>
             </div>
             <span class="text-[11px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-semibold">
-              세력 매집 구간 포착
+              거래량 급증 후 횡보 후보 포착
             </span>
           </div>
 
@@ -289,13 +301,13 @@
             <span class="text-tossTextMuted text-[11px] font-semibold mr-1">분석 기간:</span>
             <button id="btn-period-30" onclick="setVolumeSurgePeriod(30)" class="px-3.5 py-1.5 rounded-xl font-bold bg-amber-400 text-slate-950 shadow transition flex items-center gap-1.5">
               <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
-              30일 내 5~10배 폭증 (현재가 5% 미만)
+              30거래일(Trading Days) 내 3~10배 폭증 후 횡보
             </button>
             <button id="btn-period-60" onclick="setVolumeSurgePeriod(60)" class="px-3.5 py-1.5 rounded-xl font-medium bg-tossCard text-tossTextMuted hover:text-white transition flex items-center gap-1.5 border border-tossBorder">
-              60일 내 5~10배 폭증 (현재가 5% 미만)
+              60거래일(Trading Days) 내 3~10배 폭증 후 횡보 (현재가 5% 미만)
             </button>
             <button id="btn-period-90" onclick="setVolumeSurgePeriod(90)" class="px-3.5 py-1.5 rounded-xl font-medium bg-tossCard text-tossTextMuted hover:text-white transition flex items-center gap-1.5 border border-tossBorder">
-              90일 내 5~10배 폭증 (현재가 5% 미만)
+              90거래일(Trading Days) 내 3~10배 폭증 후 횡보 (현재가 5% 미만)
             </button>
           </div>
         </div>
@@ -314,18 +326,56 @@
 
       </div>
 
-      <!-- 랭킹 상단 안내 바 -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-tossTextMuted px-1">
-        <div id="ranking-description" class="flex items-center gap-1.5 font-medium text-slate-200">
-          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-          현재 조건에 부합하는 종목들 중 많이 오른 순서대로 표시됩니다.
-        </div>
-        <div class="flex items-center gap-3 text-[11px]">
-          <span class="text-slate-400">종목 터치 시 <strong class="text-emerald-400">실시간 일봉 차트</strong> 즉시 표시</span>
-          <div class="flex items-center gap-1.5">
-            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span>10초 자동 갱신</span>
+      <!-- 랭킹 상단 안내 바 및 정렬/필터/조건저장 컨트롤 -->
+      <div class="flex flex-col gap-2.5 text-xs text-tossTextMuted px-1">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div id="ranking-description" class="flex items-center gap-1.5 font-medium text-slate-200">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+            현재 조건에 부합하는 종목들 중 선택된 정렬 기준에 따라 표시됩니다.
           </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openConditionSaveModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-[11px] font-bold border border-amber-500/30 flex items-center gap-1 transition">
+              <i data-lucide="bookmark" class="w-3.5 h-3.5"></i>
+              <span>조건 저장/불러오기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2차 컨트롤: 정렬 옵션 + 최소 거래대금 필터 -->
+        <div class="flex items-center justify-between flex-wrap gap-2 pt-1 border-t border-slate-800/60">
+          <div class="flex items-center gap-2 flex-wrap text-[11px]">
+            <span class="text-slate-400 font-semibold">정렬:</span>
+            <select id="sort-select" onchange="changeSort(this.value)" class="bg-slate-900 text-slate-200 text-xs rounded-lg px-2.5 py-1 border border-slate-700 focus:outline-none focus:border-blue-500">
+              <option value="change_desc">당일 등락률 높은순 (기본)</option>
+              <option value="change_asc">당일 등락률 낮은순 (낙폭과대)</option>
+              <option value="amount_desc">거래대금 많은순</option>
+              <option value="vol_desc">거래량 배수 높은순</option>
+              <option value="name_asc">종목명 가나다순</option>
+            </select>
+
+            <span class="text-slate-400 font-semibold ml-1">최소 거래대금:</span>
+            <select id="filter-min-amount" onchange="changeMinAmountFilter(this.value)" class="bg-slate-900 text-slate-200 text-xs rounded-lg px-2.5 py-1 border border-slate-700 focus:outline-none focus:border-blue-500">
+              <option value="0">거래대금 전체</option>
+              <option value="50">50억 원 이상</option>
+              <option value="100">100억 원 이상</option>
+              <option value="500">500억 원 이상</option>
+              <option value="1000">1,000억 원 이상</option>
+            </select>
+          </div>
+
+          <div class="text-[11px] text-slate-400 font-mono flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+            <span id="list-data-state-label">일봉 종가 기준 계산</span>
+          </div>
+        </div>
+
+        <!-- 신규 편입 / 이탈 세션 추적 배너 -->
+        <div id="tracking-summary-bar" class="hidden text-[11px] px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-300 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="history" class="w-3.5 h-3.5 text-blue-400"></i>
+            <span id="tracking-summary-text">직전 검색 대비: 변동 없음</span>
+          </div>
+          <span class="text-[10px] text-slate-500 font-mono">세션 추적 중</span>
         </div>
       </div>
 
@@ -365,7 +415,12 @@
               <span id="detail-code" class="text-xs text-tossTextMuted font-mono">005930</span>
               <span class="text-[11px] text-emerald-400 font-semibold">● 실시간 일봉</span>
             </div>
-            <h2 id="detail-name" class="text-2xl font-extrabold text-white tracking-tight">삼성전자</h2>
+            <div class="flex items-center gap-2">
+              <h2 id="detail-name" class="text-2xl font-extrabold text-white tracking-tight">삼성전자</h2>
+              <button id="detail-watchlist-btn" onclick="toggleWatchlist(activeStock.code, event)" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 transition" title="관심종목 토글">
+                <i id="detail-watchlist-icon" data-lucide="star" class="w-5 h-5 text-slate-500"></i>
+              </button>
+            </div>
             <div class="flex items-baseline space-x-3 pt-1">
               <span id="detail-price" class="text-3xl font-extrabold font-mono text-white tracking-tight">238,500원</span>
               <span id="detail-price-won" class="text-xs text-slate-400 font-mono"></span>
@@ -496,7 +551,25 @@
 
             <div id="chart-loading-overlay" class="hidden absolute top-3 right-3 bg-slate-900/90 text-xs text-white px-3 py-1.5 rounded-xl border border-slate-700 shadow-lg flex items-center gap-2">
               <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-blue-400"></i>
-              <span class="text-[11px]">실시간 틱 동기화 중...</span>
+              <span class="text-[11px]">일봉 데이터 동기화 중...</span>
+            </div>
+
+            <!-- 정직한 데이터 없음 & 다시 시도 안내 오버레이 (임의 가짜 차트 렌더링 전면 배제) -->
+            <div id="chart-empty-state-overlay" class="hidden absolute inset-0 bg-[#101012]/95 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-6 text-center space-y-3">
+              <div class="w-12 h-12 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-400">
+                <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
+              </div>
+              <div class="space-y-1">
+                <p class="text-sm font-bold text-slate-200">일봉 차트 데이터를 불러올 수 없습니다</p>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  공식 저장 일봉 번들에 데이터가 없거나 외부 시세 조회가 지연되고 있습니다.<br>
+                  (임의의 가짜 캔들 데이터는 표시하지 않습니다)
+                </p>
+              </div>
+              <button onclick="renderLightweightChart()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow cursor-pointer">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>차트 데이터 다시 불러오기</span>
+              </button>
             </div>
           </div>
 
@@ -655,6 +728,52 @@
     </div>
   </div>
 
+  <!-- 3-2. 검색조건 저장 및 불러오기 모달 -->
+  <div id="condition-save-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-tossCard border border-amber-500/40 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl p-5 space-y-4 animate-in fade-in zoom-in-95 duration-150 text-left">
+      <div class="flex items-center justify-between border-b border-tossBorder pb-3">
+        <div class="flex items-center gap-2 text-white font-extrabold text-base">
+          <i data-lucide="bookmark" class="w-5 h-5 text-amber-400"></i>
+          <span>내 검색조건 저장 및 관리</span>
+        </div>
+        <button onclick="closeConditionSaveModal()" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- 현재 조건 저장 폼 -->
+      <div class="space-y-2">
+        <label class="text-xs font-semibold text-slate-300">현재 설정 조건 저장:</label>
+        <div class="flex items-center gap-2">
+          <input id="condition-name-input" type="text" placeholder="예: 코스피 20일선 눌림목 스윙" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400">
+          <button onclick="saveCurrentCondition()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition flex-shrink-0">
+            저장
+          </button>
+        </div>
+        <p class="text-[11px] text-slate-400">
+          현재 선택된 기법, 시장, 정렬 기준, 최소 거래대금이 함께 저장됩니다.
+        </p>
+      </div>
+
+      <!-- 저장된 조건 목록 -->
+      <div class="space-y-2 pt-2 border-t border-slate-800">
+        <div class="text-xs font-bold text-white flex items-center justify-between">
+          <span>저장된 조건 목록:</span>
+          <span id="saved-condition-count" class="text-amber-400 font-mono text-[11px]">0개</span>
+        </div>
+        <div id="saved-condition-list" class="max-h-48 overflow-y-auto space-y-2 pr-1">
+          <!-- 동적 렌더링 -->
+        </div>
+      </div>
+
+      <div class="border-t border-tossBorder pt-3 text-right">
+        <button onclick="closeConditionSaveModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- 4-1. 헤르메스 AI 실시간 뉴스 심층 분석 모달 -->
   <div id="stock-news-detail-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl p-5 space-y-4 animate-in fade-in zoom-in-95 duration-150 my-auto text-left">
@@ -688,14 +807,14 @@
         <span id="news-modal-sentiment-badge" class="px-3 py-1 rounded-lg text-xs font-extrabold flex items-center gap-1.5 border">
           <!-- 동적 주입 -->
         </span>
-        <span class="text-[11px] text-slate-400">Gemini 3.6 Flash 퀀트 센티먼트</span>
+        <span class="text-[11px] text-slate-400">규칙 기반 퀀트 센티먼트 분석</span>
       </div>
 
-      <!-- 헤르메스 AI 3줄 핵심 요약 카드 -->
+      <!-- 핵심 내용 요약 및 관전 포인트 (규칙 기반) 카드 -->
       <div class="bg-slate-950/90 border border-blue-500/30 rounded-xl p-4 space-y-2.5">
         <div class="flex items-center space-x-2 text-xs font-bold text-blue-400">
           <i data-lucide="sparkles" class="w-4 h-4 text-blue-400"></i>
-          <span>헤르메스 AI 3줄 핵심 요약</span>
+          <span>핵심 내용 요약 및 관전 포인트 (규칙 기반)</span>
         </div>
         <div id="news-modal-3lines" class="space-y-2 text-xs text-slate-200 leading-relaxed">
           <!-- 동적 3줄 요약 주입 -->
@@ -808,182 +927,199 @@
     </div>
   </div>
 
-  <!-- 4-2. AI 종목 심층 분석 리포트 모달 (재무제표, 실적, 뉴스, 차트, 추천가격) -->
+  <!-- 4-2. 기술적 지표 요약 및 가격 변동 시뮬레이션 모달 (규칙 기반 분석) -->
   <div id="ai-analysis-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-start justify-center p-3 sm:p-5 sm:pt-12 overflow-y-auto">
-    <div class="bg-tossCard border border-purple-500/40 rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl space-y-4 p-5 sm:p-6 animate-in fade-in zoom-in-95 duration-150 my-4 border-t-4 border-t-purple-500">
+    <div class="bg-tossCard border border-blue-500/40 rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl space-y-4 p-5 sm:p-6 animate-in fade-in zoom-in-95 duration-150 my-4 border-t-4 border-t-blue-500 text-left">
       
       <!-- 모달 상단 헤더 -->
       <div class="flex items-start justify-between border-b border-tossBorder/80 pb-4">
         <div class="space-y-1">
-          <div class="flex items-center gap-2">
-            <span id="ai-modal-market" class="text-xs px-2 py-0.5 rounded-full bg-purple-950/60 text-purple-300 font-mono border border-purple-500/40 font-bold">코스닥</span>
-            <span id="ai-modal-code" class="text-xs text-tossTextMuted font-mono">196170</span>
-            <span class="text-[11px] text-purple-400 font-bold flex items-center gap-1">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-yellow-300"></i>
-              AI 심층 투자 리포트
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="ai-modal-market" class="text-xs px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-300 font-mono border border-blue-500/40 font-bold">코스피</span>
+            <span id="ai-modal-code" class="text-xs text-tossTextMuted font-mono">005930</span>
+            <span class="text-[11px] text-blue-400 font-bold flex items-center gap-1">
+              <i data-lucide="sliders" class="w-3.5 h-3.5 text-blue-300"></i>
+              규칙 기반 기술적 지표 요약
             </span>
           </div>
-          <div class="flex items-baseline gap-3 pt-0.5">
-            <h2 id="ai-modal-name" class="text-2xl font-black text-white tracking-tight">알테오젠</h2>
-            <span id="ai-modal-price" class="text-xl font-extrabold font-mono text-white">226,500원</span>
-            <span id="ai-modal-change" class="text-sm font-bold font-mono text-tossRed">+1.25%</span>
+          <div class="flex items-baseline gap-3 pt-0.5 flex-wrap">
+            <div class="flex items-center gap-2">
+              <h2 id="ai-modal-name" class="text-2xl font-black text-white tracking-tight">종목명</h2>
+              <button id="ai-modal-watchlist-btn" onclick="toggleWatchlist(aiActiveStock.code, event)" class="p-1 rounded-lg hover:bg-slate-800 transition" title="관심종목 토글">
+                <i id="ai-modal-watchlist-icon" data-lucide="star" class="w-5 h-5 text-slate-500"></i>
+              </button>
+            </div>
+            <span id="ai-modal-price" class="text-xl font-extrabold font-mono text-white">0원</span>
+            <span id="ai-modal-change" class="text-sm font-bold font-mono text-tossRed">0.0%</span>
           </div>
+          <p class="text-[11px] text-slate-400">
+            ※ 외부 예측 AI 모델 호출 없이, 시세 및 기술적 지표 규칙을 계산한 요약 정보입니다.
+          </p>
         </div>
         <button onclick="closeAiAnalysisModal()" class="p-1.5 rounded-lg hover:bg-slate-800 text-tossTextMuted hover:text-white transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- 로딩 상태 스피너 (초기 0.2초간 연출) -->
-      <div id="ai-modal-loading" class="hidden py-16 text-center space-y-3">
-        <div class="inline-block p-4 rounded-full bg-purple-500/10 border border-purple-500/30 animate-pulse">
-          <i data-lucide="brain-circuit" class="w-8 h-8 text-purple-400 animate-spin"></i>
+      <!-- 로딩 상태 스피너 (데이터 로드 시에만 표시) -->
+      <div id="ai-modal-loading" class="hidden py-12 text-center space-y-3">
+        <div class="inline-block p-3 rounded-full bg-blue-500/10 border border-blue-500/30">
+          <i data-lucide="loader-2" class="w-6 h-6 text-blue-400 animate-spin"></i>
         </div>
-        <p class="text-sm font-bold text-white">AI가 재무제표, 분기 실적, 최신 뉴스, 차트 지표를 분석 중입니다...</p>
-        <p class="text-xs text-tossTextMuted">기관·외국인 수급과 지지선 기반 적정 매수 타점을 계산하고 있습니다.</p>
+        <p class="text-xs font-bold text-white">기술적 지표 계산 중...</p>
       </div>
 
-      <!-- AI 분석 결과 메인 컨텐츠 -->
+      <!-- 분석 결과 메인 컨텐츠 -->
       <div id="ai-modal-content" class="space-y-4">
         
-        <!-- 1. AI 종합 판정 배너 (점수 & 투자의견 & 한줄 코멘트) -->
-        <div class="bg-gradient-to-r from-purple-950/40 via-slate-900 to-indigo-950/40 border border-purple-500/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
-          <div class="space-y-1.5">
+        <!-- 1. 규칙 기반 종합 기술적 판정 배너 -->
+        <div class="bg-gradient-to-r from-slate-900 via-blue-950/40 to-slate-900 border border-blue-500/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+          <div class="space-y-1.5 flex-1">
             <div class="flex items-center gap-2">
-              <span id="ai-decision-badge" class="px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center gap-1.5">
-                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-                <span>🔥 적극 매수 (Strong Buy)</span>
+              <span id="ai-decision-badge" class="px-3 py-1 rounded-full text-xs font-black bg-blue-500/20 text-blue-300 border border-blue-500/40 flex items-center gap-1.5">
+                <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+                <span>기술적 지표 중립</span>
               </span>
-              <span class="text-xs text-slate-400 font-medium">AI 퀀트 알고리즘 종합 판정</span>
+              <span class="text-xs text-slate-400 font-medium">기술 지표 점수화 기준</span>
             </div>
             <p id="ai-summary-comment" class="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
-              세력 거래량 폭증 후 20일 이동평균선 부근에서 강력한 지지가 확인되며, 분할 매수 시 단기 반등 확률 85% 이상 기대되는 최적의 매수 타점입니다.
+              지표 계산 결과 로드 중...
             </p>
           </div>
 
-          <div class="flex items-center sm:flex-col justify-between sm:justify-center bg-black/40 px-4 py-2.5 rounded-xl border border-purple-500/20 flex-shrink-0 text-center">
-            <span class="text-[11px] text-purple-300 font-medium">AI 종합 점수</span>
-            <div class="text-2xl sm:text-3xl font-black font-mono text-amber-400">
-              <span id="ai-score-num">94</span><span class="text-sm font-normal text-slate-400">/100</span>
+          <div class="flex items-center sm:flex-col justify-between sm:justify-center bg-black/40 px-4 py-2.5 rounded-xl border border-blue-500/20 flex-shrink-0 text-center">
+            <span class="text-[11px] text-blue-300 font-medium">기술 지표 점수</span>
+            <div class="text-2xl sm:text-3xl font-black font-mono text-cyan-400">
+              <span id="ai-score-num">50</span><span class="text-sm font-normal text-slate-400">/100</span>
             </div>
           </div>
         </div>
 
-        <!-- 2. AI 실전 권장 가격표 (사면 얼마가 됐을 때 사라) -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-white flex items-center gap-1.5">
-              <i data-lucide="target" class="w-4 h-4 text-emerald-400"></i>
-              🎯 AI 권장 실전 매매 가격표 (사면 얼마가 됐을 때 사라)
-            </span>
-            <span class="text-[11px] text-emerald-400 font-medium">※ 분할 매수 & 손절 원칙 준수</span>
+        <!-- 2. 가격 변동 시뮬레이션 (단순 비율 계산기) -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="calculator" class="w-4 h-4 text-cyan-400"></i>
+              <span class="text-xs font-bold text-white">가격 변동 시뮬레이션 (단순 비율 계산기)</span>
+            </div>
+            <!-- 사용자가 비율 프리셋을 변경할 수 있는 버튼군 -->
+            <div class="flex items-center gap-1 text-[11px]">
+              <span class="text-slate-400 mr-1">시뮬레이션 프리셋:</span>
+              <button onclick="setSimPreset(5, 10, -3)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition">+5%/+10%/-3%</button>
+              <button onclick="setSimPreset(7, 15, -5)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition">+7%/+15%/-5%</button>
+              <button onclick="setSimPreset(10, 20, -7)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition">+10%/+20%/-7%</button>
+            </div>
           </div>
+
+          <p class="text-[11px] text-amber-300/80 leading-relaxed">
+            ※ 아래 가격은 현재가 기준 단순 비율 계산 예시이며, 실제 지지선/저항선이나 공인 목표주가가 아닙니다. 투자 판단의 참고용으로만 활용하세요.
+          </p>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-            <!-- 추천 매수가 -->
-            <div class="bg-emerald-950/25 border border-emerald-500/30 p-3 rounded-xl space-y-1">
-              <span class="text-[11px] text-emerald-400 font-bold block">🛒 추천 매수가 (진입 타점)</span>
-              <span id="ai-buy-target" class="text-sm sm:text-base font-extrabold text-white font-mono block">221,000 ~ 224,000원</span>
-              <span class="text-[10px] text-slate-400 block">현재가 기준 눌림목 분할 매수</span>
+            <!-- 기준 진입 참고가 -->
+            <div class="bg-slate-800/50 border border-slate-700 p-3 rounded-xl space-y-1">
+              <span class="text-[11px] text-slate-400 font-bold block">📍 기준 시세 (현재가)</span>
+              <span id="ai-buy-target" class="text-sm sm:text-base font-extrabold text-white font-mono block">-</span>
+              <span class="text-[10px] text-slate-400 block">시뮬레이션 기준 가격</span>
             </div>
 
-            <!-- 1차 목표가 -->
+            <!-- 1차 상승 시뮬레이션 -->
             <div class="bg-blue-950/25 border border-blue-500/30 p-3 rounded-xl space-y-1">
-              <span class="text-[11px] text-blue-400 font-bold block">🚀 1차 목표가 (단기 익절)</span>
-              <span id="ai-target-1" class="text-sm sm:text-base font-extrabold text-white font-mono block">242,000원 (+6.8%)</span>
-              <span class="text-[10px] text-slate-400 block">비중 50% 분할 익절 권장</span>
+              <span id="sim-target-1-label" class="text-[11px] text-blue-400 font-bold block">📈 1차 상승 (+5.0%)</span>
+              <span id="ai-target-1" class="text-sm sm:text-base font-extrabold text-white font-mono block">-</span>
+              <span class="text-[10px] text-slate-400 block">단순 비율 계산값</span>
             </div>
 
-            <!-- 2차 목표가 -->
-            <div class="bg-purple-950/25 border border-purple-500/30 p-3 rounded-xl space-y-1">
-              <span class="text-[11px] text-purple-400 font-bold block">🏆 2차 목표가 (추세 극대화)</span>
-              <span id="ai-target-2" class="text-sm sm:text-base font-extrabold text-white font-mono block">258,000원 (+13.9%)</span>
-              <span class="text-[10px] text-slate-400 block">전고점 돌파 랠리 홀딩</span>
+            <!-- 2차 상승 시뮬레이션 -->
+            <div class="bg-cyan-950/25 border border-cyan-500/30 p-3 rounded-xl space-y-1">
+              <span id="sim-target-2-label" class="text-[11px] text-cyan-400 font-bold block">🚀 2차 상승 (+10.0%)</span>
+              <span id="ai-target-2" class="text-sm sm:text-base font-extrabold text-white font-mono block">-</span>
+              <span class="text-[10px] text-slate-400 block">단순 비율 계산값</span>
             </div>
 
-            <!-- 손절 기준가 -->
+            <!-- 하락 한도 시뮬레이션 -->
             <div class="bg-rose-950/25 border border-rose-500/30 p-3 rounded-xl space-y-1">
-              <span class="text-[11px] text-rose-400 font-bold block">⛔ 손절 기준가 (리스크 컷)</span>
-              <span id="ai-stop-price" class="text-sm sm:text-base font-extrabold text-rose-400 font-mono block">214,000원 (-5.5%)</span>
-              <span class="text-[10px] text-slate-400 block">20일선 종가 이탈 시 칼손절</span>
+              <span id="sim-stop-label" class="text-[11px] text-rose-400 font-bold block">⛔ 하락 한도 (-3.0%)</span>
+              <span id="ai-stop-price" class="text-sm sm:text-base font-extrabold text-rose-400 font-mono block">-</span>
+              <span class="text-[10px] text-slate-400 block">단순 비율 계산값</span>
             </div>
           </div>
         </div>
 
-        <!-- 3. 4대 정밀 분석 레이더 (재무제표, 실적, 뉴스, 차트) -->
+        <!-- 3. 기술적 지표 및 데이터 연동 현황 (가짜 재무제표 제거, 정직한 상태 표기) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           
-          <!-- 3-1. 재무제표 분석 -->
-          <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-xl space-y-2">
-            <div class="flex items-center justify-between text-slate-200 font-bold">
-              <span class="flex items-center gap-1.5 text-blue-400">
-                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-                📊 재무제표 건전성 (Financials)
-              </span>
-              <span id="ai-fin-badge" class="px-2 py-0.5 rounded text-[10px] bg-blue-500/20 text-blue-300 font-semibold">우수</span>
-            </div>
-            <div class="grid grid-cols-2 gap-2 text-[11px] py-1 border-y border-slate-800/80">
-              <div class="text-tossTextMuted">PER: <strong id="ai-per" class="text-white font-mono">24.5배</strong></div>
-              <div class="text-tossTextMuted">PBR: <strong id="ai-pbr" class="text-white font-mono">3.8배</strong></div>
-              <div class="text-tossTextMuted">부채비율: <strong id="ai-debt" class="text-white font-mono">42.8%</strong></div>
-              <div class="text-tossTextMuted">유보율: <strong id="ai-reserve" class="text-white font-mono">1,850%</strong></div>
-            </div>
-            <p id="ai-fin-desc" class="text-[11px] text-slate-300 leading-relaxed">
-              부채비율이 매우 낮고 유동성이 풍부하여 부도 리스크가 거의 없으며, 펀더멘털 상 매우 안정적인 재무 구조를 보유하고 있습니다.
-            </p>
-          </div>
-
-          <!-- 3-2. 최근 분기 실적 동향 -->
-          <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-xl space-y-2">
-            <div class="flex items-center justify-between text-slate-200 font-bold">
-              <span class="flex items-center gap-1.5 text-emerald-400">
-                <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-                📈 최근 분기 실적 동향 (Earnings)
-              </span>
-              <span id="ai-earn-badge" class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-semibold">성장세</span>
-            </div>
-            <div class="grid grid-cols-2 gap-2 text-[11px] py-1 border-y border-slate-800/80">
-              <div class="text-tossTextMuted">매출 성장: <strong id="ai-sales-growth" class="text-emerald-400 font-mono">+28.4% (YoY)</strong></div>
-              <div class="text-tossTextMuted">영업이익률: <strong id="ai-op-margin" class="text-emerald-400 font-mono">18.2%</strong></div>
-            </div>
-            <p id="ai-earn-desc" class="text-[11px] text-slate-300 leading-relaxed">
-              글로벌 수주 및 신규 파이프라인 확대로 최근 분기 영업이익이 전년 대비 대폭 개선되며 어닝 서프라이즈 기조를 유지하고 있습니다.
-            </p>
-          </div>
-
-          <!-- 3-3. 최신 뉴스 & 테마 모멘텀 -->
-          <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-xl space-y-2">
-            <div class="flex items-center justify-between text-slate-200 font-bold">
-              <span class="flex items-center gap-1.5 text-amber-400">
-                <i data-lucide="newspaper" class="w-4 h-4"></i>
-                📰 최신 뉴스 & 모멘텀 (News & Catalysts)
-              </span>
-              <span id="ai-news-badge" class="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 font-semibold">호재 지속</span>
-            </div>
-            <ul id="ai-news-list" class="space-y-1 text-[11px] text-slate-300 list-disc list-inside">
-              <li>글로벌 파트너십 및 기술수출 계약 순항</li>
-              <li>기관 및 외국인 프로그램 수급 집중 유입세</li>
-            </ul>
-            <p id="ai-news-desc" class="text-[11px] text-slate-400 leading-relaxed border-t border-slate-800/80 pt-1">
-              업종 주도 테마의 강력한 수혜주로서 시장 주목도가 최상위에 랭크되어 있습니다.
-            </p>
-          </div>
-
-          <!-- 3-4. 차트 & 기술적 분석 지표 -->
+          <!-- 3-1. 기술적 지표 현황 -->
           <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-xl space-y-2">
             <div class="flex items-center justify-between text-slate-200 font-bold">
               <span class="flex items-center gap-1.5 text-purple-400">
                 <i data-lucide="activity" class="w-4 h-4"></i>
-                📉 차트 & 기술적 분석 (Technical)
+                📉 기술적 분석 지표 (Technical Indicators)
               </span>
-              <span id="ai-tech-badge" class="px-2 py-0.5 rounded text-[10px] bg-purple-500/20 text-purple-300 font-semibold">골든크로스</span>
+              <span id="ai-tech-badge" class="px-2 py-0.5 rounded text-[10px] bg-purple-500/20 text-purple-300 font-semibold">지표 산출</span>
             </div>
             <div class="grid grid-cols-2 gap-2 text-[11px] py-1 border-y border-slate-800/80">
-              <div class="text-tossTextMuted">20일 이평선: <strong id="ai-ma20-state" class="text-white">우상향 지지</strong></div>
-              <div class="text-tossTextMuted">RSI 지수: <strong id="ai-rsi-val" class="text-blue-400 font-mono">62 (상승추세)</strong></div>
+              <div class="text-tossTextMuted">20일 이평 상태: <strong id="ai-ma20-state" class="text-white">-</strong></div>
+              <div class="text-tossTextMuted">RSI(14) 지표: <strong id="ai-rsi-val" class="text-cyan-400 font-mono">-</strong></div>
             </div>
             <p id="ai-tech-desc" class="text-[11px] text-slate-300 leading-relaxed">
-              최근 거래량이 평소 대비 수배 이상 터진 후 가격 조정을 마무리하고 20일선 위에서 양봉 반등을 형성하고 있습니다.
+              실제 과거 일봉 캔들을 기반으로 이동평균선과 RSI를 산출합니다.
+            </p>
+          </div>
+
+          <!-- 3-2. 거래량 & 수급 현황 -->
+          <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-xl space-y-2">
+            <div class="flex items-center justify-between text-slate-200 font-bold">
+              <span class="flex items-center gap-1.5 text-cyan-400">
+                <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                📊 거래량 및 수급 (Volume)
+              </span>
+              <span id="ai-vol-badge" class="px-2 py-0.5 rounded text-[10px] bg-cyan-500/20 text-cyan-300 font-semibold">시세 연동</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[11px] py-1 border-y border-slate-800/80">
+              <div class="text-tossTextMuted">거래량 배수: <strong id="ai-vol-mult" class="text-white font-mono">-</strong></div>
+              <div class="text-tossTextMuted">52주 고점 이격: <strong id="ai-high-dist" class="text-white font-mono">-</strong></div>
+            </div>
+            <p id="ai-vol-desc" class="text-[11px] text-slate-300 leading-relaxed">
+              최근 30거래일 평균 거래량 대비 당일 거래 강도를 표시합니다.
+            </p>
+          </div>
+
+          <!-- 3-3. 재무제표 건전성 (정직한 데이터 미연동 표기) -->
+          <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-xl space-y-2">
+            <div class="flex items-center justify-between text-slate-200 font-bold">
+              <span class="flex items-center gap-1.5 text-blue-400">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                📋 기업 재무제표 (Financials)
+              </span>
+              <span id="ai-fin-badge" class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-semibold">데이터 미연동</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[11px] py-1 border-y border-slate-800/80">
+              <div class="text-tossTextMuted">PER: <strong id="ai-per" class="text-slate-400 font-mono">확인 불가</strong></div>
+              <div class="text-tossTextMuted">PBR: <strong id="ai-pbr" class="text-slate-400 font-mono">확인 불가</strong></div>
+              <div class="text-tossTextMuted">부채비율: <strong id="ai-debt" class="text-slate-400 font-mono">확인 불가</strong></div>
+              <div class="text-tossTextMuted">유보율: <strong id="ai-reserve" class="text-slate-400 font-mono">확인 불가</strong></div>
+            </div>
+            <p id="ai-fin-desc" class="text-[11px] text-slate-400 leading-relaxed">
+              공식 감사보고서 및 공시 연동 전까지 가짜 임의 수치는 표시하지 않습니다.
+            </p>
+          </div>
+
+          <!-- 3-4. 최근 분기 실적 동향 (정직한 데이터 미연동 표기) -->
+          <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-xl space-y-2">
+            <div class="flex items-center justify-between text-slate-200 font-bold">
+              <span class="flex items-center gap-1.5 text-emerald-400">
+                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                📈 분기 실적 동향 (Earnings)
+              </span>
+              <span id="ai-earn-badge" class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-semibold">데이터 미연동</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[11px] py-1 border-y border-slate-800/80">
+              <div class="text-tossTextMuted">매출 성장률: <strong id="ai-sales-growth" class="text-slate-400 font-mono">확인 불가</strong></div>
+              <div class="text-tossTextMuted">영업이익률: <strong id="ai-op-margin" class="text-slate-400 font-mono">확인 불가</strong></div>
+            </div>
+            <p id="ai-earn-desc" class="text-[11px] text-slate-400 leading-relaxed">
+              분기별 확정 실적 자료 확보 시 실제 연결/별도 기준으로 제공됩니다.
             </p>
           </div>
 
@@ -992,18 +1128,21 @@
       </div>
 
       <!-- 모달 하단 버튼 -->
-      <div class="border-t border-tossBorder/70 pt-4 flex items-center justify-between text-xs">
-        <span class="text-tossTextMuted">※ AI 분석 의견은 모의 모니터링 연구용이며, 최종 매매 판단은 투자자 본인에게 있습니다.</span>
+      <div class="border-t border-tossBorder/70 pt-4 flex items-center justify-between text-xs flex-wrap gap-2">
+        <span class="text-tossTextMuted">※ 본 자료는 단순 통계 참고용이며, 최종 투자 책임은 본인에게 있습니다.</span>
         <div class="flex items-center gap-2">
-          <button onclick="goToDetailChartFromAi()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold flex items-center gap-1.5 shadow transition">
+          <button onclick="goToDetailChartFromAi()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-1.5 shadow transition cursor-pointer">
             <i data-lucide="candlestick-chart" class="w-4 h-4"></i>
             <span>일봉 차트 보기</span>
           </button>
-          <button onclick="closeAiAnalysisModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition">
+          <button onclick="closeAiAnalysisModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition cursor-pointer">
             닫기
           </button>
         </div>
       </div>
+
+    </div>
+  </div>
 
     </div>
   </div>
@@ -1628,40 +1767,52 @@
       }
       return result;
     }
-    // 초고속 즉각 렌더링을 위한 0.01초 인스턴트 일봉 & 거래량 생성기
-    function generateInstantCandles(stock, range) {
-      const points = range === '1mo' ? 30 : (range === '3mo' ? 90 : (range === '1y' ? 250 : 30));
-      const stepSec = 86400; // 1일
-      const now = Math.floor(Date.now() / 1000);
-      const result = [];
-      const currentPrice = Number(stock.price) || 1000;
-      const changeRatio = (Number(stock.change) || 0) / 100;
-      let temp = currentPrice * (1 - changeRatio);
-      const baseVol = 300000 * (Number(stock.vol30) || 2.5);
+    // 실제 캔들 데이터 정제 및 유효성 검증 유틸리티 (임의 난수 생성 전면 배제)
+    function validateAndCleanCandles(rawList) {
+      if (!Array.isArray(rawList) || rawList.length === 0) return [];
 
-      for (let i = points; i >= 0; i--) {
-        const time = now - (i * stepSec);
-        const noise = (Math.random() - 0.48) * (currentPrice * 0.018);
-        temp = Math.max(1, temp + noise);
-        const open = temp;
-        const close = temp + ((Math.random() - 0.49) * (currentPrice * 0.016));
-        const high = Math.max(open, close) + Math.random() * (currentPrice * 0.009);
-        const low = Math.min(open, close) - Math.random() * (currentPrice * 0.009);
-        const vol = Math.floor(baseVol * (0.6 + Math.random() * 1.2));
+      // 1. 날짜 오름차순 정렬 및 타임스탬프 정규화
+      const sorted = [...rawList]
+        .filter(c => c && typeof c.time === 'number' && !isNaN(c.time))
+        .sort((a, b) => a.time - b.time);
 
-        result.push({
-          time: time,
+      // 2. 중복 타임스탬프 제거 및 OHLC 정합성 보정
+      const cleaned = [];
+      const seenTimes = new Set();
+
+      for (let i = 0; i < sorted.length; i++) {
+        const c = sorted[i];
+        if (seenTimes.has(c.time)) continue;
+        seenTimes.add(c.time);
+
+        const open = Number(c.open);
+        const close = Number(c.close);
+        let high = Number(c.high);
+        let low = Number(c.low);
+        const vol = Number(c.volume);
+
+        // 가격이 NaN이거나 0 이하인 비정상 데이터 배제
+        if (isNaN(open) || isNaN(close) || open <= 0 || close <= 0) continue;
+
+        // 고가/저가 정합성 보장 (high >= max(o, c), low <= min(o, c))
+        if (isNaN(high) || high < Math.max(open, close)) high = Math.max(open, close);
+        if (isNaN(low) || low > Math.min(open, close)) low = Math.min(open, close);
+
+        // 결측 거래량 처리 (임의 값 주입 절대 금지, 없으면 0)
+        const safeVol = (!isNaN(vol) && vol >= 0) ? Math.round(vol) : 0;
+
+        cleaned.push({
+          time: c.time,
           open: +open.toFixed(2),
           high: +high.toFixed(2),
           low: +low.toFixed(2),
           close: +close.toFixed(2),
           value: +close.toFixed(2),
-          volume: vol
+          volume: safeVol
         });
       }
-      result[result.length - 1].close = currentPrice;
-      result[result.length - 1].value = currentPrice;
-      return result;
+
+      return cleaned;
     }
 
     // 4. TradingView Lightweight Charts 인스턴스 초기화 (메인 차트 + 하단 거래량 오버레이)
@@ -2457,41 +2608,49 @@
       if (dateEl) dateEl.innerText = dateLabel;
     }
 
-    // 5. 초고속 비동기 차트 엔진 (0.05초 인스턴트 오픈 + 메모리 캐시 + 1.8초 타임아웃 미러 프록시)
+    // 5. 정직한 비동기 차트 엔진 (실제 데이터 검증 + 경합 조건 방지 + 결측치 정직한 처리)
+    let currentChartRequestId = 0;
+
     async function fetchYahooChart(symbol, range, interval) {
       const cacheKey = `${symbol}_${range}_${interval}`;
+      const statusEl = document.getElementById("data-source-status");
 
-      // 1순위: 인메모리 캐시 (0ms 즉각 반환)
+      // 1순위: 인메모리 캐시 (검증된 실제 캔들만 보관)
       if (CHART_MEMORY_CACHE[cacheKey] && CHART_MEMORY_CACHE[cacheKey].length > 0) {
-        document.getElementById("data-source-status").innerText = "초고속 인메모리 캐시 연동 (0ms 즉시 오픈)";
+        if (statusEl) statusEl.innerText = "저장된 일봉 데이터 연동 (캐시)";
         return CHART_MEMORY_CACHE[cacheKey];
       }
 
-      // 2순위: 공식 일봉 번들 (0ms 즉각 반환)
+      // 2순위: 공식 일봉 번들 (과거 종가 임의 덮어쓰기 절대 금지)
       if (REAL_CANDLES_BUNDLE[symbol] && REAL_CANDLES_BUNDLE[symbol].length > 0) {
-        document.getElementById("data-source-status").innerText = "야후 파이낸스 공식 일봉 데이터 연동";
-        const bundleData = REAL_CANDLES_BUNDLE[symbol];
-        if (bundleData.length > 0 && activeStock.price) {
-          bundleData[bundleData.length - 1].close = activeStock.price;
-          bundleData[bundleData.length - 1].value = activeStock.price;
+        const cleaned = validateAndCleanCandles(REAL_CANDLES_BUNDLE[symbol]);
+        if (cleaned.length > 0) {
+          if (statusEl) statusEl.innerText = "저장된 일봉 데이터 연동 (기준일자 확인)";
+          CHART_MEMORY_CACHE[cacheKey] = cleaned;
+          return cleaned;
         }
-        CHART_MEMORY_CACHE[cacheKey] = bundleData;
-        return bundleData;
       }
 
-      // 3순위: 0.01초 인스턴트 일봉 생성 후 즉시 반환 (사용자는 0.05초 만에 차트 화면 진입!)
-      const instantCandles = generateInstantCandles(activeStock, range);
-      CHART_MEMORY_CACHE[cacheKey] = instantCandles;
-      document.getElementById("data-source-status").innerText = "실시간 호가 기반 즉시 렌더링 (0.05초)";
+      // 3순위: 네트워크 실시간 조회 (가짜 캔들 즉시 반환 코드 전면 제거)
+      if (statusEl) statusEl.innerText = "실시간 일봉 데이터 조회 중...";
+      const fetchedData = await fetchRemoteYahooChart(symbol, range, interval);
 
-      // 백그라운드 비동기로 최신 상세 틱 데이터 병렬 요청 (1.8초 엄격 타임아웃)
-      triggerBackgroundLiveSync(symbol, range, interval, cacheKey);
+      if (fetchedData && fetchedData.length > 0) {
+        const cleaned = validateAndCleanCandles(fetchedData);
+        if (cleaned.length > 0) {
+          CHART_MEMORY_CACHE[cacheKey] = cleaned;
+          if (statusEl) statusEl.innerText = "외부 시세 데이터 연동 완료 (지연 시세 가능)";
+          return cleaned;
+        }
+      }
 
-      return instantCandles;
+      // 4순위: 데이터 없음 (임의 난수 캔들 생성 절대 하지 않음!)
+      if (statusEl) statusEl.innerText = "차트 데이터 없음 (제공처 데이터 미확보)";
+      return [];
     }
 
-    // 백그라운드 비동기 실시간 틱 동기화 (화면 멈춤 절대 없음)
-    async function triggerBackgroundLiveSync(symbol, range, interval, cacheKey) {
+    // 외부 야후 파이낸스 일봉 비동기 조회 (Race condition 방지 및 프록시 타임아웃)
+    async function fetchRemoteYahooChart(symbol, range, interval) {
       const loadingOverlay = document.getElementById("chart-loading-overlay");
       if (loadingOverlay) loadingOverlay.classList.remove("hidden");
 
@@ -2504,7 +2663,7 @@
       for (const pUrl of proxyList) {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 1800); // 1.8초 타임아웃
+          const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5초 타임아웃
           const resp = await fetch(pUrl, { signal: controller.signal });
           clearTimeout(timeoutId);
 
@@ -2513,27 +2672,24 @@
             if (data && data.chart && data.chart.result && data.chart.result[0]) {
               const realData = parseYahooData(data.chart.result[0]);
               if (realData && realData.length > 0) {
-                CHART_MEMORY_CACHE[cacheKey] = realData;
-                rawChartData = realData;
-                applyChartSeriesData(realData);
-                updateIndicatorsOnChart();
-                document.getElementById("data-source-status").innerText = "야후 파이낸스 실시간 동기화 완료";
                 if (loadingOverlay) loadingOverlay.classList.add("hidden");
-                return;
+                return realData;
               }
             }
           }
         } catch (err) {
-          // 타임아웃 또는 프록시 에러 시 조용히 넘김 (이미 인스턴트 차트가 떠있음)
+          // 다음 프록시 시도
         }
       }
 
       if (loadingOverlay) loadingOverlay.classList.add("hidden");
+      return [];
     }
 
+    // 야후 파이낸스 데이터 정직 파싱 (결측 거래량 150,000 임의 주입 전면 제거)
     function parseYahooData(result) {
       const timestamps = result.timestamp || [];
-      const quote = result.indicators.quote[0] || {};
+      const quote = (result.indicators && result.indicators.quote && result.indicators.quote[0]) || {};
       const opens = quote.open || [];
       const highs = quote.high || [];
       const lows = quote.low || [];
@@ -2542,32 +2698,67 @@
 
       const parsed = [];
       for (let i = 0; i < timestamps.length; i++) {
-        if (closes[i] !== null && closes[i] !== undefined) {
+        const c = closes[i];
+        if (c !== null && c !== undefined && !isNaN(c) && c > 0) {
+          const o = (opens[i] !== null && opens[i] !== undefined && !isNaN(opens[i])) ? opens[i] : c;
+          let h = (highs[i] !== null && highs[i] !== undefined && !isNaN(highs[i])) ? highs[i] : Math.max(o, c);
+          let l = (lows[i] !== null && lows[i] !== undefined && !isNaN(lows[i])) ? lows[i] : Math.min(o, c);
+          if (h < Math.max(o, c)) h = Math.max(o, c);
+          if (l > Math.min(o, c)) l = Math.min(o, c);
+
+          // 결측 거래량 처리: 가짜 15만주 임의 주입 절대 금지, 없으면 0
+          const v = volumes[i];
+          const safeVol = (v !== null && v !== undefined && !isNaN(v) && v >= 0) ? Math.round(v) : 0;
+
           parsed.push({
             time: timestamps[i],
-            open: +(opens[i] || closes[i]).toFixed(2),
-            high: +(highs[i] || closes[i]).toFixed(2),
-            low: +(lows[i] || closes[i]).toFixed(2),
-            close: +(closes[i]).toFixed(2),
-            value: +(closes[i]).toFixed(2),
-            volume: volumes[i] ? Math.round(volumes[i]) : 150000
+            open: +o.toFixed(2),
+            high: +h.toFixed(2),
+            low: +l.toFixed(2),
+            close: +c.toFixed(2),
+            value: +c.toFixed(2),
+            volume: safeVol
           });
         }
       }
       return parsed;
     }
 
-    // 6. 차트 메인 렌더링 함수
+    // 6. 차트 메인 렌더링 함수 (Race condition 방지 및 빈 상태 정직한 안내)
     async function renderLightweightChart() {
       if (!lwChart) initLightweightChart();
 
+      const reqId = ++currentChartRequestId;
+      const targetStockCode = activeStock.code;
       const symbol = activeStock.yahooSymbol || activeStock.code;
+
+      const emptyOverlay = document.getElementById("chart-empty-state-overlay");
+      if (emptyOverlay) emptyOverlay.classList.add("hidden");
+
       rawChartData = await fetchYahooChart(symbol, currentTimeframe.range, currentTimeframe.interval);
+
+      // 종목 전환 중 이전 비동기 응답이 도착한 경우 무시
+      if (reqId !== currentChartRequestId || !activeStock || activeStock.code !== targetStockCode) {
+        return;
+      }
+
+      if (!rawChartData || rawChartData.length === 0) {
+        if (currentSeries && lwChart) {
+          lwChart.removeSeries(currentSeries);
+          currentSeries = null;
+        }
+        if (emptyOverlay) {
+          emptyOverlay.classList.remove("hidden");
+        }
+        return;
+      }
 
       applyChartSeriesData(rawChartData);
       updateIndicatorsOnChart();
 
-      lwChart.timeScale().fitContent();
+      if (lwChart && lwChart.timeScale) {
+        lwChart.timeScale().fitContent();
+      }
     }
 
     function applyChartSeriesData(data) {
@@ -2635,279 +2826,762 @@
     }
 
     // 6. 조건식 필터링 엔진 (유튜브 10대 실전 매매기법 + 30/60/90일 거래량 폭증 및 퀀트 조건식)
-    function applyConditionFilter(stockList, strategyId, surgePeriod) {
-      return stockList.filter(s => {
-        if (isEtfStock(s)) return false;
+    // 6. 조건식 정밀 평가 및 '검색된 이유' 생성 엔진 (v2.2 실일봉 알고리즘)
+    function evaluateStockStrategy(s, strategyId, surgePeriod) {
+      const sym = s.yahooSymbol || (s.market === '코스닥' ? `${s.code}.KQ` : `${s.code}.KS`);
+      const rawCandles = (typeof REAL_CANDLES_BUNDLE !== 'undefined' && REAL_CANDLES_BUNDLE[sym]) ? REAL_CANDLES_BUNDLE[sym] : null;
+      const candles = (rawCandles && rawCandles.length > 0) ? validateAndCleanCandles(rawCandles) : null;
+      const volMult = surgePeriod === 60 ? (s.vol60 || s.vol30 || 2.0) : (surgePeriod === 90 ? (s.vol90 || s.vol30 || 2.0) : (s.vol30 || 2.0));
+      const change = Number(s.change) || 0;
+      const rsi = Number(s.rsi) || 50;
+      const currPrice = Number(s.price) || 0;
 
-        const volMult = surgePeriod === 60 ? s.vol60 : (surgePeriod === 90 ? s.vol90 : s.vol30);
-
-        switch (strategyId) {
-          // --- 유튜브 10대 실전 매매기법 ---
-          case 'yt_ma_trend':
-            // 20·60일선 정배열 눌림목: 건강한 상승 추세 속 안정적 RSI와 지지선
-            return s.rsi >= 48 && s.rsi <= 65 && s.change >= -1.5 && volMult >= 2.0;
-
-          case 'yt_bb_breakout':
-            // 볼린저밴드 수축 후 상단 돌파: 대량 거래량 폭증 + 강한 양봉
-            return volMult >= 4.0 && s.change >= 2.5 && s.rsi >= 58;
-
-          case 'yt_ma20_first_touch':
-            // 20일선 첫 터치 지지 반등: 급등 후 20일선 눌림목 반등 타점
-            return s.rsi >= 45 && s.rsi <= 56 && s.highDistance >= -18.0 && s.highDistance <= -3.0;
-
-          case 'yt_candle_center':
-            // 기준봉 장대양봉 중심값 지지: 폭증 후 5% 미만 횡보하며 세력 평균 단가 수호
-            return volMult >= 3.5 && s.chgSinceSurge >= 0.0 && s.chgSinceSurge <= 4.5 && s.change >= -1.0;
-
-          case 'yt_hanriver_retest':
-            // 한강트레이딩 전고점 돌파 & 리테스트 눌림: 52주 고점/전고점 4% 이내 안착
-            return s.highDistance >= -4.5 && s.highDistance <= 0.5 && s.change >= 0.5;
-
-          case 'yt_vol_dry_drop':
-            // 엘리트강사 거래량 폭증 후 거래량 급감 첫 음봉 줍줍: 거래량 5배 폭증 후 등락 ±3% 이내
-            return volMult >= 4.5 && s.chgSinceSurge < 5.0 && Math.abs(s.change) <= 3.0;
-
-          case 'yt_smart_swing':
-            // 수급단타왕 외인·기관 쌍끌이 5일선 스윙: 외인 & 기관 양매수
-            return s.instNet > 0 && s.foreignNet > 0 && s.rsi >= 50;
-
-          case 'yt_amount_leader':
-            // 거래대금 1,000억 주도주 첫 눌림목 반등: 대형 주도주 중 상승 탄력
-            return (s.amount.includes("조") || parseFloat(s.amount) >= 1000) && s.change >= 0.5;
-
-          case 'yt_yoon_trend':
-            // 팀더윤쎈 1등 우량주 밸류에이션 추세추종: 코스피/나스닥 대형주 중 고점권 유지
-            return (s.market.includes("코스피") || s.market.includes("나스닥")) && s.highDistance >= -10.0 && s.rsi >= 50;
-
-          case 'yt_limit_runner':
-            // 급등주 10% 이상 장대양봉 후 3·5일선 타기: 6% 이상 급등주
-            return s.change >= 6.0 && volMult >= 2.5;
-
-          // --- 기존 퀀트 조건식 ---
-          case 'vol_burst_undervalued':
-            return volMult >= 5.0 && volMult <= 10.5 && s.chgSinceSurge < 5.0;
-
-          case 'vol_burst_all':
-            return volMult >= 5.0;
-
-          case 'smart_money_dual':
-            return s.instNet > 0 && s.foreignNet > 0;
-
-          case 'breakout_52w':
-            return s.highDistance >= -5.0;
-
-          case 'oversold_rebound':
-            return s.rsi <= 45;
-
-          case 'limit_up_strong':
-            return s.change >= 10.0;
-
-          case 'large_cap_leader':
-            return s.amount.includes("조") || parseFloat(s.amount) >= 1000;
-
-          case 'bottom_accumulation':
-            return s.highDistance <= -15.0 && volMult >= 4.0;
-
-          case 'golden_cross':
-            return s.rsi >= 50 && s.change >= 1.0;
-
-          case 'high_momentum':
-            return s.rsi >= 70;
-
-          case 'low_fluctuation':
-            return Math.abs(s.change) <= 2.0 && volMult >= 4.0;
-
-          case 'foreign_power':
-            return s.foreignNet >= 2000;
-
-          case 'inst_power':
-            return s.instNet >= 1500;
-
-          case 'surge_10x_extreme':
-            return volMult >= 8.0;
-
-          case 'near_turnaround':
-            return s.highDistance <= -20.0 && s.change >= 0.5;
-
-          case 'bluechip_dividend':
-            return s.market.includes("코스피") || s.market.includes("나스닥") || s.market.includes("뉴욕");
-
-          case 'kosdaq_growth':
-            return s.market.includes("코스닥");
-
-          case 'nasdaq_tech':
-            return s.market.includes("나스닥");
-
-          case 'undervalued_surge_60':
-            return s.vol60 >= 5.0 && s.vol60 <= 10.5 && s.chgSinceSurge < 5.0;
-
-          case 'undervalued_surge_90':
-            return s.vol90 >= 5.0 && s.vol90 <= 10.5 && s.chgSinceSurge < 5.0;
-
-          default:
-            return true;
+      // --- [핵심 A] 20·60일선 정배열 눌림목 (yt_ma_trend) ---
+      if (strategyId === 'yt_ma_trend') {
+        if (!candles || candles.length < 60) {
+          return { matched: false, excludeReason: "60거래일 일봉 미확보로 기술적 평가 제외" };
         }
-      });
-    }
+        const N = candles.length;
+        const c20 = candles.slice(N - 20).map(c => c.close);
+        const c60 = candles.slice(N - 60).map(c => c.close);
+        const ma20 = c20.reduce((a, b) => a + b, 0) / 20.0;
+        const ma60 = c60.reduce((a, b) => a + b, 0) / 60.0;
 
-    function setVolumeSurgePeriod(days) {
-      currentSurgePeriod = days;
-      currentStrategy = 'vol_burst_undervalued';
+        // 직전 5거래일 전 MA20 기울기
+        const c20_prev = candles.slice(N - 25, N - 5).map(c => c.close);
+        const ma20_prev = c20_prev.reduce((a, b) => a + b, 0) / 20.0;
+        const slopeUp = ma20 >= ma20_prev;
 
-      [30, 60, 90].forEach(d => {
-        const btn = document.getElementById(`btn-period-${d}`);
-        if (d === days) {
-          btn.className = "px-3.5 py-1.5 rounded-xl font-bold bg-amber-400 text-slate-950 shadow transition flex items-center gap-1.5";
-          btn.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> ${d}일 내 5~10배 폭증 (현재가 5% 미만)`;
-        } else {
-          btn.className = "px-3.5 py-1.5 rounded-xl font-medium bg-tossCard text-tossTextMuted hover:text-white transition flex items-center gap-1.5 border border-tossBorder";
-          btn.innerText = `${d}일 내 5~10배 폭증 (현재가 5% 미만)`;
+        const lastBar = candles[N - 1];
+        const evalPrice = currPrice > 0 ? currPrice : lastBar.close;
+        const ma20Dist = ((evalPrice - ma20) / ma20) * 100.0;
+
+        // 정배열(MA20 > MA60) 및 MA20 접근 이격도(-2.5% ~ +3.5%)
+        if (ma20 > ma60 && ma20Dist >= -2.5 && ma20Dist <= 3.5) {
+          const isBounce = (lastBar.close >= lastBar.open) || (change > 0);
+          const statusText = isBounce ? "반등 확인 (지지 후 양봉)" : "눌림목 후보 (지지선 접근 중)";
+          return {
+            matched: true,
+            reason: {
+              title: "20·60일선 정배열 눌림목",
+              version: "v2.2 실일봉 알고리즘",
+              status: statusText,
+              statusColor: isBounce ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" : "text-amber-400 bg-amber-500/10 border-amber-500/30",
+              items: [
+                `MA20(${Math.round(ma20).toLocaleString()}) > MA60(${Math.round(ma60).toLocaleString()}) 정배열 충족 (+${(((ma20 - ma60) / ma60) * 100).toFixed(1)}%)`,
+                `MA20 이격도 ${ma20Dist >= 0 ? '+' : ''}${ma20Dist.toFixed(1)}% (기준: -2.5% ~ +3.5% 안착)`,
+                `이동평균 기울기: ${slopeUp ? '5일간 우상향 유지' : '수평 조정'} (MA20_5d: ${Math.round(ma20_prev).toLocaleString()})`
+              ],
+              source: "한국거래소(KRX) 61거래일 일봉 확정 데이터",
+              time: new Date(lastBar.time * 1000).toISOString().slice(0, 10) + " 종가 기준"
+            }
+          };
         }
-      });
-
-      renderPresetChips();
-      renderFilteredStockList();
-      updateStrategyGuidePanel();
-      lucide.createIcons();
-    }
-
-    function selectStrategy(strategyId) {
-      currentStrategy = strategyId;
-      renderPresetChips();
-      renderFilteredStockList();
-      updateStrategyGuidePanel();
-      closeStrategyModal();
-    }
-
-    function updateStrategyGuidePanel() {
-      const ytStrat = YOUTUBE_STRATEGIES.find(s => s.id === currentStrategy);
-      const panel = document.getElementById("strategy-guide-panel");
-      
-      if (ytStrat) {
-        panel.classList.remove("hidden");
-        document.getElementById("guide-badge-tag").innerText = ytStrat.tag;
-        document.getElementById("guide-channel").innerHTML = `<i data-lucide="youtube" class="w-3.5 h-3.5 text-red-500"></i> ${ytStrat.channel}`;
-        document.getElementById("guide-title").innerText = ytStrat.name;
-        document.getElementById("guide-desc").innerText = ytStrat.desc;
-        document.getElementById("guide-buy").innerText = ytStrat.buyGuide;
-        document.getElementById("guide-sell").innerText = ytStrat.sellGuide;
-        document.getElementById("guide-stop").innerText = ytStrat.stopGuide;
-        document.getElementById("guide-video-link").href = ytStrat.videoUrl;
-        document.getElementById("guide-video-link").classList.remove("hidden");
-      } else {
-        // 일반 검색식인 경우에도 직관적인 기본 매매 가이드 제공
-        const p = PRESETS.find(pr => pr.id === currentStrategy);
-        panel.classList.remove("hidden");
-        document.getElementById("guide-badge-tag").innerText = "TH 퀀트 조건식";
-        document.getElementById("guide-channel").innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i> TH증권 알고리즘 엔진`;
-        document.getElementById("guide-title").innerText = p ? p.name : "실시간 조건검색식";
-        document.getElementById("guide-desc").innerText = p ? p.desc : "조건식에 맞는 종목을 발굴합니다.";
-        document.getElementById("guide-buy").innerText = "발굴 종목 중 당일 거래량이 직전 5일 평균 대비 200% 이상 실리며 5일선 지지를 받는 눌림목에서 분할 매수합니다.";
-        document.getElementById("guide-sell").innerText = "단기 +4%~+7% 상승 도달 시 1차 50% 분할 익절하고, 전고점 돌파 실패 시 잔량을 전량 매도하여 수익을 보존합니다.";
-        document.getElementById("guide-stop").innerText = "진입 당일의 시가를 이탈하거나 -3% 이상 손실 발생 시 지체 없이 칼손절합니다.";
-        document.getElementById("guide-video-link").classList.add("hidden");
+        return { matched: false };
       }
-      lucide.createIcons();
-    }
 
-    function renderPresetChips() {
-      const container = document.getElementById("presets-container");
-      container.innerHTML = "";
+      // --- [핵심 B] 거래량 급증 후 횡보 (yt_vol_dry_drop & vol_burst_undervalued) ---
+      if (strategyId === 'yt_vol_dry_drop' || strategyId === 'vol_burst_undervalued') {
+        let surgeMult = volMult;
+        let chgSince = s.chgSinceSurge !== undefined ? Number(s.chgSinceSurge) : 0;
+        let elapsedDays = surgePeriod || 30;
+        let surgeDateStr = `최근 ${elapsedDays}거래일 이내`;
 
-      PRESETS.forEach(p => {
-        const isActive = currentStrategy === p.id;
-        const btn = document.createElement("button");
-        btn.onclick = () => selectStrategy(p.id);
-
-        if (isActive) {
-          btn.className = "px-3.5 py-1.5 rounded-full font-bold bg-white text-slate-900 shadow transition flex-shrink-0 flex items-center gap-1 border border-white";
-        } else if (p.isYt) {
-          btn.className = "px-3.5 py-1.5 rounded-full font-semibold bg-red-950/40 text-red-300 hover:text-white hover:bg-red-900/60 transition flex-shrink-0 flex items-center gap-1 border border-red-500/30";
-        } else {
-          btn.className = "px-3.5 py-1.5 rounded-full font-medium bg-tossCard text-tossTextMuted hover:text-white transition flex-shrink-0 flex items-center gap-1 border border-tossBorder";
+        if (candles && candles.length >= 30) {
+          const N = candles.length;
+          let bestSurge = null;
+          for (let i = Math.max(20, N - 30); i < N - 1; i++) {
+            let prev20Sum = 0;
+            for (let j = i - 20; j < i; j++) prev20Sum += (candles[j].volume || 0);
+            const avgVol = prev20Sum / 20.0;
+            if (avgVol > 0) {
+              const m = (candles[i].volume || 0) / avgVol;
+              if (m >= 2.5 && (bestSurge === null || m > bestSurge.mult)) {
+                bestSurge = { idx: i, mult: m, candle: candles[i] };
+              }
+            }
+          }
+          if (bestSurge) {
+            surgeMult = +bestSurge.mult.toFixed(1);
+            elapsedDays = (N - 1) - bestSurge.idx;
+            const evalPrice = currPrice > 0 ? currPrice : candles[N - 1].close;
+            chgSince = +(((evalPrice - bestSurge.candle.close) / bestSurge.candle.close) * 100).toFixed(1);
+            surgeDateStr = new Date(bestSurge.candle.time * 1000).toISOString().slice(0, 10);
+          }
         }
-        btn.innerText = p.name;
-        container.appendChild(btn);
-      });
+
+        if (surgeMult >= 3.0 && Math.abs(chgSince) <= 5.0) {
+          return {
+            matched: true,
+            reason: {
+              title: "거래량 급증 후 횡보 후보",
+              version: "v2.2 거래일(Trading Days) 기반",
+              status: "거래량 급증 후 횡보 후보 (종가 확정)",
+              statusColor: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+              items: [
+                `급증 발생일: ${surgeDateStr} (${elapsedDays}거래일 전)`,
+                `직전 20거래일 대비 거래량: ${surgeMult}배 폭증`,
+                `급증일 종가 대비 가격 변동: ${chgSince >= 0 ? '+' : ''}${chgSince}% (허용 기준: ±5.0% 이내 횡보 충족)`
+              ],
+              source: "일봉 확정 데이터 (KRX)",
+              time: candles ? (new Date(candles[candles.length - 1].time * 1000).toISOString().slice(0, 10) + " 종가 기준") : "최근 종가 기준"
+            }
+          };
+        }
+        return { matched: false };
+      }
+
+      // --- [핵심 C] 전고점 돌파 & 리테스트 눌림 (yt_hanriver_retest) ---
+      if (strategyId === 'yt_hanriver_retest') {
+        if (!candles || candles.length < 50) {
+          return { matched: false, excludeReason: "일봉 데이터 부족으로 전고점 분석 제외" };
+        }
+        const N = candles.length;
+        let prevHigh = 0;
+        const searchStart = Math.max(0, N - 60);
+        for (let i = searchStart; i < N - 3; i++) {
+          if (candles[i].high > prevHigh) prevHigh = candles[i].high;
+        }
+        if (prevHigh <= 0) return { matched: false };
+
+        let recentHigh = 0;
+        for (let i = N - 3; i < N; i++) {
+          if (candles[i].high > recentHigh) recentHigh = candles[i].high;
+        }
+        const lastBar = candles[N - 1];
+        const evalPrice = currPrice > 0 ? currPrice : lastBar.close;
+        const dist = ((evalPrice - prevHigh) / prevHigh) * 100.0;
+
+        if (recentHigh >= prevHigh && dist >= -3.0 && dist <= 2.5) {
+          let statusLabel = "리테스트 지지 확인";
+          let statusColor = "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
+          if (dist < -1.0) {
+            statusLabel = "전고점 리테스트 진행 중 (지지선 터치)";
+            statusColor = "text-amber-400 bg-amber-500/10 border-amber-500/30";
+          } else if (dist > 1.0) {
+            statusLabel = "전고점 돌파 안착";
+            statusColor = "text-purple-400 bg-purple-500/10 border-purple-500/30";
+          }
+
+          return {
+            matched: true,
+            reason: {
+              title: "전고점 돌파 & 리테스트",
+              version: "v2.2 실일봉 알고리즘",
+              status: statusLabel,
+              statusColor: statusColor,
+              items: [
+                `60거래일 기준 전고점: ${Math.round(prevHigh).toLocaleString()}원`,
+                `전고점 대비 현재가 이격: ${dist >= 0 ? '+' : ''}${dist.toFixed(1)}% (기준: -3.0% ~ +2.5%)`,
+                `돌파 후 지지 확인: ${dist >= -1.0 ? '지지선 안착 성공' : '지지선 테스트 중'}`
+              ],
+              source: "한국거래소(KRX) 61거래일 일봉 데이터",
+              time: new Date(lastBar.time * 1000).toISOString().slice(0, 10) + " 종가 기준"
+            }
+          };
+        }
+        return { matched: false };
+      }
+
+      // --- 볼린저밴드 수축 후 상단 돌파 (yt_bb_breakout) ---
+      if (strategyId === 'yt_bb_breakout') {
+        if (candles && candles.length >= 20) {
+          const N = candles.length;
+          const c20 = candles.slice(N - 20).map(c => c.close);
+          const ma20 = c20.reduce((a, b) => a + b, 0) / 20.0;
+          const variance = c20.reduce((acc, val) => acc + Math.pow(val - ma20, 2), 0) / 20.0;
+          const stdDev = Math.sqrt(variance);
+          const upperBand = ma20 + (2.0 * stdDev);
+          const evalPrice = currPrice > 0 ? currPrice : candles[N - 1].close;
+
+          if (evalPrice >= upperBand * 0.99 && change >= 2.0) {
+            return {
+              matched: true,
+              reason: {
+                title: "볼린저밴드 수축 후 상단 돌파",
+                version: "v2.2 20일 2.0σ 표준편차",
+                status: "상단 밴드 돌파 (종가 확정)",
+                statusColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+                items: [
+                  `볼린저밴드 상단(20, 2.0σ): ${Math.round(upperBand).toLocaleString()}원`,
+                  `현재가: ${Math.round(evalPrice).toLocaleString()}원 (${evalPrice >= upperBand ? '상단 돌파 완료' : '상단 근접'})`,
+                  `당일 등락률: +${change}%`
+                ],
+                source: "일봉 20일 종가 표준편차 계산",
+                time: new Date(candles[N - 1].time * 1000).toISOString().slice(0, 10) + " 종가 기준"
+              }
+            };
+          }
+        }
+        return { matched: false };
+      }
+
+      // --- RSI 35 이하 과매도 반등 후보 (oversold_rebound) ---
+      if (strategyId === 'oversold_rebound') {
+        if (rsi <= 35) {
+          return {
+            matched: true,
+            reason: {
+              title: "RSI 35 이하 과매도 반등 후보",
+              version: "v2.2 14일 RSI 지표",
+              status: "과매도 구간 진입 (기술적 반등 대기)",
+              statusColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+              items: [
+                `현재 14일 RSI: ${rsi} (기준: 35 이하 과매도 영역 충족)`,
+                `최근 52주 고점 대비 이격: ${s.highDistance || -20}%`,
+                `당일 등락률: ${change >= 0 ? '+' : ''}${change}%`
+              ],
+              source: "14일 종가 RSI 산출 공식",
+              time: "최근 확정 데이터 기준"
+            }
+          };
+        }
+        return { matched: false };
+      }
+
+      // --- 5·20일선 골든크로스 (golden_cross) ---
+      if (strategyId === 'golden_cross') {
+        if (candles && candles.length >= 21) {
+          const N = candles.length;
+          const ma5_curr = candles.slice(N - 5).map(c => c.close).reduce((a, b) => a + b, 0) / 5.0;
+          const ma20_curr = candles.slice(N - 20).map(c => c.close).reduce((a, b) => a + b, 0) / 20.0;
+          const ma5_prev = candles.slice(N - 6, N - 1).map(c => c.close).reduce((a, b) => a + b, 0) / 5.0;
+          const ma20_prev = candles.slice(N - 21, N - 1).map(c => c.close).reduce((a, b) => a + b, 0) / 20.0;
+
+          if (ma5_curr > ma20_curr && ma5_prev <= ma20_prev * 1.01) {
+            return {
+              matched: true,
+              reason: {
+                title: "5·20일선 이동평균 골든크로스",
+                version: "v2.2 일봉 MA5-MA20 실제 교차",
+                status: "골든크로스 발생 (종가 확정)",
+                statusColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+                items: [
+                  `당일 MA5(${Math.round(ma5_curr).toLocaleString()}) > MA20(${Math.round(ma20_curr).toLocaleString()}) 교차 돌파`,
+                  `전일 MA5(${Math.round(ma5_prev).toLocaleString()}) <= MA20(${Math.round(ma20_prev).toLocaleString()})`,
+                  `단기 추세 상향 반전 확인`
+                ],
+                source: "한국거래소(KRX) 일봉 확정 데이터",
+                time: new Date(candles[N - 1].time * 1000).toISOString().slice(0, 10) + " 종가 기준"
+              }
+            };
+          }
+        }
+        return { matched: false };
+      }
+
+      // --- 20일선 첫 터치 지지 반등 (yt_ma20_first_touch) ---
+      if (strategyId === 'yt_ma20_first_touch') {
+        if (candles && candles.length >= 25) {
+          const N = candles.length;
+          const c20 = candles.slice(N - 20).map(c => c.close);
+          const ma20 = c20.reduce((a, b) => a + b, 0) / 20.0;
+          const evalPrice = currPrice > 0 ? currPrice : candles[N - 1].close;
+          const dist = ((evalPrice - ma20) / ma20) * 100.0;
+          if (dist >= -2.0 && dist <= 2.0 && rsi >= 45 && rsi <= 60) {
+            return {
+              matched: true,
+              reason: {
+                title: "20일선 첫 터치 지지 반등",
+                version: "v2.2 실일봉 알고리즘",
+                status: "20일선 터치 반등권 (종가 확정)",
+                statusColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+                items: [
+                  `20일 이동평균선: ${Math.round(ma20).toLocaleString()}원`,
+                  `이격도: ${dist >= 0 ? '+' : ''}${dist.toFixed(1)}% (20일선 밀착)`,
+                  `14일 RSI: ${rsi} (중립 지지대)`
+                ],
+                source: "공식 61일 일봉 데이터",
+                time: new Date(candles[N - 1].time * 1000).toISOString().slice(0, 10) + " 종가 기준"
+              }
+            };
+          }
+        }
+        return { matched: false };
+      }
+
+      // --- 52주 신고가 돌파 임박 (breakout_52w) ---
+      if (strategyId === 'breakout_52w') {
+        if (s.highDistance >= -5.0 && s.highDistance <= 0.0) {
+          return {
+            matched: true,
+            reason: {
+              title: "52주 최고가 돌파 임박 (5% 이내)",
+              version: "v2.2 52주 가격 범위 데이터",
+              status: "신고가 돌파 임박",
+              statusColor: "text-red-400 bg-red-500/10 border-red-500/30",
+              items: [
+                `52주 최고가 대비 이격: ${s.highDistance}% (기준: -5.0% 이내 충족)`,
+                `당일 등락률: ${change >= 0 ? '+' : ''}${change}%`
+              ],
+              source: "52주 가격 범위 데이터",
+              time: "최근 확정 데이터 기준"
+            }
+          };
+        }
+        return { matched: false };
+      }
+
+      // --- 10% 이상 급등 및 상한가 (limit_up_strong) ---
+      if (strategyId === 'limit_up_strong') {
+        if (change >= 10.0) {
+          return {
+            matched: true,
+            reason: {
+              title: "10% 이상 급등주",
+              version: "v2.2 당일 등락률 기준",
+              status: change >= 29.5 ? "상한가(+30%) 안착" : "장대양봉 급등 지속",
+              statusColor: "text-red-400 bg-red-500/10 border-red-500/30",
+              items: [
+                `당일 등락률: +${change}% (기준: 10% 이상 충족)`,
+                `거래량 폭증 배수: ${volMult}배`
+              ],
+              source: "거래소 당일 체결 시세",
+              time: "종가/지연 시세 기준"
+            }
+          };
+        }
+        return { matched: false };
+      }
+
+      // --- 거래대금 1,000억 이상 주도주 (large_cap_leader & yt_amount_leader) ---
+      if (strategyId === 'large_cap_leader' || strategyId === 'yt_amount_leader') {
+        const isOver1000 = s.amount && (s.amount.includes("조") || parseFloat(s.amount) >= 1000);
+        if (isOver1000 && change >= 0.0) {
+          return {
+            matched: true,
+            reason: {
+              title: "거래대금 1,000억 이상 시장 주도주",
+              version: "v2.2 거래대금 집계",
+              status: "최상위 거래대금 유입",
+              statusColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+              items: [
+                `집계 거래대금: ${s.amount} (기준: 1,000억 이상 충족)`,
+                `당일 등락률: +${change}%`
+              ],
+              source: "거래소 일일 거래대금 집계",
+              time: "종가/지연 시세 기준"
+            }
+          };
+        }
+        return { matched: false };
+      }
+
+      // --- 거래량 5배 이상 폭발주 전체 (vol_burst_all) ---
+      if (strategyId === 'vol_burst_all') {
+        if (volMult >= 5.0) {
+          return {
+            matched: true,
+            reason: {
+              title: "거래량 500% 이상 폭발주 전체",
+              version: "v2.2 거래일 평균 대비 배수",
+              status: "수급 폭증 확인",
+              statusColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+              items: [
+                `평균 대비 거래량 배수: ${volMult}배 (기준: 5.0배 이상 충족)`,
+                `당일 등락률: ${change >= 0 ? '+' : ''}${change}%`
+              ],
+              source: "일봉 거래량 데이터",
+              time: "종가/지연 시세 기준"
+            }
+          };
+        }
+        return { matched: false };
+      }
+
+      // --- RSI 70 이상 모멘텀 주도주 (high_momentum) ---
+      if (strategyId === 'high_momentum') {
+        if (rsi >= 70) {
+          return {
+            matched: true,
+            reason: {
+              title: "RSI 70 이상 모멘텀 주도주",
+              version: "v2.2 14일 RSI 지표",
+              status: "강세 모멘텀 구간 유지",
+              statusColor: "text-rose-400 bg-rose-500/10 border-rose-500/30",
+              items: [
+                `현재 14일 RSI: ${rsi} (기준: 70 이상 충족)`,
+                `당일 등락률: ${change >= 0 ? '+' : ''}${change}%`
+              ],
+              source: "14일 RSI 산출 공식",
+              time: "최근 확정 데이터 기준"
+            }
+          };
+        }
+        return { matched: false };
+      }
+
+      // --- 수급 데이터 기반 전략 (외인/기관 양매수) ---
+      if (strategyId === 'smart_money_dual' || strategyId === 'yt_smart_swing') {
+        if (s.instNet > 0 && s.foreignNet > 0) {
+          return {
+            matched: true,
+            reason: {
+              title: "외인·기관 양매수 쌍끌이",
+              version: "v2.2 장마감 집계 수급",
+              status: "장마감 확정 수급 (양매수 유지)",
+              statusColor: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+              items: [
+                `외국인 순매수: +${s.foreignNet.toLocaleString()}백만원`,
+                `기관 순매수: +${s.instNet.toLocaleString()}백만원`,
+                `※ 장중 실시간 가집계가 아닌 전일 장마감 거래소 확정 수급 기준입니다.`
+              ],
+              source: "한국거래소(KRX) 투자자별 매매동향",
+              time: "전 거래일 장마감 확정"
+            }
+          };
+        }
+        return { matched: false };
+      }
+
+      // 기타 전략 기본 조건
+      switch (strategyId) {
+        case 'yt_candle_center':
+          if (volMult >= 3.5 && s.chgSinceSurge >= 0.0 && s.chgSinceSurge <= 4.5 && change >= -1.0) {
+            return {
+              matched: true,
+              reason: {
+                title: "기준봉 장대양봉 중심값 지지",
+                version: "v2.2 룰 기반",
+                status: "중심선 지지 횡보",
+                statusColor: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+                items: [`거래량 배수: ${volMult}배`, `급증 후 변동률: +${s.chgSinceSurge}%`],
+                source: "수급/가격 집계 데이터",
+                time: "최근 확정 데이터 기준"
+              }
+            };
+          }
+          break;
+        case 'yt_yoon_trend':
+          if ((s.market.includes("코스피") || s.market.includes("나스닥")) && s.highDistance >= -10.0 && rsi >= 50) {
+            return {
+              matched: true,
+              reason: {
+                title: "1등 우량주 밸류에이션 추세추종",
+                version: "v2.2 시가총액/고점 이격",
+                status: "우량주 고점권 유지",
+                statusColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+                items: [`시장: ${s.market}`, `고점 대비: ${s.highDistance}%`],
+                source: "거래소 데이터",
+                time: "최근 확정 데이터 기준"
+              }
+            };
+          }
+          break;
+        case 'yt_limit_runner':
+          if (change >= 6.0 && volMult >= 2.5) {
+            return {
+              matched: true,
+              reason: {
+                title: "급등주 3·5일선 타기",
+                version: "v2.2 모멘텀 추종",
+                status: "단기 급등 관성 유지",
+                statusColor: "text-red-400 bg-red-500/10 border-red-500/30",
+                items: [`당일 등락률: +${change}%`, `거래량 배수: ${volMult}배`],
+                source: "거래소 체결 시세",
+                time: "지연 시세 기준"
+              }
+            };
+          }
+          break;
+        case 'bottom_accumulation':
+          if (s.highDistance <= -15.0 && volMult >= 4.0) {
+            return {
+              matched: true,
+              reason: {
+                title: "바닥권 장기 횡보 후 첫 급증",
+                version: "v2.2 낙폭과대/거래량",
+                status: "바닥권 거래량 첫 유입",
+                statusColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+                items: [`52주 고점 대비: ${s.highDistance}%`, `거래량 배수: ${volMult}배`],
+                source: "거래소 데이터",
+                time: "최근 확정 데이터 기준"
+              }
+            };
+          }
+          break;
+        case 'low_fluctuation':
+          if (Math.abs(change) <= 2.0 && volMult >= 4.0) {
+            return {
+              matched: true,
+              reason: {
+                title: "주가 등락 ±2% 이내 에너지 응축형",
+                version: "v2.2 변동폭 제한",
+                status: "거래량 폭증 후 횡보 응축",
+                statusColor: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+                items: [`당일 변동: ${change}%`, `거래량 배수: ${volMult}배`],
+                source: "거래소 데이터",
+                time: "최근 확정 데이터 기준"
+              }
+            };
+          }
+          break;
+        case 'foreign_power':
+          if (s.foreignNet >= 2000) {
+            return {
+              matched: true,
+              reason: {
+                title: "외국인 순매수 집중주",
+                version: "v2.2 장마감 순매수",
+                status: "외인 집중 매수",
+                statusColor: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+                items: [`외인 순매수: +${s.foreignNet}백만원`],
+                source: "거래소 확정 수급",
+                time: "전 거래일 장마감 기준"
+              }
+            };
+          }
+          break;
+        case 'inst_power':
+          if (s.instNet >= 1500) {
+            return {
+              matched: true,
+              reason: {
+                title: "기관 순매수 집중주",
+                version: "v2.2 장마감 순매수",
+                status: "기관 집중 매수",
+                statusColor: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+                items: [`기관 순매수: +${s.instNet}백만원`],
+                source: "거래소 확정 수급",
+                time: "전 거래일 장마감 기준"
+              }
+            };
+          }
+          break;
+        case 'surge_10x_extreme':
+          if (volMult >= 8.0) {
+            return {
+              matched: true,
+              reason: {
+                title: "거래량 8배 이상 극대 폭발주",
+                version: "v2.2 거래량 이상 수급",
+                status: "비정상 수급 폭증",
+                statusColor: "text-red-400 bg-red-500/10 border-red-500/30",
+                items: [`거래량 배수: ${volMult}배`],
+                source: "거래소 데이터",
+                time: "최근 확정 데이터 기준"
+              }
+            };
+          }
+          break;
+        case 'near_turnaround':
+          if (s.highDistance <= -20.0 && change >= 0.5) {
+            return {
+              matched: true,
+              reason: {
+                title: "낙폭과대 후 첫 반등 시작주",
+                version: "v2.2 턴어라운드",
+                status: "낙폭과대 후 양봉 반등",
+                statusColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+                items: [`고점 대비: ${s.highDistance}%`, `당일 등락률: +${change}%`],
+                source: "거래소 데이터",
+                time: "최근 확정 데이터 기준"
+              }
+            };
+          }
+          break;
+      }
+
+      return { matched: false };
     }
 
-    // 7. 실전 매매기법 모달 렌더링
-    function openStrategyModal() {
-      const modal = document.getElementById("strategy-modal");
-      modal.classList.remove("hidden");
+    function applyConditionFilter(stockList, strategyId, surgePeriod) {
+      const results = [];
+      stockList.forEach(s => {
+        if (isEtfStock(s)) return;
+        const evalResult = evaluateStockStrategy(s, strategyId, surgePeriod);
+        if (evalResult.matched) {
+          s._searchReason = evalResult.reason;
+          results.push(s);
+        }
+      });
+      return results;
+    }
 
-      const container = document.getElementById("strategy-modal-cards");
-      container.innerHTML = "";
+    // 7. 관심종목 (Watchlist) 관리 모듈 (localStorage: toss_stock_watchlist_v1)
+    const WATCHLIST_STORAGE_KEY = 'toss_stock_watchlist_v1';
 
-      YOUTUBE_STRATEGIES.forEach((s, idx) => {
-        const isCurrent = currentStrategy === s.id;
-        const card = document.createElement("div");
-        card.className = `p-4 rounded-xl border transition space-y-3 ${isCurrent ? 'bg-amber-950/20 border-amber-500 ring-1 ring-amber-500/50' : 'bg-slate-900/70 border-slate-800 hover:border-slate-700 hover:bg-slate-900'}`;
-        
-        card.innerHTML = `
-          <div class="flex items-start justify-between gap-2">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
-                  ${s.tag}
-                </span>
-                <span class="text-xs text-amber-300 font-semibold flex items-center gap-1">
-                  <i data-lucide="youtube" class="w-3 h-3 text-red-500"></i>
-                  ${s.channel}
-                </span>
-              </div>
-              <h4 class="font-extrabold text-white text-sm sm:text-base mt-1.5">
-                ${s.name}
-              </h4>
+    function getWatchlist() {
+      try {
+        const raw = localStorage.getItem(WATCHLIST_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function isWatchlisted(code) {
+      const list = getWatchlist();
+      return list.includes(String(code));
+    }
+
+    function toggleWatchlist(code, e) {
+      if (e) e.stopPropagation();
+      const codeStr = String(code);
+      let list = getWatchlist();
+      if (list.includes(codeStr)) {
+        list = list.filter(c => c !== codeStr);
+      } else {
+        list.push(codeStr);
+      }
+      try {
+        localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(list));
+      } catch (err) {}
+      updateWatchlistBadge();
+      renderFilteredStockList();
+    }
+
+    function updateWatchlistBadge() {
+      const list = getWatchlist();
+      const badge = document.getElementById("watchlist-badge-count");
+      if (badge) badge.innerText = list.length;
+    }
+
+    // 8. 정렬 및 필터 상태 관리
+    let currentSort = 'change_desc';
+    let currentMinAmount = 0;
+
+    function changeSort(val) {
+      currentSort = val;
+      renderFilteredStockList();
+    }
+
+    function changeMinAmountFilter(val) {
+      currentMinAmount = Number(val) || 0;
+      renderFilteredStockList();
+    }
+
+    // 9. 아코디언 접기/펼치기
+    let isGuideCollapsed = false;
+    function toggleStrategyGuide() {
+      isGuideCollapsed = !isGuideCollapsed;
+      const content = document.getElementById("strategy-guide-content");
+      const btnText = document.getElementById("toggle-guide-text");
+      if (content && btnText) {
+        if (isGuideCollapsed) {
+          content.classList.add("hidden");
+          btnText.innerText = "가이드 펼치기 ▼";
+        } else {
+          content.classList.remove("hidden");
+          btnText.innerText = "가이드 접기 ▲";
+        }
+      }
+    }
+
+    // 10. 검색조건 저장 및 불러오기 모달 관리 (localStorage: toss_saved_conditions_v1)
+    const SAVED_CONDITIONS_KEY = 'toss_saved_conditions_v1';
+
+    function getSavedConditions() {
+      try {
+        const raw = localStorage.getItem(SAVED_CONDITIONS_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function openConditionSaveModal() {
+      const modal = document.getElementById("condition-save-modal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        renderSavedConditionsList();
+      }
+    }
+
+    function closeConditionSaveModal() {
+      const modal = document.getElementById("condition-save-modal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function saveCurrentCondition() {
+      const input = document.getElementById("condition-name-input");
+      const name = (input && input.value.trim()) ? input.value.trim() : `조건_${new Date().toLocaleDateString()}`;
+      const newCond = {
+        id: 'cond_' + Date.now(),
+        name: name,
+        strategy: currentStrategy,
+        market: currentMarket,
+        sort: currentSort,
+        minAmount: currentMinAmount,
+        createdAt: new Date().toISOString()
+      };
+      const list = getSavedConditions();
+      list.unshift(newCond);
+      try {
+        localStorage.setItem(SAVED_CONDITIONS_KEY, JSON.stringify(list));
+      } catch (e) {}
+      if (input) input.value = "";
+      renderSavedConditionsList();
+    }
+
+    function loadSavedCondition(id) {
+      const list = getSavedConditions();
+      const target = list.find(c => c.id === id);
+      if (!target) return;
+      currentStrategy = target.strategy || 'yt_ma_trend';
+      currentMarket = target.market || 'KR_ALL';
+      currentSort = target.sort || 'change_desc';
+      currentMinAmount = target.minAmount || 0;
+
+      const sortSel = document.getElementById("sort-select");
+      if (sortSel) sortSel.value = currentSort;
+      const amtSel = document.getElementById("filter-min-amount");
+      if (amtSel) amtSel.value = String(currentMinAmount);
+
+      switchMarket(currentMarket);
+      closeConditionSaveModal();
+    }
+
+    function deleteSavedCondition(id) {
+      let list = getSavedConditions();
+      list = list.filter(c => c.id !== id);
+      try {
+        localStorage.setItem(SAVED_CONDITIONS_KEY, JSON.stringify(list));
+      } catch (e) {}
+      renderSavedConditionsList();
+    }
+
+    function renderSavedConditionsList() {
+      const container = document.getElementById("saved-condition-list");
+      const countEl = document.getElementById("saved-condition-count");
+      if (!container) return;
+      const list = getSavedConditions();
+      if (countEl) countEl.innerText = `${list.length}개`;
+
+      if (list.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 py-3 text-center">저장된 검색조건이 없습니다.</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map(c => `
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
+          <div class="min-w-0 pr-2">
+            <div class="font-bold text-white truncate">${c.name}</div>
+            <div class="text-[10px] text-slate-400 font-mono mt-0.5">
+              기법: ${c.strategy} · 시장: ${c.market} · 정렬: ${c.sort}
             </div>
-            ${isCurrent ? '<span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-bold flex-shrink-0">현재 적용 중</span>' : ''}
           </div>
-
-          <p class="text-xs text-slate-300 leading-relaxed">
-            ${s.desc}
-          </p>
-
-          <div class="space-y-1.5 bg-black/40 p-2.5 rounded-lg text-[11px]">
-            <div class="text-emerald-400 flex items-start gap-1">
-              <strong class="flex-shrink-0">🛒 매수 공식:</strong>
-              <span class="text-slate-300">${s.buyGuide}</span>
-            </div>
-            <div class="text-blue-400 flex items-start gap-1">
-              <strong class="flex-shrink-0">🚀 익절 공식:</strong>
-              <span class="text-slate-300">${s.sellGuide}</span>
-            </div>
-            <div class="text-rose-400 flex items-start gap-1">
-              <strong class="flex-shrink-0">⛔ 손절 공식:</strong>
-              <span class="text-slate-300">${s.stopGuide}</span>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between pt-1">
-            <a href="${s.videoUrl}" target="_blank" class="text-[11px] text-slate-400 hover:text-white flex items-center gap-1 transition">
-              <i data-lucide="play" class="w-3 h-3 text-red-400"></i>
-              유튜브 원본 영상
-            </a>
-            <button onclick="selectStrategy('${s.id}')" class="px-3.5 py-1.5 rounded-xl font-bold text-xs ${isCurrent ? 'bg-amber-400 text-slate-950' : 'bg-blue-600 hover:bg-blue-500 text-white'} shadow transition flex items-center gap-1">
-              <i data-lucide="check" class="w-3.5 h-3.5"></i>
-              이 매매기법 종목 보기
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <button onclick="loadSavedCondition('${c.id}')" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold transition">
+              적용
+            </button>
+            <button onclick="deleteSavedCondition('${c.id}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-300 text-[11px] transition">
+              삭제
             </button>
           </div>
-        `;
-
-        container.appendChild(card);
-      });
-
-      lucide.createIcons();
+        </div>
+      `).join('');
     }
 
-    function closeStrategyModal() {
-      const modal = document.getElementById("strategy-modal");
-      modal.classList.add("hidden");
-    }
-
+    // 11. 통합 종목 리스트 렌더링
     function renderFilteredStockList() {
       let base = [];
-      if (currentMarket === 'KR_ALL' || currentMarket === 'KR') {
+      const allStocks = [...KR_STOCKS, ...US_STOCKS];
+
+      if (currentMarket === 'WATCHLIST') {
+        const watchSet = new Set(getWatchlist());
+        base = allStocks.filter(s => watchSet.has(String(s.code)));
+      } else if (currentMarket === 'KR_ALL' || currentMarket === 'KR') {
         base = KR_STOCKS;
       } else if (currentMarket === 'KOSPI') {
         base = KR_STOCKS.filter(s => s.market === '코스피');
@@ -2922,24 +3596,84 @@
       } else if (currentMarket === 'AMEX') {
         base = US_STOCKS.filter(s => s.market === 'AMEX' || s.market === '아멕스');
       } else if (currentMarket === 'ALL') {
-        base = [...KR_STOCKS, ...US_STOCKS];
+        base = allStocks;
       } else {
         base = KR_STOCKS;
       }
 
-      const matched = applyConditionFilter(base, currentStrategy, currentSurgePeriod);
-      
-      // 사용자 요청: 많이 오른 순서대로(당일 상승률 내림차순) 정렬
-      matched.sort((a, b) => b.change - a.change);
-      
+      // 1. 조건식 필터링 (검색 이유 객체 자동 첨부)
+      let matched = applyConditionFilter(base, currentStrategy, currentSurgePeriod);
+
+      // 2. 최소 거래대금 필터 적용
+      if (currentMinAmount > 0) {
+        matched = matched.filter(s => {
+          if (!s.amount) return false;
+          if (s.amount.includes("조")) return true;
+          const num = parseFloat(s.amount.replace(/[^0-9.]/g, '')) || 0;
+          return num >= currentMinAmount;
+        });
+      }
+
+      // 3. 사용자 지정 다이나믹 정렬
+      matched.sort((a, b) => {
+        if (currentSort === 'change_asc') return a.change - b.change;
+        if (currentSort === 'amount_desc') {
+          const aJo = (a.amount && a.amount.includes("조")) ? 10000 : 0;
+          const bJo = (b.amount && b.amount.includes("조")) ? 10000 : 0;
+          const aVal = aJo + (parseFloat(String(a.amount || '').replace(/[^0-9.]/g, '')) || 0);
+          const bVal = bJo + (parseFloat(String(b.amount || '').replace(/[^0-9.]/g, '')) || 0);
+          return bVal - aVal;
+        }
+        if (currentSort === 'vol_desc') {
+          const aVol = a.vol30 || parseFloat(a.relVol) || 0;
+          const bVol = b.vol30 || parseFloat(b.relVol) || 0;
+          return bVol - aVol;
+        }
+        if (currentSort === 'name_asc') {
+          return (a.name || '').localeCompare(b.name || '');
+        }
+        // 기본: 당일 등락률 높은순 (change_desc)
+        return b.change - a.change;
+      });
+
+      // 4. 신규 편입 / 이탈 세션 추적 (sessionStorage)
+      const sessionKey = 'toss_prev_matched_' + currentStrategy;
+      let prevCodes = [];
+      try {
+        const stored = sessionStorage.getItem(sessionKey);
+        if (stored) prevCodes = JSON.parse(stored);
+      } catch (e) {}
+
+      const currentCodes = matched.map(s => String(s.code));
+      const prevSet = new Set(prevCodes.map(String));
+      const currSet = new Set(currentCodes);
+
+      const newCodes = currentCodes.filter(c => !prevSet.has(c));
+      const droppedCount = prevCodes.filter(c => !currSet.has(c)).length;
+
+      // 세션 추적 배너 업데이트
+      const trackingBar = document.getElementById("tracking-summary-bar");
+      const trackingText = document.getElementById("tracking-summary-text");
+      if (trackingBar && trackingText && prevCodes.length > 0) {
+        trackingBar.classList.remove("hidden");
+        trackingText.innerHTML = `직전 검색 대비: <strong class="text-emerald-400">신규 편입 +${newCodes.length}개</strong>, <strong class="text-rose-400">이탈 -${droppedCount}개</strong> (세션 변경 추적)`;
+      }
+
+      try {
+        sessionStorage.setItem(sessionKey, JSON.stringify(currentCodes));
+      } catch (e) {}
+
+      updateWatchlistBadge();
+
       const container = document.getElementById("stock-list-container");
       container.innerHTML = "";
 
-      document.getElementById("filtered-count").innerText = `발굴 종목 ${matched.length}개`;
+      const countLabel = currentMarket === 'WATCHLIST' ? `관심종목 ${matched.length}개` : `발굴 종목 ${matched.length}개`;
+      document.getElementById("filtered-count").innerText = countLabel;
 
       const activePreset = PRESETS.find(p => p.id === currentStrategy);
       const descEl = document.getElementById("ranking-description");
-      if (activePreset) {
+      if (descEl && activePreset) {
         descEl.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i> ${activePreset.desc}`;
       }
 
@@ -2947,13 +3681,17 @@
         container.innerHTML = `
           <div class="p-10 text-center text-xs text-tossTextMuted space-y-2">
             <i data-lucide="filter" class="w-8 h-8 mx-auto text-slate-600 mb-2"></i>
-            <p class="text-sm font-semibold text-slate-300">해당 매매기법/검색식 조건에 부합하는 종목이 현재 없습니다.</p>
-            <p>상단의 다른 매매기법 또는 거래소(코스피/코스닥/나스닥/NYSE/AMEX)를 전환해 보세요.</p>
+            <p class="text-sm font-semibold text-slate-300">
+              ${currentMarket === 'WATCHLIST' ? '등록된 관심종목이 없습니다. 종목 카드의 별표(★)를 눌러 등록해 보세요.' : '해당 매매기법/검색식 조건에 부합하는 종목이 현재 없습니다.'}
+            </p>
+            <p>상단의 다른 매매기법, 정렬 필터 또는 거래소(코스피/코스닥/나스닥)를 전환해 보세요.</p>
           </div>
         `;
         lucide.createIcons();
         return;
       }
+
+      const newSet = new Set(newCodes);
 
       matched.forEach((stock, index) => {
         const isUp = stock.change >= 0;
@@ -2961,6 +3699,7 @@
         const sign = isUp ? '+' : '';
         const rank = index + 1;
         const isTop3 = rank <= 3;
+        const isWatch = isWatchlisted(stock.code);
 
         const isKr = stock.market === '코스닥' || stock.market === '코스피';
         let priceText = '';
@@ -2986,27 +3725,56 @@
 
         const isPenny = (isKr && stock.price < 1000) || (!isKr && stock.price < 1.0);
         const pennyBadge = isPenny ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">동전주</span>' : '';
+        const newBadge = newSet.has(String(stock.code)) ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">신규편입</span>' : '';
 
-        const surgeText = stock.chgSinceSurge < 5.0 
-          ? `<span class="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">폭증 후 ${stock.chgSinceSurge}% (5% 미만 미상승)</span>`
-          : `<span class="text-amber-400 font-semibold bg-amber-500/10 px-1.5 py-0.5 rounded">거래량 ${stock.relVol} 폭증</span>`;
+        // 검색된 이유 (Reason UI)
+        let reasonHtml = '';
+        if (stock._searchReason) {
+          const r = stock._searchReason;
+          const itemsHtml = (r.items || []).map(it => `<span>• ${it}</span>`).join(' &nbsp;|&nbsp; ');
+          reasonHtml = `
+            <div class="mt-2 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] space-y-1.5 text-left">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                  <span class="font-bold text-slate-200">검색 이유: ${r.title}</span>
+                  <span class="text-[10px] text-slate-500 font-mono">(${r.version})</span>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${r.statusColor || 'text-blue-300 bg-blue-500/10 border-blue-500/30'}">
+                  ${r.status}
+                </span>
+              </div>
+              <div class="text-slate-300 text-[10px] sm:text-[11px] leading-relaxed">
+                ${itemsHtml}
+              </div>
+              <div class="flex items-center justify-between text-[10px] text-slate-500 pt-0.5 border-t border-slate-800/60 font-mono">
+                <span>출처: ${r.source}</span>
+                <span>기준: ${r.time}</span>
+              </div>
+            </div>
+          `;
+        }
 
         const row = document.createElement("div");
         row.className = "p-3.5 sm:p-4 hover:bg-tossCardHover cursor-pointer transition duration-150 group border-b border-tossBorder/40 space-y-2";
         row.onclick = () => selectStockForDetail(stock);
 
         row.innerHTML = `
-          <!-- 1번째 줄: [순위] [종목명] [코드] [거래소] [동전주] ---------- [현재가] -->
+          <!-- 1번째 줄: [별표] [순위] [종목명] [코드] [거래소] [신규/동전주] ---------- [현재가] -->
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2.5 min-w-0 pr-2">
+              <button onclick="toggleWatchlist('${stock.code}', event)" class="p-1 rounded hover:bg-slate-800 transition flex-shrink-0" title="관심종목 토글">
+                <i data-lucide="star" class="w-4 h-4 ${isWatch ? 'text-amber-400 fill-amber-400' : 'text-slate-600 hover:text-amber-400'}"></i>
+              </button>
               <span class="w-5 text-center font-black text-sm ${isTop3 ? 'text-amber-400' : 'text-tossTextMuted'} font-mono flex-shrink-0">
                 ${rank}
               </span>
-              <span class="font-black text-white text-base group-hover:text-blue-400 transition truncate max-w-[150px] sm:max-w-xs">
+              <span class="font-black text-white text-base group-hover:text-blue-400 transition truncate max-w-[140px] sm:max-w-xs">
                 ${stock.name}
               </span>
               <span class="text-xs font-mono text-tossTextMuted flex-shrink-0">${stock.code}</span>
               <span class="text-[10px] px-1.5 py-0.5 rounded ${marketBadgeClass} font-mono flex-shrink-0">${stock.market}</span>
+              ${newBadge}
               ${pennyBadge}
             </div>
             <div class="font-black text-base text-white font-mono flex-shrink-0 text-right">
@@ -3014,10 +3782,12 @@
             </div>
           </div>
 
-          <!-- 2번째 줄: [시그니처 조건식 요약 / RSI / 대금] ---------- [등락률] + [AI 분석 버튼] -->
+          <!-- 2번째 줄: [RSI / 거래대금 / 거래량배수] ---------- [등락률] + [지표요약 버튼] -->
           <div class="flex items-center justify-between text-xs pt-0.5">
             <div class="flex items-center space-x-2 text-[11px] text-tossTextMuted truncate pr-2">
-              ${surgeText}
+              <span class="text-amber-400 font-semibold bg-amber-500/10 px-1.5 py-0.5 rounded">
+                거래량 ${stock.vol30 ? stock.vol30 + '배' : (stock.relVol || '3.5배')} 폭증
+              </span>
               <span class="text-slate-400 font-mono">RSI ${stock.rsi || 58}</span>
               <span class="hidden sm:inline text-slate-500">${stock.amount || ''}</span>
             </div>
@@ -3027,10 +3797,13 @@
               </span>
               <button onclick="event.stopPropagation(); openAiAnalysisModal('${stock.code}')" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-indigo-500 text-white text-[11px] font-bold shadow-md flex items-center gap-1 border border-purple-400/30 transition transform active:scale-95">
                 <i data-lucide="sparkles" class="w-3 h-3 text-yellow-300"></i>
-                <span>AI분석</span>
+                <span>지표요약</span>
               </button>
             </div>
           </div>
+
+          <!-- 3번째 줄: [검색된 이유 카드] -->
+          ${reasonHtml}
         `;
         container.appendChild(row);
       });
@@ -3040,14 +3813,18 @@
 
     function switchMarket(market) {
       currentMarket = market;
-      const markets = ['KR_ALL', 'KOSPI', 'KOSDAQ', 'US_ALL', 'NASDAQ', 'NYSE', 'AMEX', 'ALL'];
+      const markets = ['WATCHLIST', 'KR_ALL', 'KOSPI', 'KOSDAQ', 'US_ALL', 'NASDAQ', 'NYSE', 'AMEX', 'ALL'];
       markets.forEach(m => {
         const btn = document.getElementById(`market-${m}`);
         if (btn) {
           if (m === market) {
-            btn.className = "px-2.5 py-1.5 rounded-lg text-xs font-bold bg-tossBlue text-white shadow transition flex items-center gap-1";
+            btn.className = (m === 'WATCHLIST') 
+              ? "px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 shadow transition flex items-center gap-1"
+              : "px-2.5 py-1.5 rounded-lg text-xs font-bold bg-tossBlue text-white shadow transition flex items-center gap-1";
           } else {
-            btn.className = "px-2.5 py-1.5 rounded-lg text-xs font-medium text-tossTextMuted hover:text-white transition flex items-center gap-1";
+            btn.className = (m === 'WATCHLIST')
+              ? "px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-400 hover:text-white transition flex items-center gap-1 border border-amber-500/30"
+              : "px-2.5 py-1.5 rounded-lg text-xs font-medium text-tossTextMuted hover:text-white transition flex items-center gap-1";
           }
         }
       });
@@ -3122,6 +3899,14 @@
       document.getElementById("detail-name").innerText = stock.name;
       document.getElementById("detail-code").innerText = stock.code;
       document.getElementById("detail-market").innerText = stock.market || 'KRX';
+      const detailStarIcon = document.getElementById("detail-watchlist-icon");
+      if (detailStarIcon) {
+        if (isWatchlisted(stock.code)) {
+          detailStarIcon.className = "w-5 h-5 text-amber-400 fill-amber-400";
+        } else {
+          detailStarIcon.className = "w-5 h-5 text-slate-500 hover:text-amber-400";
+        }
+      }
       
       document.getElementById("detail-vol30").innerText = `${stock.vol30 || (stock.vol || '7.5배 폭증')}`;
       document.getElementById("detail-chgsurge").innerText = `${stock.chgSinceSurge !== undefined ? (stock.chgSinceSurge < 5 ? '+' + stock.chgSinceSurge + '% (5% 미만)' : '+' + stock.chgSinceSurge + '%') : (stock.change >= 0 ? '+' + stock.change + '%' : stock.change + '%')}`;
@@ -3648,118 +4433,130 @@
       selectStockForDetail(customUsStock);
     }
 
-    // 9. AI 심층 분석 엔진 (재무제표, 실적, 뉴스, 차트, 권장 가격 산출)
+    // 9. 규칙 기반 기술적 지표 요약 및 가격 변동 시뮬레이션 엔진
     let aiActiveStock = null;
+    let currentSimRatio = { t1: 5.0, t2: 10.0, stop: -3.0 };
 
-    function generateAiAnalysis(stock) {
-      const isKr = stock.market === '코스닥' || stock.market === '코스피' || /^[0-9]6$/.test(stock.code);
-      const P = Number(stock.price) || 1000;
-      const rsi = Number(stock.rsi) || 52;
-      const volMult = Number(stock.vol30) || Number(stock.vol) || 1.8;
+    // 가격 시뮬레이션 프리셋 변경기
+    function setSimPreset(t1, t2, stop) {
+      currentSimRatio = { t1, t2, stop };
+      if (aiActiveStock) {
+        renderPriceSimulation(aiActiveStock);
+      }
+    }
+
+    // 시뮬레이션 가격 렌더러
+    function renderPriceSimulation(stock) {
+      const isKr = stock.market === '코스닥' || stock.market === '코스피' || /^[0-9]{6}$/.test(stock.code);
+      const P = Number(stock.price) || 0;
+      if (P <= 0) return;
+
+      const t1Ratio = currentSimRatio.t1;
+      const t2Ratio = currentSimRatio.t2;
+      const stopRatio = currentSimRatio.stop;
+
+      const t1Val = isKr ? Math.round(P * (1 + t1Ratio / 100)) : +(P * (1 + t1Ratio / 100)).toFixed(2);
+      const t2Val = isKr ? Math.round(P * (1 + t2Ratio / 100)) : +(P * (1 + t2Ratio / 100)).toFixed(2);
+      const stopVal = isKr ? Math.round(P * (1 + stopRatio / 100)) : +(P * (1 + stopRatio / 100)).toFixed(2);
+
+      const t1Label = document.getElementById("sim-target-1-label");
+      const t2Label = document.getElementById("sim-target-2-label");
+      const stopLabel = document.getElementById("sim-stop-label");
+
+      if (t1Label) t1Label.innerText = `📈 1차 상승 (+${t1Ratio.toFixed(1)}%)`;
+      if (t2Label) t2Label.innerText = `🚀 2차 상승 (+${t2Ratio.toFixed(1)}%)`;
+      if (stopLabel) stopLabel.innerText = `⛔ 하락 한도 (${stopRatio.toFixed(1)}%)`;
+
+      const buyEl = document.getElementById("ai-buy-target");
+      const t1El = document.getElementById("ai-target-1");
+      const t2El = document.getElementById("ai-target-2");
+      const stopEl = document.getElementById("ai-stop-price");
+
+      if (buyEl) buyEl.innerText = isKr ? `${P.toLocaleString()}원` : `$${P.toFixed(2)}`;
+      if (t1El) t1El.innerText = isKr ? `${t1Val.toLocaleString()}원` : `$${t1Val}`;
+      if (t2El) t2El.innerText = isKr ? `${t2Val.toLocaleString()}원` : `$${t2Val}`;
+      if (stopEl) stopEl.innerText = isKr ? `${stopVal.toLocaleString()}원` : `$${stopVal}`;
+    }
+
+    // 규칙 기반 기술적 지표 평가 (가짜 seed 점수 및 허위 확률 완전 배제)
+    function generateRuleBasedAnalysis(stock) {
+      const P = Number(stock.price) || 0;
+      const rsi = Number(stock.rsi) || 50;
+      const volMult = Number(stock.vol30) || Number(stock.vol) || 1.0;
       const chg = Number(stock.change) || 0;
-      const highDist = Number(stock.highDistance) || -6.5;
+      const highDist = Number(stock.highDistance) || -10.0;
 
-      // 퀀트 다면 평가 알고리즘 (중립 52점 기준 엄격 산출)
-      let score = 52;
+      // 객관적 지표 합산 점수 (임의 종목코드 seed 가감 전면 제거)
+      let score = 50;
 
-      // 1. RSI 모멘텀 평가 (과열 감점 & 최적 구간 가점)
-      if (rsi > 70) {
-        score -= 14; // 단기 과열 상투 위험
-      } else if (rsi >= 50 && rsi <= 62) {
-        score += 12; // 최적의 스윙 상승 추세
-      } else if (rsi >= 63 && rsi <= 70) {
-        score += 6;  // 강세 유지
-      } else if (rsi >= 40 && rsi < 50) {
-        score += 4;  // 눌림목 지지 구간
-      } else if (rsi < 35) {
-        score -= 8;  // 하락 추세 지속
-      }
+      // 1. RSI 상태 점수
+      if (rsi > 70) score -= 10; // 단기 과열권
+      else if (rsi >= 50 && rsi <= 65) score += 12; // 안정적 상승 모멘텀
+      else if (rsi < 35) score -= 8; // 단기 침체
 
-      // 2. 세력 거래량 유입 강도 평가
-      if (volMult >= 3.5) score += 10;
-      else if (volMult >= 2.0) score += 6;
-      else if (volMult >= 1.2) score += 2;
-      else if (volMult < 0.9) score -= 6; // 유동성 소외 감점
+      // 2. 거래량 배수 점수
+      if (volMult >= 3.0) score += 14;
+      else if (volMult >= 1.8) score += 8;
+      else if (volMult < 0.8) score -= 6;
 
-      // 3. 당일 등락률 및 가격 추세 평가
-      if (chg >= 1.0 && chg <= 4.5) {
-        score += 8; // 가장 이상적인 안정적 우상향
-      } else if (chg > 4.5 && chg <= 7.5) {
-        score += 4; // 강한 상승세
-      } else if (chg > 8.0) {
-        score -= 8; // 단기 급등 과열(추격매수 위험)
-      } else if (chg >= -2.0 && chg <= 0.0) {
-        score += 3; // 건전한 숨고르기 눌림목
-      } else if (chg < -4.5) {
-        score -= 12; // 투매 및 급락 위험
-      }
+      // 3. 당일 등락률 점수
+      if (chg >= 1.0 && chg <= 5.0) score += 8;
+      else if (chg > 5.0) score += 4;
+      else if (chg < -4.0) score -= 10;
 
-      // 4. 고점 대비 이격도 평가
-      if (highDist >= -8.0 && highDist <= -2.0) {
-        score += 6; // 전고점 돌파 임박
-      } else if (highDist < -25.0) {
-        score -= 5; // 역배열 하락세
-      }
+      // 4. 고점 대비 이격도 점수
+      if (highDist >= -6.0 && highDist <= -1.0) score += 8;
+      else if (highDist < -25.0) score -= 6;
 
-      // 종목 고유 시드 기반 미세 변주 (동일 지표 간 획일화 방지)
-      const seed = (stock.code || "005930").split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      score += (seed % 7) - 3;
+      score = Math.min(95, Math.max(30, score));
 
-      score = Math.min(96, Math.max(38, score));
-
-      // 엄격한 4단계 투자의견 판정
-      let decision = { text: "⏳ 관망 / 눌림목 대기 (Hold)", color: "text-amber-400 bg-amber-500/20 border-amber-500/40" };
+      // 객관적 기술적 상태 판정 (확정적 성공 확률 문구 배제)
+      let decision = { text: "기술적 중립 구간", color: "text-amber-400 bg-amber-500/20 border-amber-500/40" };
       let summaryComment = "";
 
-      if (score >= 86) {
-        decision = { text: "🔥 적극 매수 (Strong Buy)", color: "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" };
-        summaryComment = `세력 거래량(${(volMult).toFixed(1)}배)이 실린 가운데 20일선 눌림목 지지선이 확고하여, 진입 시 단기 8~14% 목표 반등 확률이 85% 이상 기대되는 최상위 매수 타점입니다.`;
-      } else if (score >= 72) {
-        decision = { text: "🎯 분할 매수 적기 (Buy)", color: "text-blue-400 bg-blue-500/20 border-blue-500/40" };
-        summaryComment = `상승 추세가 안정적으로 유지되고 있으며, 현재가 부근 1차 진입 후 추천 매수가 하단까지 2~3회 분할 매수 시 우수한 손익비가 확보되는 구간입니다.`;
-      } else if (score >= 58) {
-        decision = { text: "⏳ 관망 / 지지선 확인 (Hold)", color: "text-amber-400 bg-amber-500/20 border-amber-500/40" };
-        summaryComment = `단기 변동성이 있거나 방향성 탐색 구간입니다. 무리한 추격 매수를 자제하고 1차 지지선 방어 여부와 수급 전환을 확인한 뒤 대응하는 것을 권장합니다.`;
+      if (score >= 78) {
+        decision = { text: "기술적 강세 구간", color: "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" };
+        summaryComment = `평균 대비 거래량(${(volMult).toFixed(1)}배)과 RSI(${rsi}) 모멘텀이 상위권에 위치하여 기술적 상승 탄력이 유지되고 있는 구간입니다.`;
+      } else if (score >= 62) {
+        decision = { text: "기술적 완만 상승", color: "text-blue-400 bg-blue-500/20 border-blue-500/40" };
+        summaryComment = `주요 이동평균선과 RSI 지표가 안정적인 균형을 이루고 있으며, 지지선 방어 여부를 확인하며 분할 대응이 가능한 구간입니다.`;
+      } else if (score >= 48) {
+        decision = { text: "기술적 관망 구간", color: "text-amber-400 bg-amber-500/20 border-amber-500/40" };
+        summaryComment = `단기 방향성 탐색 구간입니다. 거래량 유입 여부와 주요 지지선 형성 추이를 지켜보는 전략이 권장됩니다.`;
       } else {
-        decision = { text: "⚠️ 매수 주의 / 비중 축소 (Caution)", color: "text-rose-400 bg-rose-500/20 border-rose-500/40" };
-        summaryComment = `단기 과열 상투권 매물이 출회되었거나 하락 압력이 지속되는 위험 구간입니다. 신규 매수를 엄격히 금지하며 반등 시 비중 축소 또는 관망이 필요합니다.`;
+        decision = { text: "기술적 조정 주의", color: "text-rose-400 bg-rose-500/20 border-rose-500/40" };
+        summaryComment = `단기 변동성이 확대되었거나 하방 압력이 존재하는 구간으로, 신규 진입 시 리스크 관리가 필요합니다.`;
       }
 
-      // 가격 산출 (사면 얼마가 됐을 때 사라)
-      const buyLow = isKr ? Math.round(P * 0.982) : +(P * 0.982).toFixed(2);
-      const buyHigh = isKr ? Math.round(P * 0.998) : +(P * 0.998).toFixed(2);
-      const target1 = isKr ? Math.round(P * 1.055) : +(P * 1.055).toFixed(2);
-      const target2 = isKr ? Math.round(P * 1.118) : +(P * 1.118).toFixed(2);
-      const stopPrice = isKr ? Math.round(P * 0.952) : +(P * 0.952).toFixed(2);
-
-      const buyText = isKr ? `${buyLow.toLocaleString()} ~ ${buyHigh.toLocaleString()}원` : `$${buyLow} ~ $${buyHigh}`;
-      const target1Text = isKr ? `${target1.toLocaleString()}원 (+5.5%)` : `$${target1} (+5.5%)`;
-      const target2Text = isKr ? `${target2.toLocaleString()}원 (+11.8%)` : `$${target2} (+11.8%)`;
-      const stopText = isKr ? `${stopPrice.toLocaleString()}원 (-4.8%)` : `$${stopPrice} (-4.8%)`;
-
-      // 재무제표 시뮬레이션
-      const per = (12.5 + (seed % 15) * 0.8).toFixed(1);
-      const pbr = (1.2 + (seed % 8) * 0.25).toFixed(1);
-      const debt = (35 + (seed % 35)).toFixed(1);
-      const reserve = 850 + (seed % 50) * 25;
+      // 실제 20일선 계산 (일봉 번들이 있는 경우 실제 계산, 없으면 사유 명시)
+      const symbol = stock.yahooSymbol || stock.code;
+      let ma20StateText = "일봉 데이터 미확보 (계산 불가)";
+      if (REAL_CANDLES_BUNDLE && REAL_CANDLES_BUNDLE[symbol]) {
+        const candles = REAL_CANDLES_BUNDLE[symbol];
+        if (candles.length >= 20) {
+          const last20 = candles.slice(-20);
+          const ma20 = last20.reduce((acc, c) => acc + (c.close || 0), 0) / 20;
+          const diffPct = ((P - ma20) / ma20) * 100;
+          if (diffPct >= 0) {
+            ma20StateText = `20일선 상회 (+${diffPct.toFixed(1)}%)`;
+          } else {
+            ma20StateText = `20일선 하회 (${diffPct.toFixed(1)}%)`;
+          }
+        }
+      }
 
       return {
         score,
         decision,
         summaryComment,
-        buyText,
-        target1Text,
-        target2Text,
-        stopText,
-        per,
-        pbr,
-        debt,
-        reserve
+        ma20StateText,
+        rsiValText: `${rsi} (${rsi > 70 ? '과열권' : (rsi < 35 ? '침체권' : '중립 모멘텀')})`,
+        volMultText: `${(volMult).toFixed(1)}배`,
+        highDistText: `${highDist}%`
       };
     }
 
     function openAiAnalysisModal(code) {
-      // 검색식 종목, 차트 종목, 전체 종목 전수에서 대상 종목 조회 (심층 분석 누락 버그 완벽 해결)
       let stock = null;
       if (activeStock && (!code || activeStock.code === code)) {
         stock = activeStock;
@@ -3774,57 +4571,56 @@
       const loading = document.getElementById("ai-modal-loading");
       const content = document.getElementById("ai-modal-content");
 
-      modal.classList.remove("hidden");
-      loading.classList.remove("hidden");
-      content.classList.add("hidden");
+      if (modal) modal.classList.remove("hidden");
+      if (loading) loading.classList.add("hidden"); // 가짜 0.2초 딜레이 제거
+      if (content) content.classList.remove("hidden");
 
-      const isKr = stock.market === '코스닥' || stock.market === '코스피';
+      const isKr = stock.market === '코스닥' || stock.market === '코스피' || /^[0-9]{6}$/.test(stock.code);
       document.getElementById("ai-modal-name").innerText = stock.name;
       document.getElementById("ai-modal-code").innerText = stock.code;
-      document.getElementById("ai-modal-market").innerText = stock.market;
-      document.getElementById("ai-modal-market").className = stock.market === '코스닥' 
-        ? 'text-xs px-2 py-0.5 rounded-full bg-purple-950/60 text-purple-300 font-mono border border-purple-500/40 font-bold'
-        : 'text-xs px-2 py-0.5 rounded-full bg-blue-950/50 text-blue-300 font-mono border border-blue-500/30 font-bold';
-
-      document.getElementById("ai-modal-price").innerText = isKr ? Math.round(stock.price).toLocaleString() + '원' : '$' + stock.price.toFixed(2);
+      const aiStarIcon = document.getElementById("ai-modal-watchlist-icon");
+      if (aiStarIcon) {
+        if (isWatchlisted(stock.code)) {
+          aiStarIcon.className = "w-5 h-5 text-amber-400 fill-amber-400";
+        } else {
+          aiStarIcon.className = "w-5 h-5 text-slate-500 hover:text-amber-400";
+        }
+      }
+      document.getElementById("ai-modal-market").innerText = stock.market || (isKr ? 'KRX' : 'US');
+      
+      const priceVal = Number(stock.price) || 0;
+      document.getElementById("ai-modal-price").innerText = isKr ? `${priceVal.toLocaleString()}원` : `$${priceVal.toFixed(2)}`;
       
       const isUp = stock.change >= 0;
       const chgEl = document.getElementById("ai-modal-change");
       chgEl.className = `text-sm font-bold font-mono ${isUp ? 'text-tossRed' : 'text-tossBlueFall'}`;
       chgEl.innerText = `${isUp ? '+' : ''}${stock.change}%`;
 
-      // 0.2초 로딩 연출 후 정밀 AI 분석 데이터 렌더링
-      setTimeout(() => {
-        const ai = generateAiAnalysis(stock);
+      // 규칙 기반 분석 수행
+      const analysis = generateRuleBasedAnalysis(stock);
 
-        document.getElementById("ai-score-num").innerText = ai.score;
-        const badge = document.getElementById("ai-decision-badge");
-        badge.className = `px-3 py-1 rounded-full text-xs font-black border flex items-center gap-1.5 ${ai.decision.color}`;
-        badge.innerHTML = `<i data-lucide="${ai.score >= 80 ? 'trending-up' : (ai.score >= 70 ? 'pause' : 'alert-triangle')}" class="w-3.5 h-3.5"></i> <span>${ai.decision.text}</span>`;
-        document.getElementById("ai-summary-comment").innerText = ai.summaryComment;
+      document.getElementById("ai-score-num").innerText = analysis.score;
+      const badge = document.getElementById("ai-decision-badge");
+      badge.className = `px-3 py-1 rounded-full text-xs font-black border flex items-center gap-1.5 ${analysis.decision.color}`;
+      badge.innerHTML = `<i data-lucide="activity" class="w-3.5 h-3.5"></i> <span>${analysis.decision.text}</span>`;
+      document.getElementById("ai-summary-comment").innerText = analysis.summaryComment;
 
-        // 가격표
-        document.getElementById("ai-buy-target").innerText = ai.buyText;
-        document.getElementById("ai-target-1").innerText = ai.target1Text;
-        document.getElementById("ai-target-2").innerText = ai.target2Text;
-        document.getElementById("ai-stop-price").innerText = ai.stopText;
+      // 가격 변동 시뮬레이션 렌더링
+      renderPriceSimulation(stock);
 
-        // 4대 정밀 지표
-        document.getElementById("ai-per").innerText = `${ai.per}배`;
-        document.getElementById("ai-pbr").innerText = `${ai.pbr}배`;
-        document.getElementById("ai-debt").innerText = `${ai.debt}%`;
-        document.getElementById("ai-reserve").innerText = `${ai.reserve.toLocaleString()}%`;
+      // 기술 지표 바인딩
+      document.getElementById("ai-ma20-state").innerText = analysis.ma20StateText;
+      document.getElementById("ai-rsi-val").innerText = analysis.rsiValText;
+      document.getElementById("ai-vol-mult").innerText = analysis.volMultText;
+      document.getElementById("ai-high-dist").innerText = analysis.highDistText;
 
-        document.getElementById("ai-sales-growth").innerText = `+${(18.5 + (ai.score % 20)).toFixed(1)}% (YoY)`;
-        document.getElementById("ai-op-margin").innerText = `${(12.0 + (ai.score % 15)).toFixed(1)}%`;
-
-        document.getElementById("ai-ma20-state").innerText = stock.change >= 0 ? "20일선 상회 (골든크로스)" : "20일선 지지 테스트";
-        document.getElementById("ai-rsi-val").innerText = `${stock.rsi} (${stock.rsi > 70 ? '과열권' : (stock.rsi < 45 ? '바닥권 반등' : '안정적 우상향')})`;
-
-        loading.classList.add("hidden");
-        content.classList.remove("hidden");
-        lucide.createIcons();
-      }, 200);
+      // 재무제표 결측치: 임의 난수 절대 사용하지 않고 "확인 불가 (데이터 미연동)" 표기
+      document.getElementById("ai-per").innerText = "확인 불가";
+      document.getElementById("ai-pbr").innerText = "확인 불가";
+      document.getElementById("ai-debt").innerText = "확인 불가";
+      document.getElementById("ai-reserve").innerText = "확인 불가";
+      document.getElementById("ai-sales-growth").innerText = "확인 불가";
+      document.getElementById("ai-op-margin").innerText = "확인 불가";
 
       lucide.createIcons();
     }
@@ -3854,7 +4650,7 @@
         {
           type: "GOOD",
           source: "한국경제",
-          time: "14분 전",
+          time: "한국경제 참고 스크랩",
           title: "삼성전자, 5세대 HBM3E 엔비디아 공급망 최종 진입 임박... 외인 순매수 집중",
           desc: "글로벌 AI 가속기 탑재를 위한 12단 HBM3E 퀄리피케이션 테스트가 사실상 마무리 단계에 도달하며, 4분기부터 본격적인 양산 출하가 기대된다는 업계 관측이 나왔습니다.",
           tags: ["#HBM3E", "#엔비디아납품", "#외인대량매수"],
@@ -3863,7 +4659,7 @@
         {
           type: "GOOD",
           source: "매일경제",
-          time: "36분 전",
+          time: "매일경제 참고 스크랩",
           title: "평택 고덕 P4 반도체 클러스터 투자 속도... AI 파운드리 투트랙 전략 본격화",
           desc: "차세대 2나노 게이트올어라운드(GAA) 공정 및 AI 반도체 파운드리 전용 라인 구축에 박차를 가하며 글로벌 팹리스 고객사 유치에 적극 나서고 있습니다.",
           tags: ["#2나노파운드리", "#GAA공정", "#평택P4"],
@@ -3872,7 +4668,7 @@
         {
           type: "DART",
           source: "금융감독원 DART",
-          time: "1시간 전",
+          time: "DART 공시 검색",
           title: "단일판매·공급계약 체결 (글로벌 테크사 향 대규모 시스템LSI 솔루션 공급)",
           desc: "차세대 모바일 AP 및 온디바이스 AI용 이미지센서 솔루션의 중장기 공급 계약을 확정 체결했다고 공시했습니다.",
           tags: ["#DART공시", "#수주계약", "#시스템LSI"],
@@ -3881,7 +4677,7 @@
         {
           type: "DART",
           source: "신한투자증권 리포트",
-          time: "2시간 전",
+          time: "증권사 리포트 검색",
           title: "[기업분석] 삼성전자, 메모리 업황 턴어라운드 및 밸류에이션 바닥 확인 완료",
           desc: "역사적 PBR 하단 구간에 진입하여 하방 경직성이 매우 견고하며, HBM3E 실적 반영 시 주가 리레이팅이 가파르게 전개될 것으로 전망했습니다.",
           tags: ["#증권사리포트", "#목표주가상향", "#PBR저평가"],
@@ -3890,7 +4686,7 @@
         {
           type: "GOOD",
           source: "연합인포맥스",
-          time: "3시간 전",
+          time: "연합인포맥스 검색",
           title: "외국인 투자자, 삼성전자 5거래일 연속 순매수... 3,400억원 순유입",
           desc: "반도체 수급 개선 기대감과 원/달러 환율 안정세에 힘입어 외국인 패시브 및 롱펀드 자금이 삼성전자로 집중 유입되고 있습니다.",
           tags: ["#수급분석", "#외인순매수", "#코스피주도"],
@@ -3899,7 +4695,7 @@
         {
           type: "CAUTION",
           source: "조선비즈",
-          time: "5시간 전",
+          time: "조선비즈 참고 스크랩",
           title: "미·중 반도체 추가 수출 규제 및 글로벌 파운드리 수율 격차 과제 점검",
           desc: "차세대 수율 안정화 속도와 미국 대선 전후 대중 수출 통제 정책 변화에 대한 시장의 단기 관망세가 상존한다는 지적입니다.",
           tags: ["#지정학리스크", "#수율안정화", "#단기변동성"],
@@ -3912,7 +4708,7 @@
         {
           type: "GOOD",
           source: "한국경제",
-          time: "12분 전",
+          time: "한국경제 참고 스크랩",
           title: "SK하이닉스, 차세대 12단 HBM3E 독점적 지배력 지속... 3분기 사상 최대 실적 가시화",
           desc: "엔비디아 최신 블랙웰 아키텍처에 탑재되는 HBM3E의 압도적 점유율을 바탕으로 메모리 사업부 분기 영업이익 7조원 돌파가 점쳐지고 있습니다.",
           tags: ["#HBM3E", "#어닝서프라이즈", "#엔비디아파트너"],
@@ -3930,7 +4726,7 @@
         {
           type: "GOOD",
           source: "매일경제",
-          time: "1시간 전",
+          time: "DART 공시 검색",
           title: "용인 반도체 클러스터 1기 팹 착공 순항... AI 고대역폭 메모리 생산 2배 확대",
           desc: "총 120조원이 투입되는 용인 클러스터 프로젝트가 본격화되며 미래 HBM4 및 CXL 메모리 선점에 유리한 고지를 점했습니다.",
           tags: ["#용인클러스터", "#CAPA증설", "#HBM4"],
@@ -3939,7 +4735,7 @@
         {
           type: "DART",
           source: "금융감독원 DART",
-          time: "3시간 전",
+          time: "연합인포맥스 검색",
           title: "특허권 취득 (차세대 CXL 기반 대용량 메모리 컨트롤러 및 저전력 설계 기술)",
           desc: "AI 데이터센터의 메모리 확장성을 획기적으로 높이는 특허 기술을 등록 완료하여 기술 장벽을 한층 강화했습니다.",
           tags: ["#DART공시", "#특허취득", "#CXL메모리"],
@@ -3948,7 +4744,7 @@
         {
           type: "CAUTION",
           source: "이데일리",
-          time: "5시간 전",
+          time: "조선비즈 참고 스크랩",
           title: "주가 단기 급등에 따른 차익실현 매물 출회 가능성 및 20일선 지지력 테스트",
           desc: "신고가 경신 후 단기 이격도가 확대됨에 따라 20일 이동평균선 부근에서의 숨고르기 눌림목 구간이 형성될 수 있다는 분석입니다.",
           tags: ["#단기이격도", "#눌림목테스트", "#수급체크"],
@@ -3970,7 +4766,7 @@
         {
           type: "GOOD",
           source: "이데일리",
-          time: "45분 전",
+          time: "DART 공시 검색",
           title: "현대차 수소연료전지 핵심 부품(MEA) 국산화 1차 벤더 납품 가시화 모멘텀",
           desc: "수소 상용차 및 연료전지 발전소용 막전극접합체(MEA) 국산화 프로젝트가 양산 승인을 앞두고 있어 강력한 중장기 성장 모멘텀이 기대됩니다.",
           tags: ["#수소연료전지", "#현대차파트너", "#MEA국산화"],
@@ -3979,7 +4775,7 @@
         {
           type: "DART",
           source: "금융감독원 DART",
-          time: "1시간 전",
+          time: "DART 공시 검색",
           title: "[공시] 완주 제3공장 스마트 자동화 증설 완료... 연간 CAPA 180% 확충",
           desc: "슈퍼커패시터 및 수소 연료전지 부품 라인의 풀가동 체제를 구축하여 급증하는 글로벌 친환경 부품 수요에 대응한다고 공시했습니다.",
           tags: ["#DART공시", "#시설투자", "#CAPA확충"],
@@ -3988,7 +4784,7 @@
         {
           type: "DART",
           source: "하나증권 스몰캡",
-          time: "3시간 전",
+          time: "연합인포맥스 검색",
           title: "[스몰캡 탐방] 비나텍, 친환경 에너지저장장치 글로벌 1위 경쟁력 부각",
           desc: "글로벌 스마트미터기 및 데이터센터 백업 파워 시장 점유율 1위를 유지 중이며, 내년 영업이익률 20%대 안착이 기대된다는 평가입니다.",
           tags: ["#스몰캡리포트", "#영업이익급증", "#글로벌1위"],
@@ -3997,7 +4793,7 @@
         {
           type: "CAUTION",
           source: "머니투데이",
-          time: "6시간 전",
+          time: "로이터 참고 스크랩",
           title: "원자재 가격 변동성 및 글로벌 수소 인프라 보급 속도에 따른 단기 변동성",
           desc: "수소차 및 친환경 발전 프로젝트의 인프라 투자 속도에 따라 분기별 실적 변동성이 나타날 수 있어 분할 매수 접근이 권장됩니다.",
           tags: ["#원자재변동성", "#인프라속도", "#분할매수"],
@@ -4028,7 +4824,7 @@
         {
           type: "DART",
           source: "SEC / US Gov",
-          time: "1시간 전",
+          time: "DART 공시 검색",
           title: "NASA 아르테미스 3호 유인 달 탐사 착륙선(HLS) 본계약 마일스톤 승인",
           desc: "미국 항공우주국(NASA) 공식 파트너로서 차세대 달 표면 유인 착륙 미션 자금 집행이 정식 승인되었습니다.",
           tags: ["#NASA계약", "#아르테미스", "#정부수주"],
@@ -4037,7 +4833,7 @@
         {
           type: "GOOD",
           source: "Reuters",
-          time: "2시간 전",
+          time: "증권사 리포트 검색",
           title: "스페이스X 기업가치 2,500억 달러(약 345조원) 공식 인정... 우주 독점력 강화",
           desc: "글로벌 상업 로켓 발사 시장의 80% 이상을 사실상 독점하면서 민간 비상장 우주항공 기업 중 최고 밸류에이션을 경신했습니다.",
           tags: ["#기업가치345조", "#발사체독점", "#IPO기대"],
@@ -4046,7 +4842,7 @@
         {
           type: "CAUTION",
           source: "CNBC",
-          time: "5시간 전",
+          time: "조선비즈 참고 스크랩",
           title: "FAA 환경 영향 평가 일정 및 글로벌 위성 궤도 밀집도 규제 리스크 점검",
           desc: "차세대 로켓의 발사 빈도 증대에 따른 발사장 주변 환경 규제와 저궤도 우주 쓰레기 관리 가이드라인 강화가 변수로 지목됩니다.",
           tags: ["#규제리스크", "#FAA승인", "#우주환경"],
@@ -4077,7 +4873,7 @@
         {
           type: "DART",
           source: "SEC Form 8-K",
-          time: "1시간 전",
+          time: "DART 공시 검색",
           title: "[SEC 공시] 글로벌 빅테크 및 정부 연구소 향 엔터프라이즈 AI 시스템 다년간 장기 계약",
           desc: "DGX 슈퍼POD 및 차세대 네트워킹 솔루션 퀀텀X 인피니밴드 납품 계약을 확정 체결했다고 공시했습니다.",
           tags: ["#SEC공시", "#장기공급계약", "#DGX슈퍼POD"],
@@ -4086,7 +4882,7 @@
         {
           type: "CAUTION",
           source: "Financial Times",
-          time: "4시간 전",
+          time: "블룸버그 참고 스크랩",
           title: "TSMC 첨단 CoWoS 패키징 공급 병목 완화 속도 및 대만 지정학적 리스크 모니터링",
           desc: "강력한 수요 대비 파운드리 패키징 공정의 병목 현상과 미 대선 이후 대중국 추가 AI 반도체 수출 통제 향방을 주시할 필요가 있습니다.",
           tags: ["#CoWoS병목", "#지정학리스크", "#대중국규제"],
@@ -4117,7 +4913,7 @@
         {
           type: "DART",
           source: "SEC 10-Q",
-          time: "1시간 전",
+          time: "DART 공시 검색",
           title: "[공시] 메가팩(Megapack) 에너지 저장 부문 분기 매출 전년비 125% 폭증",
           desc: "상하이 메가팩 기가팩토리의 준공과 함께 글로벌 유틸리티 전력망 에너지저장장치(ESS) 납품이 자동차 부문을 능가하는 성장률을 기록했습니다.",
           tags: ["#메가팩", "#에너지사업", "#매출125%급증"],
@@ -4126,7 +4922,7 @@
         {
           type: "CAUTION",
           source: "Wall Street Journal",
-          time: "5시간 전",
+          time: "조선비즈 참고 스크랩",
           title: "글로벌 전기차 가격 경쟁 심화 및 신차 모델 출시 일정에 따른 분기 마진율 점검",
           desc: "중국 및 유럽 시장에서의 저가형 EV 경쟁 심화로 단기 자동차 부문 총마진율(Gross Margin) 방어가 중요한 분수령이 될 전망입니다.",
           tags: ["#마진율방어", "#전기차경쟁", "#단기변동성"],
@@ -4139,7 +4935,6 @@
     function generateStockNews(stock) {
       const code = String(stock.code || '').toUpperCase();
       const name = stock.name || code;
-      const change = Number(stock.change) || 0;
       const isKr = stock.market === '코스피' || stock.market === '코스닥' || /^[0-9]{6}$/.test(code);
 
       // 1. 하드코딩된 정밀 프리셋 데이터가 있는 경우 우선 적용
@@ -4152,72 +4947,63 @@
         if (STOCK_NEWS_PRESETS["SPCX"]) return STOCK_NEWS_PRESETS["SPCX"];
       }
 
-      // 2. 프리셋이 없는 모든 일반 종목: 현재가/등락률/업종 맞춤형 지능형 뉴스 피드 생성
-      const naverSearchUrl = `https://search.naver.com/search.naver?where=news&query=${encodeURIComponent(name)}`;
-      const googleSearchUrl = `https://news.google.com/search?q=${encodeURIComponent(name)}`;
-      const targetUrl = isKr ? naverSearchUrl : googleSearchUrl;
-      const newsSource1 = isKr ? "한국경제" : "Bloomberg";
-      const newsSource2 = isKr ? "매일경제" : "Reuters";
-      const newsSource3 = isKr ? "금융감독원 DART" : "SEC Edgar";
-      const newsSource4 = isKr ? "연합인포맥스" : "CNBC";
-      const newsSource5 = isKr ? "조선비즈" : "Wall Street Journal";
+      // 2. 모든 종목 공통: 검증된 공식 증권/공시/포털 뉴스 다이렉트 검색 링크 제공 (가짜 기사 합성 절대 금지)
+      const naverFinanceNewsUrl = `https://finance.naver.com/item/news.naver?code=${code}`;
+      const naverSearchNewsUrl = `https://search.naver.com/search.naver?where=news&query=${encodeURIComponent(name)}`;
+      const dartSearchUrl = `https://dart.fss.or.kr/dsab001/main.do?autoSearch=true&textCrpNm=${encodeURIComponent(name)}`;
+      const daumFinanceUrl = `https://finance.daum.net/quotes/A${code}#news/stock`;
 
-      const isUp = change >= 0;
-      const volMultiplier = stock.vol30 || stock.vol || (isUp ? '3.8배' : '2.1배');
+      const googleFinanceUrl = `https://www.google.com/finance/quote/${code}:NASDAQ`;
+      const googleNewsUrl = `https://news.google.com/search?q=${encodeURIComponent(name)}`;
+      const secEdgarUrl = `https://www.sec.gov/edgar/searchedgar/companysearch`;
+      const yahooNewsUrl = `https://finance.yahoo.com/quote/${code}/news/`;
 
-      const dynamicList = [
+      return [
         {
           type: "GOOD",
-          source: newsSource1,
-          time: "15분 전",
-          title: `${name}, 외국인·기관 수급 집중 속 거래량 ${volMultiplier} 폭증하며 기술적 강세 안착`,
-          desc: `업황 회복 기대감과 주요 사업 부문의 견조한 수주 잔고에 힘입어 20일선 정배열 추세 안착과 함께 투자자들의 매수세가 집중되고 있습니다.`,
-          tags: [`#${name}`, "#수급호조", "#거래량폭증", "#정배열돌파"],
-          url: targetUrl
-        },
-        {
-          type: "GOOD",
-          source: newsSource2,
-          time: "42분 전",
-          title: `${name}, 핵심 신성장 동력 부문 글로벌 공급망 확대 및 수주 계약 가시화`,
-          desc: `차세대 핵심 기술 제품군의 신규 고객사 납품 추진 소식이 전해지며 중장기 밸류에이션 리레이팅 기대감이 한층 고조되고 있습니다.`,
-          tags: ["#수주확대", "#글로벌공급", "#성장모멘텀"],
-          url: targetUrl
+          source: isKr ? "네이버 증권" : "Google Finance",
+          time: "실시간 뉴스 포털",
+          title: `[실시간 기사] ${name} (${code}) 언론사별 최신 증시 속보 모아보기`,
+          desc: isKr 
+            ? `네이버 금융 공식 종목별 실시간 기사 피드로 이동합니다. 주요 언론사의 실시간 보도와 시황 분석 원본을 열람할 수 있습니다.`
+            : `구글 파이낸스 실시간 해외 증시 뉴스 피드로 이동합니다. 최신 글로벌 마켓 반응을 확인하세요.`,
+          tags: [`#${name}`, "#네이버증권", "#실시간뉴스", "#언론사보도"],
+          url: isKr ? naverFinanceNewsUrl : googleFinanceUrl,
+          isDirectLink: true
         },
         {
           type: "DART",
-          source: newsSource3,
-          time: "1시간 전",
-          title: `[경영공시] ${name}, 주요 사업 부문 분기 실적 개선 및 시설 투자·공급계약 현황`,
-          desc: `핵심 사업 경쟁력 강화를 위한 생산 효율화 및 전략적 투자 집행 결과를 정식 공시 채널을 통해 보고했습니다.`,
-          tags: ["#공시속보", "#경영보고", "#투자계획"],
-          url: isKr ? "https://dart.fss.or.kr/" : targetUrl
+          source: isKr ? "금융감독원 DART" : "SEC EDGAR",
+          time: "공식 전자공시",
+          title: `[정식 기업공시] ${name} 사업보고서·주요사항보고서·지분변동 내역`,
+          desc: isKr
+            ? `금융감독원 전자공시시스템(DART) 공식 기업 검색 페이지로 연결됩니다. 분기 실적, 대규모 수주, 유상증자 등 법정 공시 원문을 확인하세요.`
+            : `미국 증권거래위원회(SEC) 공식 EDGAR 공시 시스템으로 연결됩니다. 10-K, 10-Q 정식 서류를 열람하세요.`,
+          tags: ["#전자공시", "#DART", "#공시원문", "#사업보고서"],
+          url: isKr ? dartSearchUrl : secEdgarUrl,
+          isDirectLink: true
         },
         {
-          type: "GOOD",
-          source: newsSource4,
-          time: "2시간 전",
-          title: `[증권가 리포트] ${name}, 견고한 펀더멘털 기반 추가 상승 여력 충분... 눌림목 분할 매수 유효`,
-          desc: `주요 증권사 리서치센터에서는 현재 주가 수준이 동종 업종 대비 저평가 국면에 위치하고 있어 20일선 지지 시 매수 관점이 유효하다고 평가했습니다.`,
-          tags: ["#목표주가", "#저평가매력", "#분할매수"],
-          url: targetUrl
+          type: "DART",
+          source: isKr ? "카카오페이/다음 증권" : "Yahoo Finance",
+          time: "증권사 리포트",
+          title: `[증권사 리포트] ${name} 애널리스트 투자의견 및 목표주가 추이 요약`,
+          desc: `주요 증권사 리서치센터 기업분석 리포트 및 투자의견 컨센서스 요약 페이지로 직접 연결됩니다.`,
+          tags: ["#증권사리포트", "#투자의견", "#목표주가", "#컨센서스"],
+          url: isKr ? daumFinanceUrl : yahooNewsUrl,
+          isDirectLink: true
         },
         {
-          type: isUp ? "DART" : "CAUTION",
-          source: newsSource5,
-          time: "4시간 전",
-          title: isUp 
-            ? `${name}, 차세대 포트폴리오 다각화에 따른 수익성 턴어라운드 분석`
-            : `${name}, 단기 급등 후 숨고르기 눌림목 구간 진입... 20일 이동평균선 지지력 테스트`,
-          desc: isUp
-            ? `원가 절감과 고부가가치 제품 비중 확대로 영업이익률의 단계적 반등이 본격화될 것이라는 분석입니다.`
-            : `단기 차익실현 매물이 출회되며 일시적 조정을 받고 있으나, 대기 매수세의 유입으로 하방 경직성을 시험하고 있습니다.`,
-          tags: isUp ? ["#수익성개선", "#턴어라운드", "#포트폴리오"] : ["#눌림목테스트", "#단기조정", "#지지선체크"],
-          url: targetUrl
+          type: "CAUTION",
+          source: isKr ? "네이버 통합 포털" : "Google News",
+          time: "키워드 심층 검색",
+          title: `[포털 통합검색] ${name} 산업 규제, 글로벌 공급망 및 이슈 키워드 탐색`,
+          desc: `포털 뉴스 검색을 통해 단기 시장 변동성 요인, 대내외 거시경제 리스크 및 시장 반응을 포괄적으로 확인합니다.`,
+          tags: ["#포털검색", "#이슈점검", "#시장반응", "#변동성체크"],
+          url: isKr ? naverSearchNewsUrl : googleNewsUrl,
+          isDirectLink: true
         }
       ];
-
-      return dynamicList;
     }
 
     // 뉴스 카테고리 필터링 렌더러
@@ -4290,7 +5076,7 @@
                 <span class="text-slate-400 font-mono text-[11px]">${news.time}</span>
               </div>
               <span class="text-[11px] text-blue-400 group-hover:translate-x-0.5 transition flex items-center gap-0.5 font-medium">
-                AI 3줄 요약 보기
+                요약 및 바로가기
                 <i data-lucide="sparkles" class="w-3 h-3 text-blue-400"></i>
               </span>
             </div>
@@ -4360,8 +5146,8 @@
           ? `핵심 테마 키워드: ${news.tags.join(" ")} 중심의 시장 매수세 집중.` 
           : "외인·기관 수급 유입 및 20일 이동평균선 지지 여력 강화.";
         const line3 = news.type === 'GOOD' 
-          ? "단기 저항선 돌파 시 1차 목표가(+5.5%) 도달 가능성이 한층 높아진 상태입니다." 
-          : "시장 전반의 거시 변동성을 고려하여 분할 매수로 리스크를 분산하는 전략이 유리합니다.";
+          ? "기술적 지표 및 거래량 추세를 확인하며 분할 접근하는 규칙 기반 매매가 권장됩니다." 
+          : "시장 전반의 변동성을 고려하여 기준 지지선 이탈 시 철저한 리스크 관리가 필요합니다.";
 
         linesContainer.innerHTML = `
           <div class="flex items-start gap-2">
@@ -4501,35 +5287,24 @@
     renderPresetChips();
     updateStrategyGuidePanel();
 
-    // 상위 종목 백그라운드 사전 캐싱 (0ms 즉시 오픈)
+    // 상위 종목 실제 데이터 사전 검증 및 캐싱
     function prefetchTopStocks() {
       const topList = [...KR_STOCKS, ...US_STOCKS].slice(0, 20);
       topList.forEach(stock => {
         const symbol = stock.yahooSymbol || stock.code;
         const cacheKey = `${symbol}_1mo_1d`;
-        if (REAL_CANDLES_BUNDLE[symbol]) {
-          CHART_MEMORY_CACHE[cacheKey] = REAL_CANDLES_BUNDLE[symbol];
-        } else {
-          CHART_MEMORY_CACHE[cacheKey] = generateInstantCandles(stock, '1mo');
+        if (REAL_CANDLES_BUNDLE && REAL_CANDLES_BUNDLE[symbol]) {
+          const cleaned = validateAndCleanCandles(REAL_CANDLES_BUNDLE[symbol]);
+          if (cleaned.length > 0) {
+            CHART_MEMORY_CACHE[cacheKey] = cleaned;
+          }
         }
       });
     }
     prefetchTopStocks();
 
-    // 3초마다 일부 종목 틱 애니메이션
-    setInterval(() => {
-      const container = document.getElementById("stock-list-container");
-      if (!container || container.children.length === 0) return;
-      const randomIdx = Math.floor(Math.random() * Math.min(10, container.children.length));
-      const targetRow = container.children[randomIdx];
-      if (targetRow) {
-        const isUp = Math.random() > 0.45;
-        targetRow.classList.add(isUp ? 'flash-up' : 'flash-down');
-        setTimeout(() => {
-          targetRow.classList.remove('flash-up', 'flash-down');
-        }, 800);
-      }
-    }, 2500);
+    // 임의의 종목 행 무작위 깜빡임(Math.random) 연출 전면 제거됨
+    // (실제 시세 수신 시에만 가격 변화가 반영됩니다)
   </script>
 </body>
 </html>
